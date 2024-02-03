@@ -12,94 +12,97 @@
 
 ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 
-class VariantSlot;
-class VariantPool;
+            class VariantSlot;
 
-class StringPool {
- public:
-  StringPool() = default;
-  StringPool(const StringPool&) = delete;
-  void operator=(StringPool&& src) = delete;
+            class VariantPool;
 
-  ~StringPool() {
-    ARDUINOJSON_ASSERT(strings_ == nullptr);
-  }
+            class StringPool {
+            public:
+                StringPool() = default;
 
-  friend void swap(StringPool& a, StringPool& b) {
-    swap_(a.strings_, b.strings_);
-  }
+                StringPool(const StringPool &) = delete;
 
-  void clear(Allocator* allocator) {
-    while (strings_) {
-      auto node = strings_;
-      strings_ = node->next;
-      StringNode::destroy(node, allocator);
-    }
-  }
+                void operator=(StringPool &&src) = delete;
 
-  size_t size() const {
-    size_t total = 0;
-    for (auto node = strings_; node; node = node->next)
-      total += sizeofString(node->length);
-    return total;
-  }
+                ~StringPool() {
+                    ARDUINOJSON_ASSERT(strings_ == nullptr);
+                }
 
-  template <typename TAdaptedString>
-  StringNode* add(TAdaptedString str, Allocator* allocator) {
-    ARDUINOJSON_ASSERT(str.isNull() == false);
+                friend void swap(StringPool &a, StringPool &b) {
+                    swap_(a.strings_, b.strings_);
+                }
 
-    auto node = get(str);
-    if (node) {
-      node->references++;
-      return node;
-    }
+                void clear(Allocator *allocator) {
+                    while (strings_) {
+                        auto node = strings_;
+                        strings_ = node->next;
+                        StringNode::destroy(node, allocator);
+                    }
+                }
 
-    size_t n = str.size();
+                size_t size() const {
+                    size_t total = 0;
+                    for (auto node = strings_; node; node = node->next)
+                        total += sizeofString(node->length);
+                    return total;
+                }
 
-    node = StringNode::create(n, allocator);
-    if (!node)
-      return nullptr;
+                template<typename TAdaptedString>
+                StringNode *add(TAdaptedString str, Allocator *allocator) {
+                    ARDUINOJSON_ASSERT(str.isNull() == false);
 
-    stringGetChars(str, node->data, n);
-    node->data[n] = 0;  // force NUL terminator
-    add(node);
-    return node;
-  }
+                    auto node = get(str);
+                    if (node) {
+                        node->references++;
+                        return node;
+                    }
 
-  void add(StringNode* node) {
-    ARDUINOJSON_ASSERT(node != nullptr);
-    node->next = strings_;
-    strings_ = node;
-  }
+                    size_t n = str.size();
 
-  template <typename TAdaptedString>
-  StringNode* get(const TAdaptedString& str) const {
-    for (auto node = strings_; node; node = node->next) {
-      if (stringEquals(str, adaptString(node->data, node->length)))
-        return node;
-    }
-    return nullptr;
-  }
+                    node = StringNode::create(n, allocator);
+                    if (!node)
+                        return nullptr;
 
-  void dereference(const char* s, Allocator* allocator) {
-    StringNode* prev = nullptr;
-    for (auto node = strings_; node; node = node->next) {
-      if (node->data == s) {
-        if (--node->references == 0) {
-          if (prev)
-            prev->next = node->next;
-          else
-            strings_ = node->next;
-          StringNode::destroy(node, allocator);
-        }
-        return;
-      }
-      prev = node;
-    }
-  }
+                    stringGetChars(str, node->data, n);
+                    node->data[n] = 0;  // force NUL terminator
+                    add(node);
+                    return node;
+                }
 
- private:
-  StringNode* strings_ = nullptr;
-};
+                void add(StringNode *node) {
+                    ARDUINOJSON_ASSERT(node != nullptr);
+                    node->next = strings_;
+                    strings_ = node;
+                }
+
+                template<typename TAdaptedString>
+                StringNode *get(const TAdaptedString &str) const {
+                    for (auto node = strings_; node; node = node->next) {
+                        if (stringEquals(str, adaptString(node->data, node->length)))
+                            return node;
+                    }
+                    return nullptr;
+                }
+
+                void dereference(const char *s, Allocator *allocator) {
+                    StringNode *prev = nullptr;
+                    for (auto node = strings_; node; node = node->next) {
+                        if (node->data == s) {
+                            if (--node->references == 0) {
+                                if (prev)
+                                    prev->next = node->next;
+                                else
+                                    strings_ = node->next;
+                                StringNode::destroy(node, allocator);
+                            }
+                            return;
+                        }
+                        prev = node;
+                    }
+                }
+
+            private:
+                StringNode *strings_ = nullptr;
+            };
 
 ARDUINOJSON_END_PRIVATE_NAMESPACE

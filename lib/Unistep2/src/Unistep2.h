@@ -13,9 +13,8 @@
 
 #include "Arduino.h"
 
-class Unistep2
-{
-  public:
+class Unistep2 {
+public:
     // Constructor. We define pins for In1, In2, In3 and In4 on a ULN2003AN driver
     // plus the number of steps per rev (which is usually 4096) and the delay
     // between steps (900 works well).
@@ -48,7 +47,7 @@ class Unistep2
     // possible and pulls pins low.
     void stop();
 
-  private:
+private:
     int phase; //the curret phase setp
     int p1; //output pin
     int p2; //output pin
@@ -61,15 +60,25 @@ class Unistep2
     unsigned long _lastStepTime; //the last step time in microseconds
     void nextStep();   //Called if there are stepstogo (!= 0)
     void stepCW();
+
     void stepCCW();
+
     void goto1();
+
     void goto2();
+
     void goto3();
+
     void goto4();
+
     void goto5();
+
     void goto6();
+
     void goto7();
+
     void goto0();
+
     void powerUp(); //powers pins at current step to get ready for move
 };
 

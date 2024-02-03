@@ -1,17 +1,22 @@
 # Contributing to DHT11 Arduino Library
 
-Thank you for considering contributing to the DHT11 Arduino Library. It's community members like you that enhance the usefulness of this library.
+Thank you for considering contributing to the DHT11 Arduino Library. It's community members like you that enhance the
+usefulness of this library.
 
 ## Code of Conduct
 
-I'm committed to fostering a welcoming and open environment. All contributors are expected to adhere to the [DHT11 Arduino Library Code of Conduct](CODE_OF_CONDUCT.md). If you encounter unacceptable behavior, please report it to dhrubasaha@outlook.com.
+I'm committed to fostering a welcoming and open environment. All contributors are expected to adhere to
+the [DHT11 Arduino Library Code of Conduct](CODE_OF_CONDUCT.md). If you encounter unacceptable behavior, please report
+it to dhrubasaha@outlook.com.
 
 ## How Can I Contribute?
 
 ### Reporting Bugs
 
-- **Ensure the bug wasn't previously reported** by searching on GitHub under [Issues](https://github.com/dhrubasaha08/DHT11/issues).
-- If you can't find an existing issue addressing the problem, [open a new one](https://github.com/dhrubasaha08/DHT11/issues/new).
+- **Ensure the bug wasn't previously reported** by searching on GitHub
+  under [Issues](https://github.com/dhrubasaha08/DHT11/issues).
+- If you can't find an existing issue addressing the
+  problem, [open a new one](https://github.com/dhrubasaha08/DHT11/issues/new).
 
 ### Suggesting Enhancements
 

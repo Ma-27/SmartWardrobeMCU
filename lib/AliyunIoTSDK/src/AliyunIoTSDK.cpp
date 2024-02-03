@@ -49,7 +49,7 @@ static String hmac256(const String &signcontent, const String &ds)
     size_t keySize = ds.length();
 
     sha256.resetHMAC(key, keySize);
-    sha256.update((const byte *)signcontent.c_str(), signcontent.length());
+    sha256.updateTemperatureAndHumidity((const byte *) signcontent.c_str(), signcontent.length());
     sha256.finalizeHMAC(key, keySize, hashCode, sizeof(hashCode));
 
     String sign = "";

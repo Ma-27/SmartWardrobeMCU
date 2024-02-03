@@ -8,74 +8,76 @@
 
 ARDUINOJSON_BEGIN_PUBLIC_NAMESPACE
 
-class JsonObjectIterator {
-  friend class JsonObject;
+        class JsonObjectIterator {
+            friend class JsonObject;
 
- public:
-  JsonObjectIterator() {}
+        public:
+            JsonObjectIterator() {}
 
-  explicit JsonObjectIterator(detail::ObjectData::iterator iterator,
-                              detail::ResourceManager* resources)
-      : iterator_(iterator), resources_(resources) {}
+            explicit JsonObjectIterator(detail::ObjectData::iterator iterator,
+                                        detail::ResourceManager *resources)
+                    : iterator_(iterator), resources_(resources) {}
 
-  JsonPair operator*() const {
-    return JsonPair(iterator_, resources_);
-  }
-  Ptr<JsonPair> operator->() {
-    return operator*();
-  }
+            JsonPair operator*() const {
+                return JsonPair(iterator_, resources_);
+            }
 
-  bool operator==(const JsonObjectIterator& other) const {
-    return iterator_ == other.iterator_;
-  }
+            Ptr<JsonPair> operator->() {
+                return operator*();
+            }
 
-  bool operator!=(const JsonObjectIterator& other) const {
-    return iterator_ != other.iterator_;
-  }
+            bool operator==(const JsonObjectIterator &other) const {
+                return iterator_ == other.iterator_;
+            }
 
-  JsonObjectIterator& operator++() {
-    iterator_.next(resources_);
-    return *this;
-  }
+            bool operator!=(const JsonObjectIterator &other) const {
+                return iterator_ != other.iterator_;
+            }
 
- private:
-  detail::ObjectData::iterator iterator_;
-  detail::ResourceManager* resources_;
-};
+            JsonObjectIterator &operator++() {
+                iterator_.next(resources_);
+                return *this;
+            }
 
-class JsonObjectConstIterator {
-  friend class JsonObject;
+        private:
+            detail::ObjectData::iterator iterator_;
+            detail::ResourceManager *resources_;
+        };
 
- public:
-  JsonObjectConstIterator() {}
+        class JsonObjectConstIterator {
+            friend class JsonObject;
 
-  explicit JsonObjectConstIterator(detail::ObjectData::iterator iterator,
-                                   const detail::ResourceManager* resources)
-      : iterator_(iterator), resources_(resources) {}
+        public:
+            JsonObjectConstIterator() {}
 
-  JsonPairConst operator*() const {
-    return JsonPairConst(iterator_, resources_);
-  }
-  Ptr<JsonPairConst> operator->() {
-    return operator*();
-  }
+            explicit JsonObjectConstIterator(detail::ObjectData::iterator iterator,
+                                             const detail::ResourceManager *resources)
+                    : iterator_(iterator), resources_(resources) {}
 
-  bool operator==(const JsonObjectConstIterator& other) const {
-    return iterator_ == other.iterator_;
-  }
+            JsonPairConst operator*() const {
+                return JsonPairConst(iterator_, resources_);
+            }
 
-  bool operator!=(const JsonObjectConstIterator& other) const {
-    return iterator_ != other.iterator_;
-  }
+            Ptr<JsonPairConst> operator->() {
+                return operator*();
+            }
 
-  JsonObjectConstIterator& operator++() {
-    iterator_.next(resources_);
-    return *this;
-  }
+            bool operator==(const JsonObjectConstIterator &other) const {
+                return iterator_ == other.iterator_;
+            }
 
- private:
-  detail::ObjectData::iterator iterator_;
-  const detail::ResourceManager* resources_;
-};
+            bool operator!=(const JsonObjectConstIterator &other) const {
+                return iterator_ != other.iterator_;
+            }
+
+            JsonObjectConstIterator &operator++() {
+                iterator_.next(resources_);
+                return *this;
+            }
+
+        private:
+            detail::ObjectData::iterator iterator_;
+            const detail::ResourceManager *resources_;
+        };
 
 ARDUINOJSON_END_PUBLIC_NAMESPACE

@@ -22,38 +22,36 @@
 // pins for IN1, IN2, IN3, IN4, steps per rev, step delay(in micros)
 Unistep2 stepper(2, 3, 4, 5, 4096, 1000);
 
-void setup()
-{
-  // Your setup code here
-  // The library initializes the pins for you
+void setup() {
+    // Your setup code here
+    // The library initializes the pins for you
 
-  Serial.begin(9600);
-  Serial.println(F(" *** Unistep2 library example ***"));
-  Serial.println(F(" Enter absolute position between 0 and 4096"));
+    Serial.begin(9600);
+    Serial.println(F(" *** Unistep2 library example ***"));
+    Serial.println(F(" Enter absolute position between 0 and 4096"));
 
 }
 
-void loop()
-{
-  // We need to call run() frequently, so we place it in the loop()
-  stepper.run();
+void loop() {
+    // We need to call run() frequently, so we place it in the loop()
+    stepper.run();
 
-  // Get user input via Serial monitor
-  while ( Serial.available() > 0 && stepper.stepsToGo() == 0 ) {
+    // Get user input via Serial monitor
+    while (Serial.available() > 0 && stepper.stepsToGo() == 0) {
 
-    int stepPos = Serial.parseInt();
+        int stepPos = Serial.parseInt();
 
-    if (Serial.read() == '\n') {
-      Serial.print("Movement command: ");
-      // currentPosition() gives us stepper position
-      Serial.print(stepper.currentPosition());
-      Serial.print(" --> ");
-      Serial.println(stepPos);
+        if (Serial.read() == '\n') {
+            Serial.print("Movement command: ");
+            // currentPosition() gives us stepper position
+            Serial.print(stepper.currentPosition());
+            Serial.print(" --> ");
+            Serial.println(stepPos);
 
-      // moveTo() chooses the shortest path between the two positions.
-      stepper.moveTo(stepPos);
+            // moveTo() chooses the shortest path between the two positions.
+            stepper.moveTo(stepPos);
+        }
     }
-  }
-  // Other code
+    // Other code
 
 }

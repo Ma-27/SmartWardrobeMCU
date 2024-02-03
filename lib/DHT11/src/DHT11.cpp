@@ -15,11 +15,10 @@
  *
  * @param pin: Digital pin number on the Arduino board to which the DHT11 sensor is connected.
  */
-DHT11::DHT11(int pin)
-{
-  _pin = pin;
-  pinMode(_pin, OUTPUT);
-  digitalWrite(_pin, HIGH);
+DHT11::DHT11(int pin) {
+    _pin = pin;
+    pinMode(_pin, OUTPUT);
+    digitalWrite(_pin, HIGH);
 }
 
 /**
@@ -28,42 +27,34 @@ DHT11::DHT11(int pin)
  * @return: Temperature value in Celsius. Returns DHT11::ERROR_TIMEOUT if reading times out.
  *          Returns DHT11::ERROR_CHECKSUM if checksum validation fails.
  */
-int DHT11::readTemperature()
-{
-  delay(150);
-  byte data[5] = {0, 0, 0, 0, 0};
-  startSignal();
-  unsigned long timeout_start = millis();
+int DHT11::readTemperature() {
+    delay(150);
+    byte data[5] = {0, 0, 0, 0, 0};
+    startSignal();
+    unsigned long timeout_start = millis();
 
-  while (digitalRead(_pin) == HIGH)
-  {
-    if (millis() - timeout_start > DHT11::TIMEOUT_DURATION)
-    {
-      return DHT11::ERROR_TIMEOUT;
-    }
-  }
-
-  if (digitalRead(_pin) == LOW)
-  {
-    delayMicroseconds(80);
-    if (digitalRead(_pin) == HIGH)
-    {
-      delayMicroseconds(80);
-      for (int i = 0; i < 5; i++)
-      {
-        data[i] = readByte();
-        if (data[i] == DHT11::ERROR_TIMEOUT)
-        {
-          return DHT11::ERROR_TIMEOUT;
+    while (digitalRead(_pin) == HIGH) {
+        if (millis() - timeout_start > DHT11::TIMEOUT_DURATION) {
+            return DHT11::ERROR_TIMEOUT;
         }
-      }
-      if (data[4] == ((data[0] + data[1] + data[2] + data[3]) & 0xFF))
-      {
-        return data[2];
-      }
     }
-  }
-  return DHT11::ERROR_CHECKSUM;
+
+    if (digitalRead(_pin) == LOW) {
+        delayMicroseconds(80);
+        if (digitalRead(_pin) == HIGH) {
+            delayMicroseconds(80);
+            for (int i = 0; i < 5; i++) {
+                data[i] = readByte();
+                if (data[i] == DHT11::ERROR_TIMEOUT) {
+                    return DHT11::ERROR_TIMEOUT;
+                }
+            }
+            if (data[4] == ((data[0] + data[1] + data[2] + data[3]) & 0xFF)) {
+                return data[2];
+            }
+        }
+    }
+    return DHT11::ERROR_CHECKSUM;
 }
 
 /**
@@ -72,42 +63,34 @@ int DHT11::readTemperature()
  * @return: Humidity value in percentage. Returns DHT11::ERROR_TIMEOUT if reading times out.
  *          Returns DHT11::ERROR_CHECKSUM if checksum validation fails.
  */
-int DHT11::readHumidity()
-{
-  delay(150);
-  byte data[5] = {0, 0, 0, 0, 0};
-  startSignal();
-  unsigned long timeout_start = millis();
+int DHT11::readHumidity() {
+    delay(150);
+    byte data[5] = {0, 0, 0, 0, 0};
+    startSignal();
+    unsigned long timeout_start = millis();
 
-  while (digitalRead(_pin) == HIGH)
-  {
-    if (millis() - timeout_start > DHT11::TIMEOUT_DURATION)
-    {
-      return DHT11::ERROR_TIMEOUT;
-    }
-  }
-
-  if (digitalRead(_pin) == LOW)
-  {
-    delayMicroseconds(80);
-    if (digitalRead(_pin) == HIGH)
-    {
-      delayMicroseconds(80);
-      for (int i = 0; i < 5; i++)
-      {
-        data[i] = readByte();
-        if (data[i] == DHT11::ERROR_TIMEOUT)
-        {
-          return DHT11::ERROR_TIMEOUT;
+    while (digitalRead(_pin) == HIGH) {
+        if (millis() - timeout_start > DHT11::TIMEOUT_DURATION) {
+            return DHT11::ERROR_TIMEOUT;
         }
-      }
-      if (data[4] == ((data[0] + data[1] + data[2] + data[3]) & 0xFF))
-      {
-        return data[0];
-      }
     }
-  }
-  return DHT11::ERROR_CHECKSUM;
+
+    if (digitalRead(_pin) == LOW) {
+        delayMicroseconds(80);
+        if (digitalRead(_pin) == HIGH) {
+            delayMicroseconds(80);
+            for (int i = 0; i < 5; i++) {
+                data[i] = readByte();
+                if (data[i] == DHT11::ERROR_TIMEOUT) {
+                    return DHT11::ERROR_TIMEOUT;
+                }
+            }
+            if (data[4] == ((data[0] + data[1] + data[2] + data[3]) & 0xFF)) {
+                return data[0];
+            }
+        }
+    }
+    return DHT11::ERROR_CHECKSUM;
 }
 
 /**
@@ -115,23 +98,18 @@ int DHT11::readHumidity()
  *
  * @return: A byte of data read from the sensor.
  */
-byte DHT11::readByte()
-{
-  byte value = 0;
+byte DHT11::readByte() {
+    byte value = 0;
 
-  for (int i = 0; i < 8; i++)
-  {
-    while (digitalRead(_pin) == LOW)
-      ;
-    delayMicroseconds(30);
-    if (digitalRead(_pin) == HIGH)
-    {
-      value |= (1 << (7 - i));
+    for (int i = 0; i < 8; i++) {
+        while (digitalRead(_pin) == LOW);
+        delayMicroseconds(30);
+        if (digitalRead(_pin) == HIGH) {
+            value |= (1 << (7 - i));
+        }
+        while (digitalRead(_pin) == HIGH);
     }
-    while (digitalRead(_pin) == HIGH)
-      ;
-  }
-  return value;
+    return value;
 }
 
 /**
@@ -139,14 +117,13 @@ byte DHT11::readByte()
  * This involves setting the data pin low for a specific duration, then high,
  * and finally setting it to input mode to read the data.
  */
-void DHT11::startSignal()
-{
-  pinMode(_pin, OUTPUT);
-  digitalWrite(_pin, LOW);
-  delay(18);
-  digitalWrite(_pin, HIGH);
-  delayMicroseconds(40);
-  pinMode(_pin, INPUT);
+void DHT11::startSignal() {
+    pinMode(_pin, OUTPUT);
+    digitalWrite(_pin, LOW);
+    delay(18);
+    digitalWrite(_pin, HIGH);
+    delayMicroseconds(40);
+    pinMode(_pin, INPUT);
 }
 
 /**
@@ -157,15 +134,13 @@ void DHT11::startSignal()
  * @param errorCode The error code for which the description is required.
  * @return A descriptive string explaining the error.
  */
-String DHT11::getErrorString(int errorCode)
-{
-  switch (errorCode)
-  {
-  case DHT11::ERROR_TIMEOUT:
-    return "Error: Reading from DHT11 timed out.";
-  case DHT11::ERROR_CHECKSUM:
-    return "Error: Checksum mismatch while reading from DHT11.";
-  default:
-    return "Error: Unknown error code.";
-  }
+String DHT11::getErrorString(int errorCode) {
+    switch (errorCode) {
+        case DHT11::ERROR_TIMEOUT:
+            return "Error: Reading from DHT11 timed out.";
+        case DHT11::ERROR_CHECKSUM:
+            return "Error: Checksum mismatch while reading from DHT11.";
+        default:
+            return "Error: Unknown error code.";
+    }
 }

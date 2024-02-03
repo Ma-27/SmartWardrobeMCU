@@ -1,72 +1,125 @@
-### 系统的硬件代码
+# 物联网智能衣柜设计-Arduino硬件部分源代码
 
-采用MVC架构涉及将应用程序划分为三个主要组成部分：模型（Model）、视图（View）和控制器（Controller）。在Arduino中，视图通过LED屏幕显示。以下是项目的目录结构：
+### 架构
+
+架构不仅包括MVC的元素，还融合了模块化的思想。
+
+### 设计架构/接口与数据流
+
+1. **核心控制单元** (`CoreController`)
+    - 负责整体的业务逻辑控制。
+    - 协调传感器读取、命令解析、状态管理和网络通信。
+    - 接口与数据流
+        - 接口：提供初始化 (`init`), 更新 (`updateTemperatureAndHumidity`), 和命令处理 (`handleCommand`) 方法。
+        - 数据流：从`SensorManager`接收数据，向`ActuatorManager`发送指令，通过`NetworkManager`与云平台通信。
+        - 串口：打印数据流等等。
+2. **传感器管理器** (`SensorManager`)
+    - 负责管理所有传感器，如DHT11。
+    - 提供统一的接口供核心控制单元查询环境数据。
+    - 接口与数据流
+        - 接口：提供读取 (`read`) 和初始化 (`init`) 方法。
+        - 数据流：定期向核心控制单元提供传感器数据。
+3. **执行器管理器** (`ActuatorManager`)
+   - 负责管理所有执行器，如LED灯、步进电机等等可以被控制驱动的电子单元。
+    - 根据核心控制单元的指令执行动作。
+    - 接口与数据流
+        - 接口：提供动作执行 (`executeAction`) 方法。
+        - 数据流：接收核心控制单元的动作指令并执行。
+4. **网络管理器** (`NetworkManager`)
+    - 负责处理所有网络通信。
+    - 接收来自云平台的指令，并将数据发送至云平台。
+    - 接口与数据流
+        - 接口：提供数据发送 (`sendData`) 和接收命令 (`receiveCommand`) 方法。
+        - 数据流：双向通信，接收指令和发送数据。
+5. **显示管理器** (`DisplayManager`)
+    - 负责管理与显示相关的所有操作，如LED屏幕显示。
+    - 显示来自核心控制单元的状态和信息。
+    - 接口与数据流
+        - 接口：提供显示 (`display`) 方法。
+        - 数据流：从核心控制单元接收要显示的信息。
+6. **设备抽象层** (`HardwareAbstraction`)
+    - 为传感器和执行器、显示器提供统一的抽象接口。
+    - 使得在不同硬件之间切换时不需要修改核心逻辑。
+    - 接口与数据流
+        - 接口：定义硬件操作的通用接口。
+        - 数据流：为核心控制单元提供设备状态和执行操作的能力。
+7. **数据管理器** (`DataManager`)
+   - 中心化管理和调度数据流。负责数据的存储和校验，协调数据的在各个组件之间的流通等等。
+   - 结合串口管理器 (SerialManager)，利用串口通信进行调试信息的输出和读取。
+   - 接口与数据流
+      - 接口：提供数据处理 (processData), 数据存储 (storeData), 数据发送 (sendData) 以及接收命令 (receiveCommand) 等方法。
+      - 数据流：建立起复杂的数据交互路径。它不仅接收和发送数据，还负责将调试信息输出到串口，以及读取串口数据进行分析或调试。
+
+### 文件结构
 
 ```
 /SmartWardrobe
 |-- /src
 |   |-- main.ino
-|   |-- /model
-|   |   |-- EnvironmentData.h
-|   |   |-- EnvironmentData.cpp
-|   |   |-- MotorControl.h
-|   |   |-- MotorControl.cpp
-|   |-- /view
-|   |   |-- DisplayInterface.h
-|   |   |-- DisplayInterface.cpp
-|   |   |-- NetworkInterface.h
-|   |   |-- NetworkInterface.cpp
-|   |-- /controller
-|   |   |-- SystemController.h
-|   |   |-- SystemController.cpp
-|   |-- /utility
-|   |   |-- Common.h
-|   |   |-- Common.cpp
+|   |-- /core
+|   |   |-- CoreController.h
+|   |   |-- CoreController.cpp
+|   |-- /hardware_abstraction
+|   |   |-- HardwareAbstraction.h
+|   |   |-- HardwareAbstraction.cpp
+|   |   |-- /sensors
+|   |   |   |-- SensorManager.h        
+|   |   |   |-- SensorManager.cpp
+|   |   |-- /display
+|   |   |   |-- DisplayManager.h       // LCD显示的实现
+|   |   |   |-- DisplayManager.cpp
+|   |   |-- /actuators
+|   |   |   |-- ActuatorManager.h       // LED执行器的实现
+|   |   |   |-- ActuatorManager.cpp
 |   |-- /network
 |   |   |-- NetworkManager.h
 |   |   |-- NetworkManager.cpp
-|   |-- /hardware
-|   |   |-- SensorManager.h
-|   |   |-- SensorManager.cpp
-|   |   |-- LightManager.h
-|   |   |-- LightManager.cpp
-|   |   |-- MotorManager.h
-|   |   |-- MotorManager.cpp
+|   |-- /data
+|   |   |-- DataManager.h
+|   |   |-- DataManager.cpp
+|   |   |-- SerialManager.h
+|   |   |-- SerialManager.cpp
+|   |-- /utility
+|   |   |-- Utility.h
+|   |   |-- Utility.cpp
 |-- README.md
+
+
 ```
 
-在这个目录结构中：
+系统架构设计图：
 
-- `main.ino`: 这是程序的入口点，它负责初始化系统并在`setup()`和`loop()`函数中调用其他模块。
-- `/model`: 包含所有数据模型的文件，比如`EnvironmentData`负责存储环境数据，`MotorControl`负责管理步进电机的状态。
-- `/view`: 包含所有视图相关的文件，比如`DisplayInterface`负责管理LED显示屏，`NetworkInterface`负责格式化数据以通过网络发送。
-- `/controller`: 包含控制器文件，如`SystemController`，它负责协调模型和视图，并处理来自网络的命令。
-- `/utility`: 包含各种辅助功能和共享资源。
-- `/network`: 包含处理网络通信的文件。
-- `/hardware`: 包含直接与硬件交互的文件，如传感器和光管理。
-- `/lib`: 包含第三方库或自定义组件的文件夹，如DHT库和ESP8266库。
-
-每个`.cpp`和`.h`文件将包含特定于它们职责的类和方法。例如，`SensorManager`将管理与温湿度传感器的通信，`MotorManager`将控制步进电机，而`LightManager`将负责控制LED屏幕和可能的灯光系统。
-
-`main.ino` 的概念性框架可能如下：
-
-```cpp
-#include "SystemController.h"
-
-SystemController systemController;
-
-void setup() {
-  systemController.init();
-}
-
-void loop() {
-  systemController.update();
-}
+```
+                             +------------------+
+                             |  CoreController  |
+                             +------------------+
+                                      |
+     +--------------------------------+-------------------------------------+---------------------------+
+     |                                |                                     |                           |
+     |                      +----------------+                      +----------------+             +----------------+
+     |                      |                |                      |                |             |                |
+     |                      | Hardware       |                      | Network        |             | Data           |
+     |                      | Abstraction    |                      | Manager        |             | Manager        |
+     |                      +----------------+                      +----------------+             +----------------+
+     |                              |                                       |                              |
+     |            +-----------------+------------------+                    v                              v
+     |            |                 |                  |            +----------------+             +----------------+
+     |            v                 v                  v            |                |             |                |
+     |  +----------------+  +----------------+  +----------------+  | External       |             | Local or       |
+     |  | Sensors        |  | Display        |  | Actuators      |  | Systems        |             | External       |
+     |  +----------------+  +----------------+  +----------------+  | (e.g., Cloud   |             | Systems data   |
+     |                                                              |   Platform)    |             | serial tracing |
+     |                                                              | management     |             | (e.g., PC,     |
+     |                                                              +----------------+             |  other Arduino)|
+     |                                                                                             +----------------+
+     |
+     +----------------+
+     |                |
+     | Utility        |
+     +----------------+
 ```
 
-在此架构中，`SystemController`类将负责管理其他所有类的实例，并确保它们在适当的时候进行通信和数据更新。例如，它可能需要从`EnvironmentData`获取最新的环境读数，并通过`NetworkInterface`将其发送到云平台。
-
-这样的结构使得代码清晰且模块化，便于单独测试每个组件，并且能够轻松地添加或修改组件而不影响其他部分。在编写具体的代码之前，建立这样的框架将有助于保持项目的组织性，并确保每个部分都有明
+`CoreController`通过`HardwareAbstraction`层与各个硬件模块进行交互，而`HardwareAbstraction`层进一步细分为`sensors`、`display`和`actuators`子模块，每个子模块负责特定类型硬件的抽象和实现。这种分层和模块化的设计使得系统更易于扩展和维护，同时也方便针对特定硬件类别的优化。 此架构允许系统的每个部分独立工作，并通过定义好的接口与其他部分通信。这样的设计有助于在不同层之间保持清晰的边界，易于测试和维护。此外，如果将来需要更换传感器或执行器硬件，只需更新相应的硬件抽象层代码，而不会影响到核心控制逻辑。
 
 ### Arduino的接线
 
@@ -74,5 +127,15 @@ void loop() {
 Unistep2 stepper(23, 25, 27, 29, 4096, 4096);
 
 23/25/27/29 步进电机 IN 1 2 3 4
+
+### 串口打印调试信息的方法
+
+//FIXME
+DataManager::getInstance()->sendData(String(humidity) + "这里是要发送的数据" + String(temperature), true);
+
+测试
+https://docs.platformio.org/en/latest/advanced/unit-testing/index.html
+
+
 
 

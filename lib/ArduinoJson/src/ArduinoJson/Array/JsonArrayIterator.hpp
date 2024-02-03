@@ -8,89 +8,93 @@
 
 ARDUINOJSON_BEGIN_PUBLIC_NAMESPACE
 
-template <typename T>
-class Ptr {
- public:
-  Ptr(T value) : value_(value) {}
+        template<typename T>
+        class Ptr {
+        public:
+            Ptr(T value) : value_(value) {}
 
-  T* operator->() {
-    return &value_;
-  }
+            T *operator->() {
+                return &value_;
+            }
 
-  T& operator*() {
-    return value_;
-  }
+            T &operator*() {
+                return value_;
+            }
 
- private:
-  T value_;
-};
+        private:
+            T value_;
+        };
 
-class JsonArrayIterator {
-  friend class JsonArray;
+        class JsonArrayIterator {
+            friend class JsonArray;
 
- public:
-  JsonArrayIterator() {}
-  explicit JsonArrayIterator(detail::ArrayData::iterator iterator,
-                             detail::ResourceManager* resources)
-      : iterator_(iterator), resources_(resources) {}
+        public:
+            JsonArrayIterator() {}
 
-  JsonVariant operator*() {
-    return JsonVariant(iterator_.data(), resources_);
-  }
-  Ptr<JsonVariant> operator->() {
-    return operator*();
-  }
+            explicit JsonArrayIterator(detail::ArrayData::iterator iterator,
+                                       detail::ResourceManager *resources)
+                    : iterator_(iterator), resources_(resources) {}
 
-  bool operator==(const JsonArrayIterator& other) const {
-    return iterator_ == other.iterator_;
-  }
+            JsonVariant operator*() {
+                return JsonVariant(iterator_.data(), resources_);
+            }
 
-  bool operator!=(const JsonArrayIterator& other) const {
-    return iterator_ != other.iterator_;
-  }
+            Ptr<JsonVariant> operator->() {
+                return operator*();
+            }
 
-  JsonArrayIterator& operator++() {
-    iterator_.next(resources_);
-    return *this;
-  }
+            bool operator==(const JsonArrayIterator &other) const {
+                return iterator_ == other.iterator_;
+            }
 
- private:
-  detail::ArrayData::iterator iterator_;
-  detail::ResourceManager* resources_;
-};
+            bool operator!=(const JsonArrayIterator &other) const {
+                return iterator_ != other.iterator_;
+            }
 
-class JsonArrayConstIterator {
-  friend class JsonArray;
+            JsonArrayIterator &operator++() {
+                iterator_.next(resources_);
+                return *this;
+            }
 
- public:
-  JsonArrayConstIterator() {}
-  explicit JsonArrayConstIterator(detail::ArrayData::iterator iterator,
-                                  const detail::ResourceManager* resources)
-      : iterator_(iterator), resources_(resources) {}
+        private:
+            detail::ArrayData::iterator iterator_;
+            detail::ResourceManager *resources_;
+        };
 
-  JsonVariantConst operator*() const {
-    return JsonVariantConst(iterator_.data(), resources_);
-  }
-  Ptr<JsonVariantConst> operator->() {
-    return operator*();
-  }
+        class JsonArrayConstIterator {
+            friend class JsonArray;
 
-  bool operator==(const JsonArrayConstIterator& other) const {
-    return iterator_ == other.iterator_;
-  }
+        public:
+            JsonArrayConstIterator() {}
 
-  bool operator!=(const JsonArrayConstIterator& other) const {
-    return iterator_ != other.iterator_;
-  }
+            explicit JsonArrayConstIterator(detail::ArrayData::iterator iterator,
+                                            const detail::ResourceManager *resources)
+                    : iterator_(iterator), resources_(resources) {}
 
-  JsonArrayConstIterator& operator++() {
-    iterator_.next(resources_);
-    return *this;
-  }
+            JsonVariantConst operator*() const {
+                return JsonVariantConst(iterator_.data(), resources_);
+            }
 
- private:
-  detail::ArrayData::iterator iterator_;
-  const detail::ResourceManager* resources_;
-};
+            Ptr<JsonVariantConst> operator->() {
+                return operator*();
+            }
+
+            bool operator==(const JsonArrayConstIterator &other) const {
+                return iterator_ == other.iterator_;
+            }
+
+            bool operator!=(const JsonArrayConstIterator &other) const {
+                return iterator_ != other.iterator_;
+            }
+
+            JsonArrayConstIterator &operator++() {
+                iterator_.next(resources_);
+                return *this;
+            }
+
+        private:
+            detail::ArrayData::iterator iterator_;
+            const detail::ResourceManager *resources_;
+        };
 
 ARDUINOJSON_END_PUBLIC_NAMESPACE

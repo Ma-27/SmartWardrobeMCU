@@ -7,7 +7,7 @@
 #define SERIAL_MANAGER_H
 
 #include <Arduino.h> // 包含Arduino基础头文件，提供Serial等类的定义
-#include "ProjectConfig.h"
+#include "utility/ProjectConfig.h"
 
 /** 串口管理器  SerialManager类
  * 负责管理，格式化串口有关的打印输出。
@@ -18,7 +18,6 @@ class SerialManager {
 private:
     static SerialManager *instance; // 该类的静态实例，采用单例模式
     SerialManager(); // 构造函数声明
-    SerialManager(long baudRate);
 
 
 public:

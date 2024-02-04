@@ -6,8 +6,8 @@
 #define HARDWARE_ABSTRACTION_H
 
 // 确保包含DisplayManager的定义
-#include "DisplayManager.h"
-#include "SensorManager.h"
+#include "hardware_abstraction/display/DisplayManager.h"
+#include "hardware_abstraction/sensors/SensorManager.h"
 
 /**
  * 硬件抽象层，负责提供硬件操作的统一接口，包括LCD显示等。

@@ -1,13 +1,13 @@
-#include "CoreController.h"
-#include "CoreControllerBuilder.h"
-#include "SerialManager.h"
-#include "SensorManager.h"
-#include "ActuatorManager.h"
-#include "NetworkManager.h"
-#include "DisplayManager.h"
-#include "HardwareAbstraction.h"
-#include "Utility.h"
-#include "ProjectConfig.h"
+#include "core/CoreController.h"
+#include "core/CoreControllerBuilder.h"
+#include "data/SerialManager.h"
+#include "hardware_abstraction/sensors/SensorManager.h"
+#include "hardware_abstraction/actuators/ActuatorManager.h"
+#include "network/NetworkManager.h"
+#include "hardware_abstraction/display/DisplayManager.h"
+#include "hardware_abstraction/HardwareAbstraction.h"
+#include "utility/Utility.h"
+#include "utility/ProjectConfig.h"
 
 CoreControllerBuilder builder;
 CoreController *controller;
@@ -15,15 +15,18 @@ CoreController *controller;
 void setup() {
     // 初始化整个控制器。控制器会将必要的组件全都初始化。
     controller = CoreController::getInstance();
+    // 控制器中，各大组件有序进行初始化工作（转控制器）
+    controller->init();
 }
 
 void loop() {
     // 真正的控制循环过程在controller中反复执行。确保coreController不是nullptr
-    if (controller != nullptr) {
-        controller->looper();
-    } else {
-        // 报错
-        DataManager::getInstance()->sendData("Empty controller!", true);
+    if (!controller) {
+        controller = CoreController::getInstance();
+        // 再尝试初始化一遍，如果还不行就报错
+        if (!controller)
+            DataManager::getInstance()->saveData("Empty controller!", true);
     }
+    controller->looper();
 }
 

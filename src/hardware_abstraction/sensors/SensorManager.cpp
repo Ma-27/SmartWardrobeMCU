@@ -2,7 +2,7 @@
 // Created by Mamh on 2024/2/2.
 //
 
-#include "SensorManager.h"
+#include "hardware_abstraction/sensors/SensorManager.h"
 
 SensorManager* SensorManager::instance = nullptr;
 

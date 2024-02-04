@@ -39,7 +39,30 @@ public:
     CoreController* build() {
         return new CoreController(hardware, network, data);
     }
+
+    /*
+    // 新增的rebuild方法
+    CoreController* rebuild(CoreController* existingController, DataManager* newDataManager = nullptr, HardwareAbstraction* newHardwareAbstraction = nullptr, NetworkManager* newNetworkManager = nullptr) {
+        if (existingController != nullptr) {
+            // 根据提供的新管理器实例更新existingController
+            if (newDataManager != nullptr) {
+                existingController->setDataManager(newDataManager);
+            }
+            if (newHardwareAbstraction != nullptr) {
+                existingController->setHardwareAbstraction(newHardwareAbstraction);
+            }
+            if (newNetworkManager != nullptr) {
+                existingController->setNetworkManager(newNetworkManager);
+            }
+        }
+        return existingController;
+    }
+     */
+
+
+
 };
+
 
 #endif // CORE_CONTROLLER_BUILDER_H
 

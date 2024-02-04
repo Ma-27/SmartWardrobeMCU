@@ -2,24 +2,25 @@
 // Created by Mamh on 2024/2/4.
 //
 
-#include "SerialManager.h"
+#include "data/SerialManager.h"
 
 SerialManager *SerialManager::instance = nullptr;
 
 SerialManager *SerialManager::getInstance() {
     if (instance == nullptr) {
-        instance = new SerialManager(ProjectConfig::BAUD); // Initialize with default baud rate
+        instance = new SerialManager();
     }
     return instance;
 }
 
 // SerialManager构造函数
-SerialManager::SerialManager() = default;
-
-// SerialManager构造函数。初始化串口通信，接受一个波特率参数。
-SerialManager::SerialManager(long baudRate) {
-    Serial.begin(baudRate); // 使用Arduino Serial库的begin方法初始化串口通信
-}
+SerialManager::SerialManager() {
+    //  TODO 配置波特率
+    // 使用Arduino Serial库的begin方法初始化串口通信.初始化串口通信，接受一个波特率参数。
+    Serial.begin(ProjectConfig::BAUD);
+    // 使用Arduino Serial库的begin方法初始化串口通信.初始化串口通信，接受一个波特率参数。
+    Serial1.begin(ProjectConfig::WIFI_BAUD);
+};
 
 // println方法定义，打印一条消息并换行
 void SerialManager::println(const String &message) {

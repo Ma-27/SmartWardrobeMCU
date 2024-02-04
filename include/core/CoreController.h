@@ -5,10 +5,10 @@
 #ifndef CORE_CONTROLLER_H
 #define CORE_CONTROLLER_H
 
-#include "HardwareAbstraction.h"
-#include "SerialManager.h"
-#include "NetworkManager.h"
-#include "DataManager.h"
+#include "hardware_abstraction/HardwareAbstraction.h"
+#include "data/SerialManager.h"
+#include "network/NetworkManager.h"
+#include "data/DataManager.h"
 
 /**
  * **核心控制单元** (`CoreController`)
@@ -48,8 +48,8 @@ public:
     // 获取单例对象的静态方法
     static CoreController* getInstance();
 
-    // 更新温湿度
-    void updateTemperatureAndHumidity(int updateFreq);
+    //
+    void init();
 
     // 直接来自于loop函数的looper。此函数循环往复，一直运行
     void looper();
@@ -66,6 +66,13 @@ public:
     DataManager* getDataManager() const {
         return data;
     }
+
+    // 功能定义
+    // 更新温湿度
+    void updateTemperatureAndHumidity(int updateFreq);
+
+    // 连接到wif网络
+    bool connectToWifi();
 };
 
 #endif

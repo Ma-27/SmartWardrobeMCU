@@ -2,10 +2,10 @@
 // Created by Mamh on 2024/2/3.
 //
 
-#include "HardwareAbstraction.h"
-#include "SensorManager.h"  // 确保包含SensorManager的头文件
-#include "ProjectConfig.h"
-#include "DataManager.h"
+#include "hardware_abstraction/HardwareAbstraction.h"
+#include "hardware_abstraction/sensors/SensorManager.h"  // 确保包含SensorManager的头文件
+#include "utility/ProjectConfig.h"
+#include "data/DataManager.h"
 
 // 初始化静态实例指针
 HardwareAbstraction *HardwareAbstraction::instance = nullptr;

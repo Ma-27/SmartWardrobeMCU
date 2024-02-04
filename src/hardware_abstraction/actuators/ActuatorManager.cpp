@@ -2,7 +2,7 @@
 // Created by Mamh on 2024/2/2.
 //
 
-#include "ActuatorManager.h"
+#include "hardware_abstraction/actuators/ActuatorManager.h"
 
 // 初始化静态实例指针
 ActuatorManager *ActuatorManager::instance = nullptr;

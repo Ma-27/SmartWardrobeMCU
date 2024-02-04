@@ -5,8 +5,8 @@
 #ifndef SENSOR_MANAGER_H
 #define SENSOR_MANAGER_H
 
-#include <DHT.h>
-#include "ProjectConfig.h" // 引入配置类
+#include "DHT.h"
+#include "utility/ProjectConfig.h" // 引入配置类
 
 /**
  * **传感器管理器** (`SensorManager`)

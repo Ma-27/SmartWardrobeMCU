@@ -32,6 +32,12 @@ public:
     // 显示温湿度的接口
     void displayHumidity(float humidity);
     void displayTemperature(float temperature);
+
+    // 在屏幕上方一行显示info
+    void displayUpper(String info);
+
+    // 在屏幕下方一行显示info
+    void displayBelow(String info);
 };
 
 #endif

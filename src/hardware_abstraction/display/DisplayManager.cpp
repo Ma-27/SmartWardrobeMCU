@@ -63,7 +63,6 @@ void DisplayManager::displayUpper(String info) {
     lcd.blink();
     lcd.setCursor(0, 0);
     lcd.print(info);
-    lcd.autoscroll();
 }
 
 // 显示屏幕下方一行
@@ -71,7 +70,6 @@ void DisplayManager::displayBelow(String info) {
     lcd.blink();
     lcd.setCursor(0, 1);
     lcd.print(info);
-    lcd.autoscroll();
 }
 
 

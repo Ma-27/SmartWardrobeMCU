@@ -8,15 +8,20 @@
 // 确保包含DisplayManager的定义
 #include "hardware_abstraction/display/DisplayManager.h"
 #include "hardware_abstraction/sensors/SensorManager.h"
+#include "data/pub-sub/Subscriber.h"
+#include "data/pub-sub/EventManager.h"
 
 /**
  * 硬件抽象层，负责提供硬件操作的统一接口，包括LCD显示等。
  */
-class HardwareAbstraction {
+class HardwareAbstraction : public Subscriber {
 private:
     static HardwareAbstraction *instance; // 静态公共私有实例指针
     // 私有化构造函数
     HardwareAbstraction();
+
+    // 保存事件接收器的一个对象，为了订阅并且接收网络更新的信息。
+    EventManager *eventManager;
 
 
     DisplayManager* displayManager; // 用于存储DisplayManager实例的指针
@@ -34,7 +39,15 @@ public:
 
     // // 采集温湿度并且显示在LCD屏幕上
     void processTemperatureAndHumidity(bool enabled);
-    // 其他管理器的接口方法
+
+    /**
+   * 实现Subscriber接口要求的update方法。
+   * 更新网络连接状态到LCD屏幕上。
+   * @param message 收到的消息（收到它的子类的消息，int类型号）
+   */
+    void update(const Message &message) override;
+
+    void initHAL();
 };
 
 #endif // HARDWARE_ABSTRACTION_H

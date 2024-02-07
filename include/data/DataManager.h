@@ -7,6 +7,8 @@
 
 #include <WString.h>
 #include "data/SerialManager.h"
+#include "network/NetworkManager.h"
+#include "data/pub-sub/EventManager.h"
 
 /**
  * **数据管理器** (`DataManager`)
@@ -20,18 +22,25 @@ private:
 
     DataManager(); // 私有构造函数
 
-    // FIXME
+    // FIXME 存储数据模式有待优化
     // 假设存储的是这个数据
     String storedData;
     // 串口管理器
     SerialManager *serialManager;
 
+    // pub-sub Event
+    EventManager *eventManager;
+
 public:
-    DataManager(const DataManager &) = delete; // 外部不可见默认的构造方法
+    // 外部不可见默认的构造方法
+    DataManager(const DataManager &) = delete;
     DataManager &operator=(const DataManager &) = delete;
 
-    static DataManager *getInstance(); // 获取单例对象的方法
-    void saveData(const String &data, bool SerialPrint); // 发送数据的方法
+    // 获取单例对象的方法
+    static DataManager *getInstance();
+
+    // 发送数据的方法
+    void saveData(const String &data, bool SerialPrint);
 };
 
 #endif

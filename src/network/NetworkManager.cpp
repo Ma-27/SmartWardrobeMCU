@@ -10,7 +10,6 @@
 
 // 初始化静态实例指针
 NetworkManager *NetworkManager::instance = nullptr;
-DataManager *dataManager = nullptr;
 
 // 提供一个公共的访问方法
 NetworkManager *NetworkManager::getInstance() {
@@ -22,8 +21,11 @@ NetworkManager *NetworkManager::getInstance() {
 
 // 初始化所有硬件组件，这是该类的默认构造函数
 NetworkManager::NetworkManager() {
-    // 初始化数据中心， 为了发送结果准备
+    // 获得DataManager实例
     dataManager = DataManager::getInstance();
+
+    // 获得EventManager实例
+    eventManager = EventManager::getInstance();
 }
 
 
@@ -42,10 +44,10 @@ bool NetworkManager::executeAT_Setting(const char *data, const char *keyword, un
         if (Serial1.available()) {
             readData = Serial1.readStringUntil('\n');
             // 打印接收到的每行数据
-            dataManager->saveData("Received: " + readData, true);
+            dataManager->saveData("Received: " + readData, false);
             if (readData.indexOf(keyword) >= 0) {
                 dataManager->saveData("-----------------Received expected response:" + readData + "-----------------",
-                                      true);   // 收到预期响应
+                                      false);   // 收到预期响应
                 return true;                                                // 找到关键词
             }
         }
@@ -56,13 +58,13 @@ bool NetworkManager::executeAT_Setting(const char *data, const char *keyword, un
     return false;
 }
 
-/*
+/**
  * 连接到指定的Wi-Fi接入点AP，接入互联网
  */
 bool NetworkManager::connectWifi() {
     bool success = true;
     // 开始连接wifi
-    dataManager->saveData("Wi-Fi Connecting", true);
+    dataManager->saveData("Wi-Fi Connecting", false);
 
     // AT 测试 esp8266能否工作
     success = executeAT_Setting("AT", "OK", 2000) && success;
@@ -114,7 +116,7 @@ bool NetworkManager::readServerShakehands() {
     // 用于存储从服务器接收到的数据
     String response = "";
     // 提示信息
-    dataManager->saveData("Waiting for server response...", true);
+    dataManager->saveData("Waiting for server response...", false);
 
     // 检查是否有数据可读，或者是否超时
     while ((millis() - startTime) < timeout) {
@@ -137,16 +139,16 @@ bool NetworkManager::readServerShakehands() {
 
     // 如果接收到了响应
     if (response.length() > 0) {
-        dataManager->saveData("Received response from server:", true);
+        dataManager->saveData("Received response from server:", false);
         // 打印响应
-        dataManager->saveData(response, true);
+        dataManager->saveData(response, false);
     } else {
         // 超时，没有接收到响应
         dataManager->saveData("No response from server (timeout)", true);
     }
 
     if (success) {
-        dataManager->saveData("-----------------Device successfully online.-----------------", true);
+        dataManager->saveData("-----------------Device successfully online.-----------------", false);
     }
     return success;
 }
@@ -162,41 +164,21 @@ bool NetworkManager::resetConnection() {
 }
 
 
-
-
-/* with while
-bool NetworkManager::connectWifi() {
-    // 开始连接wifi
-    dataManager->saveData("Wi-Fi Connecting", true);
-
-    // AT 测试 esp8266能否工作
-    while (!executeAT_Setting("AT", "OK", 2000));
-
-    // 设置工作模式。1：station模式；2：ap模式；3：ap+station模式
-    while (!executeAT_Setting("AT+CWMODE=3", "OK", 1000));
-
-    // 加入当前Wi-Fi热点无线网络
-    while (!executeAT_Setting("AT+CWJAP=\"" WIFI_SSID "\",\"" WIFI_PASSWORD "\"", "WIFI CONNECTED", 20000));
-
-    // 查询本机IP
-    while (!executeAT_Setting("AT+CIFSR", "OK", 1000));
-
-    // 连接服务器，这里TCP为TCP透传、183.230.40.33为服务器IP地址，80为端口号
-    while (!executeAT_Setting("AT+CIPSTART=\"TCP\",\"183.230.40.40\",1811", "CONNECT", 10000));
-
-    // AT+CIPMUX=1 1：开启多连接；0：单链接
-    while (!executeAT_Setting("AT+CIPMUX=1", "OK", 2000));
-
-    // 设置透传模式。0非透传模式；1透传模式
-    while (!executeAT_Setting("AT+CIPMODE=1", "OK", 2000));
-
-    // 尝试发送AT+CIPSEND指令
-    while (!executeAT_Setting("AT+CIPSEND", "OK", 2000));
-
-    // 向OpenIot（中国移动物联网平台）发送身份识别信息：私钥
-    Serial1.println(IOT_PLATFORM_PRIVATE_KEY);
-
-    return true;
+// 添加用于获取和设置当前网络状态的方法
+ConnectionStatus NetworkManager::getCurrentStatus() {
+    return instance->connectionStatus;
 }
-*/
+
+// 设置当前的连接状态。
+void NetworkManager::setConnectionStatus(ConnectionStatus status) {
+    connectionStatus = status;
+
+    // 发布网络状态更新消息
+    NetworkStatusMessage message(status);
+    Serial.flush();
+    // delay(500);
+    eventManager->notify(NETWORK_STATUS_CHANGE, message);
+    // delay(500);
+    Serial.flush();
+}
 

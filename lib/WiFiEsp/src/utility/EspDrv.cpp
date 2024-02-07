@@ -730,7 +730,7 @@ int EspDrv::getDataBuf(uint8_t connId, uint8_t *buf, uint16_t bufSize) {
 
 
 bool EspDrv::sendData(uint8_t sock, const uint8_t *data, uint16_t len) {
-    LOGDEBUG2(F("> saveData:"), sock, len);
+    LOGDEBUG2(F("> sendData:"), sock, len);
 
     char cmdBuf[20];
     sprintf_P(cmdBuf, PSTR("AT+CIPSEND=%d,%u"), sock, len);
@@ -753,9 +753,9 @@ bool EspDrv::sendData(uint8_t sock, const uint8_t *data, uint16_t len) {
     return true;
 }
 
-// Overrided saveData method for __FlashStringHelper strings
+// Overrided sendData method for __FlashStringHelper strings
 bool EspDrv::sendData(uint8_t sock, const __FlashStringHelper *data, uint16_t len, bool appendCrLf) {
-    LOGDEBUG2(F("> saveData:"), sock, len);
+    LOGDEBUG2(F("> sendData:"), sock, len);
 
     char cmdBuf[20];
     uint16_t len2 = len + 2 * appendCrLf;

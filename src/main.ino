@@ -13,6 +13,12 @@ CoreControllerBuilder builder;
 CoreController *controller;
 
 void setup() {
+    // 先把灯灭了，省电
+    // 设置数字引脚13为输出模式
+    pinMode(13, OUTPUT);
+    // 将数字引脚13设置为低电平，熄灭LED
+    digitalWrite(13, LOW);
+
     // 初始化整个控制器。控制器会将必要的组件全都初始化。
     controller = CoreController::getInstance();
     // 控制器中，各大组件有序进行初始化工作（转控制器）

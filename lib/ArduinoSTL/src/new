@@ -27,10 +27,16 @@
 #pragma GCC visibility push(default)
 
 namespace std{
-	class _UCXXEXPORT bad_alloc : public exception {};
+#ifndef __STD_NO_THROW_T_DEFINED
+#define __STD_NO_THROW_T_DEFINED
 
-	struct _UCXXEXPORT nothrow_t {};
+	class _UCXXEXPORT bad_alloc : public exception {
+	};
+
+	struct _UCXXEXPORT nothrow_t {
+	};
 	extern const nothrow_t nothrow;
+#endif
 
 	typedef void (*new_handler)();
 	_UCXXEXPORT new_handler set_new_handler(new_handler new_p) _UCXX_USE_NOEXCEPT;

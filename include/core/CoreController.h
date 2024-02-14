@@ -1,6 +1,9 @@
-//
-// Created by Mamh on 2024/2/3.
-//
+/**
+ * @description: 
+ * @author: Mamh
+ * @email: mamhsl@163.com
+ * @date: 2024/2/3 上午 09:30
+ */
 
 #ifndef CORE_CONTROLLER_H
 #define CORE_CONTROLLER_H
@@ -9,17 +12,17 @@
 #include "data/SerialManager.h"
 #include "network/NetworkManager.h"
 #include "data/DataManager.h"
+#include "TaskScheduler.h"
+
+
+class CoreControllerBuilder; // 前向声明
+
 
 /**
  * **核心控制单元** (`CoreController`)
     - 负责整体的业务逻辑控制。包括控制中断，初始化，循环体等等。
     - 协调传感器读取、命令解析、状态管理和网络通信。
  */
-
-
-
-class CoreControllerBuilder; // 前向声明
-
 class CoreController {
 
 private:
@@ -44,11 +47,14 @@ private:
     // 允许CoreControllerBuilder访问CoreController的私有部分
     friend class CoreControllerBuilder;
 
+    // 任务调度器。获取TaskScheduler的单例实例
+    TaskScheduler &scheduler = TaskScheduler::getInstance();
+
 public:
     // 获取单例对象的静态方法
     static CoreController* getInstance();
 
-    //
+    // 初始化整个控制器，取自main的setup函数。
     void init();
 
     // 直接来自于loop函数的looper。此函数循环往复，一直运行
@@ -69,7 +75,7 @@ public:
 
     // 功能定义
     // 更新温湿度
-    void updateTemperatureAndHumidity(int updateFreq);
+    void updateTemperatureAndHumidity();
 
     // 连接到wif网络
     bool connectToWifi();

@@ -23,9 +23,7 @@ void setup() {
     controller = CoreController::getInstance();
     // 控制器中，各大组件有序进行初始化工作（转控制器）
     controller->init();
-}
 
-void loop() {
     // 真正的控制循环过程在controller中反复执行。确保coreController不是nullptr
     if (!controller) {
         controller = CoreController::getInstance();
@@ -33,6 +31,11 @@ void loop() {
         if (!controller)
             DataManager::getInstance()->saveData("Empty controller!", true);
     }
+}
+
+
+void loop() {
+    // 真正的控制循环过程
     controller->looper();
 }
 

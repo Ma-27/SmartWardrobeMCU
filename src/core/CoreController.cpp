@@ -1,6 +1,9 @@
-//
-// Created by Mamh on 2024/2/3.
-//
+/**
+ * @description:
+ * @author: Mamh
+ * @email: mamhsl@163.com
+ * @date: 2024/2/3 上午 09:30
+ */
 
 
 #include "core/CoreController.h"
@@ -24,28 +27,34 @@ CoreController *CoreController::getInstance() {
 }
 
 // 负责更新温湿度，此过程由HardwareAbstraction层进行。此层管理该功能是否启用。
-void CoreController::updateTemperatureAndHumidity(int updateFreq) {
-    // 延迟规定时间再更新
-    delay(updateFreq);
-
+void CoreController::updateTemperatureAndHumidity() {
     // 获取到硬件抽象层实例，并且使用硬件抽象层更新温湿度，不经过此层控制
     hardware->processTemperatureAndHumidity(true);
 }
 
 
-//核心控制单元中，上电初始化时首先执行的函数。TODO 要严格注意其执行顺序
+/** 核心控制单元中，上电初始化时首先执行的函数。
+ * TODO 要严格注意其执行顺序
+ */
 void CoreController::init() {
     // 连接网络。
     bool result = connectToWifi();
 
     // 返回连接结果,1表示成功，0表示失败。
     data->saveData(String(result), false);
+
+    // 接下来的是任务调度，模拟线程为每个任务定时执行。当到了规定时间间隔后执行任务。
+    // 使用Lambda表达式安排updateTemperatureAndHumidity作为任务， 更新温湿度
+    scheduler.addTask([this]() { this->updateTemperatureAndHumidity(); }, ProjectConfig::UPDATE_DHT_TIME);
 }
 
-//核心控制单元中，可以一直运行的函数。它负责管理整个循环
+
+/**
+ * 核心控制单元中，可以一直运行的函数。它负责管理整个循环
+ */
 void CoreController::looper() {
-    // 更新温湿度
-    updateTemperatureAndHumidity(ProjectConfig::LOOPER_UPDATE_TIME);
+    // 运行任务调度器
+    scheduler.run();
 }
 
 // 连接到iot服务器并且握手

@@ -1,6 +1,9 @@
-//
-// Created by Mamh on 2024/2/3.
-//
+/**
+ * @description:
+ * @author: Mamh
+ * @email: mamhsl@163.com
+ * @date: 2024/2/3 上午 11:13
+ */
 
 #ifndef PROJECT_CONFIG_H
 #define PROJECT_CONFIG_H
@@ -13,8 +16,8 @@
 
 class ProjectConfig {
 public:
-    // 更新数据的频率,单位为ms
-    static const int LOOPER_UPDATE_TIME = 500;
+    // 更新温湿度数据的频率,单位为ms
+    static const int UPDATE_DHT_TIME = 500;
 
     // 串口和单片机的波特率设为9600.
     static const long BAUD = 9600;

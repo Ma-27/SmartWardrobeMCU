@@ -1,6 +1,9 @@
-//
-// Created by Mamh on 2024/2/3.
-//
+/**
+ * @description:
+ * @author: Mamh
+ * @email: mamhsl@163.com
+ * @date: 2024/2/3 上午 08:37
+ */
 
 #include "hardware_abstraction/HardwareAbstraction.h"
 #include "hardware_abstraction/sensors/SensorManager.h"  // 确保包含SensorManager的头文件
@@ -35,7 +38,10 @@ void HardwareAbstraction::initHAL() {
     eventManager->subscribe(NETWORK_STATUS_CHANGE, this);
 }
 
-// 采集温湿度并且显示在LCD屏幕上
+
+/** 采集温湿度并且显示在LCD屏幕上
+ * @param enabled 是否启用该功能
+ */
 void HardwareAbstraction::processTemperatureAndHumidity(boolean enabled) {
     if (!enabled) return;
 

@@ -1,6 +1,9 @@
-//
-// Created by Mamh on 2024/2/2.
-//
+/**
+ * @description:
+ * @author: Mamh
+ * @email: mamhsl@163.com
+ * @date: 2024/2/3 上午 08:37
+ */
 
 #ifndef HARDWARE_ABSTRACTION_H
 #define HARDWARE_ABSTRACTION_H

@@ -32,10 +32,8 @@ void HardwareAbstraction::initHAL() {
     displayManager = DisplayManager::getInstance();
     // 获取传感器组件的实例
     sensorManager = SensorManager::getInstance();
-    // 获得处理pub-sub的对象的单例
-    eventManager = EventManager::getInstance();
-    // 订阅NETWORK_STATUS_CHANGE消息
-    eventManager->subscribe(NETWORK_STATUS_CHANGE, this);
+    // 获取数据中心的实例
+    dataManager = DataManager::getInstance();
 }
 
 
@@ -45,45 +43,12 @@ void HardwareAbstraction::initHAL() {
 void HardwareAbstraction::processTemperatureAndHumidity(boolean enabled) {
     if (!enabled) return;
 
-    float humidity = sensorManager->readHumidity();
-    float temperature = sensorManager->readTemperature();
-
-    displayManager->displayHumidity(humidity);
-    displayManager->displayTemperature(temperature);
-}
-
-
-/**
-    * 实现Subscriber接口要求的update方法。
-    * 更新网络连接状态到LCD屏幕上。
-    * @param message 收到的消息（收到它的子类的消息，int类型号）
-    */
-void HardwareAbstraction::update(const Message &message) {
-    DataManager *dataManager = DataManager::getInstance();
-    // 需要将Message对象转换为具体类型，消息类型
-    const auto &networkMessage = static_cast<const NetworkStatusMessage &>(message);
-    ConnectionStatus status = networkMessage.getStatus();
-    String data;
-    switch (status) {
-        case ConnectionStatus::NotConnected:
-            data = "Not Connected";
-            break;
-        case ConnectionStatus::ConnectingToWiFi:
-            data = "Connecting WiFi";
-            break;
-        case ConnectionStatus::WiFiConnected:
-            data = "WiFi Connected";
-            break;
-        case ConnectionStatus::ServerConnected:
-            data = "Server Connected";
-            break;
-        default:
-            data = "Unknown Status";
-    }
-
-    // 在屏幕下方区域显示网络连接状态
-    displayManager->displayBelow(data);
-    dataManager->saveData(data, false);
+    // 保存温湿度
+    dataManager->humidity = sensorManager->readHumidity();
+    dataManager->temperature = sensorManager->readTemperature();
+    // 显示温湿度
+    displayManager->displayHumidity(dataManager->humidity);
+    displayManager->displayTemperature(dataManager->temperature);
 }
 
 // 其他管理器的接口方法实现，如传感器数据读取和执行器控制

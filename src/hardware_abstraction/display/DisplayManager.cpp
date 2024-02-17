@@ -1,6 +1,9 @@
-//
-// Created by Mamh on 2024/2/2.
-//
+/**
+ * @description:
+ * @author: Mamh
+ * @email: mamhsl@163.com
+ * @date: 2024/2/2 下午 8:48
+ */
 
 #include "hardware_abstraction/display/DisplayManager.h"
 #include "LiquidCrystal_PCF8574.h"
@@ -18,9 +21,51 @@ DisplayManager::DisplayManager(uint8_t addr) : address(addr) {
 DisplayManager* DisplayManager::getInstance() {
     if (instance == nullptr) {
         instance = new DisplayManager(ProjectConfig::LCD_ADDRESS);
+        instance->initDisplayManager();
     }
     return instance;
 }
+
+void DisplayManager::initDisplayManager() {
+    // 获得处理pub-sub的对象的单例
+    eventManager = EventManager::getInstance();
+    // 订阅NETWORK_STATUS_CHANGE消息
+    eventManager->subscribe(NETWORK_STATUS_CHANGE, this);
+}
+
+/**
+    * 实现Subscriber接口要求的update方法。
+    * 更新网络连接状态到LCD屏幕上。
+    * @param message 收到的消息（收到它的子类的消息，int类型号）
+    */
+void DisplayManager::update(const Message &message) {
+    DataManager *dataManager = DataManager::getInstance();
+    // 需要将Message对象转换为具体类型，消息类型
+    const auto &networkMessage = static_cast<const NetworkStatusMessage &>(message);
+    ConnectionStatus status = networkMessage.getStatus();
+    String data;
+    switch (status) {
+        case ConnectionStatus::NotConnected:
+            data = "Not Connected";
+            break;
+        case ConnectionStatus::ConnectingToWiFi:
+            data = "Connecting WiFi";
+            break;
+        case ConnectionStatus::WiFiConnected:
+            data = "WiFi Connected";
+            break;
+        case ConnectionStatus::ServerConnected:
+            data = "Server Connected";
+            break;
+        default:
+            data = "Unknown Status";
+    }
+
+    // 在屏幕下方区域显示网络连接状态
+    displayBelow(data);
+    dataManager->saveData(data, false);
+}
+
 
 // 显示进系统欢迎字符，这也是一个测试。
 void DisplayManager::LCD1602Init() {

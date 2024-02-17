@@ -1,6 +1,9 @@
-//
-// Created by Mamh on 2024/2/3.
-//
+/**
+ * @description:
+ * @author: Mamh
+ * @email: mamhsl@163.com
+ * @date: 2024/2/3 下午 03:11
+ */
 
 #ifndef DATA_MANAGER_H
 #define DATA_MANAGER_H
@@ -41,6 +44,15 @@ public:
 
     // 发送数据的方法
     void saveData(const String &data, bool SerialPrint);
+
+    // 湿度
+    float humidity;
+
+    // 湿度
+    float temperature;
+
+    // 光照强度
+    int light;
 };
 
 #endif

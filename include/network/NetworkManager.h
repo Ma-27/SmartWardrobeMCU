@@ -1,6 +1,9 @@
-//
-// Created by Mamh on 2024/2/2.
-//
+/**
+ * @description:
+ * @author: Mamh
+ * @email: mamhsl@163.com
+ * @date: 2024/2/2 上午 10:15
+ */
 
 #ifndef NETWORK_MANAGER_H
 #define NETWORK_MANAGER_H
@@ -54,6 +57,9 @@ public:
 
     // 连接到指定的Wi-Fi接入点AP，接入互联网
     bool connectWifi();
+
+    // 上传数据到云平台
+    bool uploadDataToPlatform(String data);
 };
 
 #endif

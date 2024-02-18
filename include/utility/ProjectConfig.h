@@ -45,6 +45,9 @@ public:
     // 连接到OneNetIot平台的私人秘钥
 #define IOT_PLATFORM_PRIVATE_KEY "*627051#KimirrCloset#script*"
 
+    // 更新温湿度数据的频率,单位为ms(30S)
+    static const int UPLOAD_DATA_TIME = 30000;
+
 };
 
 #endif // PROJECT_CONFIG_H

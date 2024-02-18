@@ -1,6 +1,9 @@
-//
-// Created by Mamh on 2024/2/2.
-//
+/**
+ * @description:
+ * @author: Mamh
+ * @email: mamhsl@163.com
+ * @date: 2024/2/2 上午 10:15
+ */
 
 #include <HardwareSerial.h>
 #include <Arduino.h>
@@ -180,5 +183,11 @@ void NetworkManager::setConnectionStatus(ConnectionStatus status) {
     eventManager->notify(NETWORK_STATUS_CHANGE, message);
     // delay(500);
     Serial.flush();
+}
+
+bool NetworkManager::uploadDataToPlatform(String data) {
+    Serial1.println(data);
+    dataManager->saveData(data, true);
+    return true;
 }
 

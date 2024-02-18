@@ -50,6 +50,9 @@ private:
     // 任务调度器。获取TaskScheduler的单例实例
     TaskScheduler &scheduler = TaskScheduler::getInstance();
 
+    // 将数据上传到云平台
+    void uploadDataToPlatform();
+
 public:
     // 获取单例对象的静态方法
     static CoreController* getInstance();

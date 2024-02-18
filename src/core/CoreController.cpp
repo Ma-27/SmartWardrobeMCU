@@ -27,12 +27,6 @@ CoreController *CoreController::getInstance() {
     return instance;
 }
 
-// 负责更新温湿度，此过程由HardwareAbstraction层进行。此层管理该功能是否启用。
-void CoreController::updateTemperatureAndHumidity() {
-    // 获取到硬件抽象层实例，并且使用硬件抽象层更新温湿度，不经过此层控制
-    hardware->processTemperatureAndHumidity(true);
-}
-
 
 /** 核心控制单元中，上电初始化时首先执行的函数。
  * TODO 要严格注意其执行顺序
@@ -52,6 +46,8 @@ void CoreController::init() {
     // 接下来的是任务调度，模拟线程为每个任务定时执行。当到了规定时间间隔后执行任务。
     // 使用Lambda表达式安排updateTemperatureAndHumidity作为任务， 更新温湿度
     scheduler.addTask([this]() { this->updateTemperatureAndHumidity(); }, ProjectConfig::UPDATE_DHT_TIME);
+
+    scheduler.addTask([this]() { this->uploadDataToPlatform(); }, ProjectConfig::UPLOAD_DATA_TIME);
 }
 
 
@@ -91,5 +87,21 @@ bool CoreController::connectToWifi() {
     }
 
     return result;
+}
+
+
+// 负责更新温湿度，此过程由HardwareAbstraction层进行。
+void CoreController::updateTemperatureAndHumidity() {
+    // 获取到硬件抽象层实例，并且使用硬件抽象层更新温湿度，不经过此层控制
+    hardware->processTemperatureAndHumidity(true);
+}
+
+// 负责上传数据到云平台 TODO 第一批数据为温湿度。
+void CoreController::uploadDataToPlatform() {
+    char c[100];
+    // sprintf 在 Arduino 中无法转换浮点数
+    dtostrf(data->temperature, 2, 2, c);
+    dtostrf(data->humidity, 2, 2, c + 5);
+    network->uploadDataToPlatform(String(c));
 }
 

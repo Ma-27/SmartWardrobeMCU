@@ -8,50 +8,50 @@
 
 ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 
-class ArrayData : public CollectionData {
- public:
-  VariantData* addElement(ResourceManager* resources) {
-    return addSlot(resources).data();
-  }
+            class ArrayData : public CollectionData {
+            public:
+                VariantData *addElement(ResourceManager *resources) {
+                    return addSlot(resources).data();
+                }
 
-  static VariantData* addElement(ArrayData* array, ResourceManager* resources) {
-    if (!array)
-      return nullptr;
-    return array->addElement(resources);
-  }
+                static VariantData *addElement(ArrayData *array, ResourceManager *resources) {
+                    if (!array)
+                        return nullptr;
+                    return array->addElement(resources);
+                }
 
-  VariantData* getOrAddElement(size_t index, ResourceManager* resources);
+                VariantData *getOrAddElement(size_t index, ResourceManager *resources);
 
-  VariantData* getElement(size_t index, const ResourceManager* resources) const;
+                VariantData *getElement(size_t index, const ResourceManager *resources) const;
 
-  static VariantData* getElement(const ArrayData* array, size_t index,
-                                 const ResourceManager* resources) {
-    if (!array)
-      return nullptr;
-    return array->getElement(index, resources);
-  }
+                static VariantData *getElement(const ArrayData *array, size_t index,
+                                               const ResourceManager *resources) {
+                    if (!array)
+                        return nullptr;
+                    return array->getElement(index, resources);
+                }
 
-  void removeElement(size_t index, ResourceManager* resources);
+                void removeElement(size_t index, ResourceManager *resources);
 
-  static void removeElement(ArrayData* array, size_t index,
-                            ResourceManager* resources) {
-    if (!array)
-      return;
-    array->removeElement(index, resources);
-  }
+                static void removeElement(ArrayData *array, size_t index,
+                                          ResourceManager *resources) {
+                    if (!array)
+                        return;
+                    array->removeElement(index, resources);
+                }
 
-  bool copyFrom(const ArrayData& src, ResourceManager* resources);
+                bool copyFrom(const ArrayData &src, ResourceManager *resources);
 
-  static bool copy(ArrayData* dst, const ArrayData* src,
-                   ResourceManager* resources) {
-    if (!dst || !src)
-      return false;
+                static bool copy(ArrayData *dst, const ArrayData *src,
+                                 ResourceManager *resources) {
+                    if (!dst || !src)
+                        return false;
 
-    return dst->copyFrom(*src, resources);
-  }
+                    return dst->copyFrom(*src, resources);
+                }
 
- private:
-  iterator at(size_t index, const ResourceManager* resources) const;
-};
+            private:
+                iterator at(size_t index, const ResourceManager *resources) const;
+            };
 
 ARDUINOJSON_END_PRIVATE_NAMESPACE

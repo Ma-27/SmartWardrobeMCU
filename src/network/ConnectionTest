@@ -1,0 +1,36 @@
+//  -------------------------------------------------------------------------------------------------------
+/* with while
+bool NetworkManager::connectWifi() {
+    // 开始连接wifi
+    dataManager->saveData("Wi-Fi Connecting", true);
+
+    // AT 测试 esp8266能否工作
+    while (!executeAT_Setting("AT", "OK", 2000));
+
+    // 设置工作模式。1：station模式；2：ap模式；3：ap+station模式
+    while (!executeAT_Setting("AT+CWMODE=3", "OK", 1000));
+
+    // 加入当前Wi-Fi热点无线网络
+    while (!executeAT_Setting("AT+CWJAP=\"" WIFI_SSID "\",\"" WIFI_PASSWORD "\"", "WIFI CONNECTED", 20000));
+
+    // 查询本机IP
+    while (!executeAT_Setting("AT+CIFSR", "OK", 1000));
+
+    // 连接服务器，这里TCP为TCP透传、183.230.40.33为服务器IP地址，80为端口号
+    while (!executeAT_Setting("AT+CIPSTART=\"TCP\",\"183.230.40.40\",1811", "CONNECT", 10000));
+
+    // AT+CIPMUX=1 1：开启多连接；0：单链接
+    while (!executeAT_Setting("AT+CIPMUX=1", "OK", 2000));
+
+    // 设置透传模式。0非透传模式；1透传模式
+    while (!executeAT_Setting("AT+CIPMODE=1", "OK", 2000));
+
+    // 尝试发送AT+CIPSEND指令
+    while (!executeAT_Setting("AT+CIPSEND", "OK", 2000));
+
+    // 向OpenIot（中国移动物联网平台）发送身份识别信息：私钥
+    Serial1.println(IOT_PLATFORM_PRIVATE_KEY);
+
+    return true;
+}
+*/

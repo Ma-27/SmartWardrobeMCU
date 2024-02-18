@@ -26,12 +26,10 @@ along with The Arduino WiFiEsp library.  If not, see
 #include "utility/debug.h"
 
 
-WiFiEspClient::WiFiEspClient() : _sock(255)
-{
+WiFiEspClient::WiFiEspClient() : _sock(255) {
 }
 
-WiFiEspClient::WiFiEspClient(uint8_t sock) : _sock(sock)
-{
+WiFiEspClient::WiFiEspClient(uint8_t sock) : _sock(sock) {
 }
 
 
@@ -41,16 +39,14 @@ WiFiEspClient::WiFiEspClient(uint8_t sock) : _sock(sock)
 
 // the standard print method will call write for each character in the buffer
 // this is very slow on ESP
-size_t WiFiEspClient::print(const __FlashStringHelper *ifsh)
-{
-	printFSH(ifsh, false);
+size_t WiFiEspClient::print(const __FlashStringHelper *ifsh) {
+    printFSH(ifsh, false);
 }
 
 // if we do override this, the standard println will call the print
 // method twice
-size_t WiFiEspClient::println(const __FlashStringHelper *ifsh)
-{
-	printFSH(ifsh, true);
+size_t WiFiEspClient::println(const __FlashStringHelper *ifsh) {
+    printFSH(ifsh, true);
 }
 
 
@@ -58,172 +54,145 @@ size_t WiFiEspClient::println(const __FlashStringHelper *ifsh)
 // Implementation of Client virtual methods
 ////////////////////////////////////////////////////////////////////////////////
 
-int WiFiEspClient::connectSSL(const char* host, uint16_t port)
-{
-	return connect(host, port, SSL_MODE);
+int WiFiEspClient::connectSSL(const char *host, uint16_t port) {
+    return connect(host, port, SSL_MODE);
 }
 
-int WiFiEspClient::connectSSL(IPAddress ip, uint16_t port)
-{
-	char s[16];
-	sprintf_P(s, PSTR("%d.%d.%d.%d"), ip[0], ip[1], ip[2], ip[3]);
-	return connect(s, port, SSL_MODE);
+int WiFiEspClient::connectSSL(IPAddress ip, uint16_t port) {
+    char s[16];
+    sprintf_P(s, PSTR("%d.%d.%d.%d"), ip[0], ip[1], ip[2], ip[3]);
+    return connect(s, port, SSL_MODE);
 }
 
-int WiFiEspClient::connect(const char* host, uint16_t port)
-{
+int WiFiEspClient::connect(const char *host, uint16_t port) {
     return connect(host, port, TCP_MODE);
 }
 
-int WiFiEspClient::connect(IPAddress ip, uint16_t port)
-{
-	char s[16];
-	sprintf_P(s, PSTR("%d.%d.%d.%d"), ip[0], ip[1], ip[2], ip[3]);
+int WiFiEspClient::connect(IPAddress ip, uint16_t port) {
+    char s[16];
+    sprintf_P(s, PSTR("%d.%d.%d.%d"), ip[0], ip[1], ip[2], ip[3]);
 
-	return connect(s, port, TCP_MODE);
+    return connect(s, port, TCP_MODE);
 }
 
 /* Private method */
-int WiFiEspClient::connect(const char* host, uint16_t port, uint8_t protMode)
-{
-	LOGINFO1(F("Connecting to"), host);
+int WiFiEspClient::connect(const char *host, uint16_t port, uint8_t protMode) {
+    LOGINFO1(F("Connecting to"), host);
 
-	_sock = WiFiEspClass::getFreeSocket();
+    _sock = WiFiEspClass::getFreeSocket();
 
-    if (_sock != NO_SOCKET_AVAIL)
-    {
-    	if (!EspDrv::startClient(host, port, _sock, protMode))
-			return 0;
+    if (_sock != NO_SOCKET_AVAIL) {
+        if (!EspDrv::startClient(host, port, _sock, protMode))
+            return 0;
 
-    	WiFiEspClass::allocateSocket(_sock);
-    }
-	else
-	{
-    	LOGERROR(F("No socket available"));
-    	return 0;
+        WiFiEspClass::allocateSocket(_sock);
+    } else {
+        LOGERROR(F("No socket available"));
+        return 0;
     }
     return 1;
 }
 
 
-
-size_t WiFiEspClient::write(uint8_t b)
-{
-	  return write(&b, 1);
+size_t WiFiEspClient::write(uint8_t b) {
+    return write(&b, 1);
 }
 
-size_t WiFiEspClient::write(const uint8_t *buf, size_t size)
-{
-	if (_sock >= MAX_SOCK_NUM or size==0)
-	{
-		setWriteError();
-		return 0;
-	}
+size_t WiFiEspClient::write(const uint8_t *buf, size_t size) {
+    if (_sock >= MAX_SOCK_NUM or size == 0) {
+        setWriteError();
+        return 0;
+    }
 
-	bool r = EspDrv::sendData(_sock, buf, size);
-	if (!r)
-	{
-		setWriteError();
-		LOGERROR1(F("Failed to write to socket"), _sock);
-		delay(4000);
-		stop();
-		return 0;
-	}
+    bool r = EspDrv::sendData(_sock, buf, size);
+    if (!r) {
+        setWriteError();
+        LOGERROR1(F("Failed to write to socket"), _sock);
+        delay(4000);
+        stop();
+        return 0;
+    }
 
-	return size;
+    return size;
 }
 
 
+int WiFiEspClient::available() {
+    if (_sock != 255) {
+        int bytes = EspDrv::availData(_sock);
+        if (bytes > 0) {
+            return bytes;
+        }
+    }
 
-int WiFiEspClient::available()
-{
-	if (_sock != 255)
-	{
-		int bytes = EspDrv::availData(_sock);
-		if (bytes>0)
-		{
-			return bytes;
-		}
-	}
-
-	return 0;
+    return 0;
 }
 
-int WiFiEspClient::read()
-{
-	uint8_t b;
-	if (!available())
-		return -1;
+int WiFiEspClient::read() {
+    uint8_t b;
+    if (!available())
+        return -1;
 
-	bool connClose = false;
-	EspDrv::getData(_sock, &b, false, &connClose);
+    bool connClose = false;
+    EspDrv::getData(_sock, &b, false, &connClose);
 
-	if (connClose)
-	{
-		WiFiEspClass::releaseSocket(_sock);
-		_sock = 255;
-	}
+    if (connClose) {
+        WiFiEspClass::releaseSocket(_sock);
+        _sock = 255;
+    }
 
-	return b;
+    return b;
 }
 
-int WiFiEspClient::read(uint8_t* buf, size_t size)
-{
-	if (!available())
-		return -1;
-	return EspDrv::getDataBuf(_sock, buf, size);
+int WiFiEspClient::read(uint8_t *buf, size_t size) {
+    if (!available())
+        return -1;
+    return EspDrv::getDataBuf(_sock, buf, size);
 }
 
-int WiFiEspClient::peek()
-{
-	uint8_t b;
-	if (!available())
-		return -1;
+int WiFiEspClient::peek() {
+    uint8_t b;
+    if (!available())
+        return -1;
 
-	bool connClose = false;
-	EspDrv::getData(_sock, &b, true, &connClose);
+    bool connClose = false;
+    EspDrv::getData(_sock, &b, true, &connClose);
 
-	if (connClose)
-	{
-		WiFiEspClass::releaseSocket(_sock);
-		_sock = 255;
-	}
+    if (connClose) {
+        WiFiEspClass::releaseSocket(_sock);
+        _sock = 255;
+    }
 
-	return b;
+    return b;
 }
 
 
-void WiFiEspClient::flush()
-{
-	while (available())
-		read();
+void WiFiEspClient::flush() {
+    while (available())
+        read();
 }
 
 
+void WiFiEspClient::stop() {
+    if (_sock == 255)
+        return;
 
-void WiFiEspClient::stop()
-{
-	if (_sock == 255)
-		return;
+    LOGINFO1(F("Disconnecting "), _sock);
 
-	LOGINFO1(F("Disconnecting "), _sock);
+    EspDrv::stopClient(_sock);
 
-	EspDrv::stopClient(_sock);
-
-	WiFiEspClass::releaseSocket(_sock);
-	_sock = 255;
+    WiFiEspClass::releaseSocket(_sock);
+    _sock = 255;
 }
 
 
-uint8_t WiFiEspClient::connected()
-{
-	return (status() == ESTABLISHED);
+uint8_t WiFiEspClient::connected() {
+    return (status() == ESTABLISHED);
 }
 
 
-WiFiEspClient::operator bool()
-{
-  return _sock != 255;
+WiFiEspClient::operator bool() {
+    return _sock != 255;
 }
 
 
@@ -232,59 +201,51 @@ WiFiEspClient::operator bool()
 ////////////////////////////////////////////////////////////////////////////////
 
 
-uint8_t WiFiEspClient::status()
-{
-	if (_sock == 255)
-	{
-		return CLOSED;
-	}
+uint8_t WiFiEspClient::status() {
+    if (_sock == 255) {
+        return CLOSED;
+    }
 
-	if (EspDrv::availData(_sock))
-	{
-		return ESTABLISHED;
-	}
+    if (EspDrv::availData(_sock)) {
+        return ESTABLISHED;
+    }
 
-	if (EspDrv::getClientState(_sock))
-	{
-		return ESTABLISHED;
-	}
+    if (EspDrv::getClientState(_sock)) {
+        return ESTABLISHED;
+    }
 
-	WiFiEspClass::releaseSocket(_sock);
-	_sock = 255;
+    WiFiEspClass::releaseSocket(_sock);
+    _sock = 255;
 
-	return CLOSED;
+    return CLOSED;
 }
 
-IPAddress WiFiEspClient::remoteIP()
-{
-	IPAddress ret;
-	EspDrv::getRemoteIpAddress(ret);
-	return ret;
+IPAddress WiFiEspClient::remoteIP() {
+    IPAddress ret;
+    EspDrv::getRemoteIpAddress(ret);
+    return ret;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Private Methods
 ////////////////////////////////////////////////////////////////////////////////
 
-size_t WiFiEspClient::printFSH(const __FlashStringHelper *ifsh, bool appendCrLf)
-{
-	size_t size = strlen_P((char*)ifsh);
-	
-	if (_sock >= MAX_SOCK_NUM or size==0)
-	{
-		setWriteError();
-		return 0;
-	}
+size_t WiFiEspClient::printFSH(const __FlashStringHelper *ifsh, bool appendCrLf) {
+    size_t size = strlen_P((char *) ifsh);
 
-	bool r = EspDrv::sendData(_sock, ifsh, size, appendCrLf);
-	if (!r)
-	{
-		setWriteError();
-		LOGERROR1(F("Failed to write to socket"), _sock);
-		delay(4000);
-		stop();
-		return 0;
-	}
+    if (_sock >= MAX_SOCK_NUM or size == 0) {
+        setWriteError();
+        return 0;
+    }
 
-	return size;
+    bool r = EspDrv::sendData(_sock, ifsh, size, appendCrLf);
+    if (!r) {
+        setWriteError();
+        LOGERROR1(F("Failed to write to socket"), _sock);
+        delay(4000);
+        stop();
+        return 0;
+    }
+
+    return size;
 }

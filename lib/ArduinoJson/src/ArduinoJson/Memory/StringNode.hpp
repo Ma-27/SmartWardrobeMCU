@@ -14,60 +14,60 @@
 
 ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 
-struct StringNode {
-  // Use the same type as SlotId to store the reference count
-  // (there can never be more references than slots)
-  using references_type = uint_t<ARDUINOJSON_SLOT_ID_SIZE * 8>::type;
+            struct StringNode {
+                // Use the same type as SlotId to store the reference count
+                // (there can never be more references than slots)
+                using references_type = uint_t<ARDUINOJSON_SLOT_ID_SIZE * 8>::type;
 
-  using length_type = uint_t<ARDUINOJSON_STRING_LENGTH_SIZE * 8>::type;
+                using length_type = uint_t<ARDUINOJSON_STRING_LENGTH_SIZE * 8>::type;
 
-  struct StringNode* next;
-  references_type references;
-  length_type length;
-  char data[1];
+                struct StringNode *next;
+                references_type references;
+                length_type length;
+                char data[1];
 
-  static constexpr size_t maxLength = numeric_limits<length_type>::highest();
+                static constexpr size_t maxLength = numeric_limits<length_type>::highest();
 
-  static constexpr size_t sizeForLength(size_t n) {
-    return n + 1 + offsetof(StringNode, data);
-  }
+                static constexpr size_t sizeForLength(size_t n) {
+                    return n + 1 + offsetof(StringNode, data);
+                }
 
-  static StringNode* create(size_t length, Allocator* allocator) {
-    if (length > maxLength)
-      return nullptr;
-    auto node = reinterpret_cast<StringNode*>(
-        allocator->allocate(sizeForLength(length)));
-    if (node) {
-      node->length = length_type(length);
-      node->references = 1;
-    }
-    return node;
-  }
+                static StringNode *create(size_t length, Allocator *allocator) {
+                    if (length > maxLength)
+                        return nullptr;
+                    auto node = reinterpret_cast<StringNode *>(
+                            allocator->allocate(sizeForLength(length)));
+                    if (node) {
+                        node->length = length_type(length);
+                        node->references = 1;
+                    }
+                    return node;
+                }
 
-  static StringNode* resize(StringNode* node, size_t length,
-                            Allocator* allocator) {
-    ARDUINOJSON_ASSERT(node != nullptr);
-    StringNode* newNode;
-    if (length <= maxLength)
-      newNode = reinterpret_cast<StringNode*>(
-          allocator->reallocate(node, sizeForLength(length)));
-    else
-      newNode = nullptr;
-    if (newNode)
-      newNode->length = length_type(length);
-    else
-      allocator->deallocate(node);
-    return newNode;
-  }
+                static StringNode *resize(StringNode *node, size_t length,
+                                          Allocator *allocator) {
+                    ARDUINOJSON_ASSERT(node != nullptr);
+                    StringNode *newNode;
+                    if (length <= maxLength)
+                        newNode = reinterpret_cast<StringNode *>(
+                                allocator->reallocate(node, sizeForLength(length)));
+                    else
+                        newNode = nullptr;
+                    if (newNode)
+                        newNode->length = length_type(length);
+                    else
+                        allocator->deallocate(node);
+                    return newNode;
+                }
 
-  static void destroy(StringNode* node, Allocator* allocator) {
-    allocator->deallocate(node);
-  }
-};
+                static void destroy(StringNode *node, Allocator *allocator) {
+                    allocator->deallocate(node);
+                }
+            };
 
 // Returns the size (in bytes) of an string with n characters.
-constexpr size_t sizeofString(size_t n) {
-  return StringNode::sizeForLength(n);
-}
+            constexpr size_t sizeofString(size_t n) {
+                return StringNode::sizeForLength(n);
+            }
 
 ARDUINOJSON_END_PRIVATE_NAMESPACE

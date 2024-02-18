@@ -10,54 +10,62 @@
 
 ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 
-class VariantSlot;
-using SlotId = uint_t<ARDUINOJSON_SLOT_ID_SIZE * 8>::type;
-using SlotCount = SlotId;
-const SlotId NULL_SLOT = SlotId(-1);
+            class VariantSlot;
 
-class SlotWithId {
- public:
-  SlotWithId() : slot_(nullptr), id_(NULL_SLOT) {}
-  SlotWithId(VariantSlot* slot, SlotId id) : slot_(slot), id_(id) {
-    ARDUINOJSON_ASSERT((slot == nullptr) == (id == NULL_SLOT));
-  }
+            using SlotId = uint_t<ARDUINOJSON_SLOT_ID_SIZE * 8>::type;
+            using SlotCount = SlotId;
+            const SlotId NULL_SLOT = SlotId(-1);
 
-  SlotId id() const {
-    return id_;
-  }
+            class SlotWithId {
+            public:
+                SlotWithId() : slot_(nullptr), id_(NULL_SLOT) {}
 
-  operator VariantSlot*() {
-    return slot_;
-  }
+                SlotWithId(VariantSlot *slot, SlotId id) : slot_(slot), id_(id) {
+                    ARDUINOJSON_ASSERT((slot == nullptr) == (id == NULL_SLOT));
+                }
 
-  VariantSlot* operator->() {
-    ARDUINOJSON_ASSERT(slot_ != nullptr);
-    return slot_;
-  }
+                SlotId id() const {
+                    return id_;
+                }
 
- private:
-  VariantSlot* slot_;
-  SlotId id_;
-};
+                operator VariantSlot *() {
+                    return slot_;
+                }
 
-class VariantPool {
- public:
-  void create(SlotCount cap, Allocator* allocator);
-  void destroy(Allocator* allocator);
+                VariantSlot *operator->() {
+                    ARDUINOJSON_ASSERT(slot_ != nullptr);
+                    return slot_;
+                }
 
-  SlotWithId allocSlot();
-  VariantSlot* getSlot(SlotId id) const;
-  void clear();
-  void shrinkToFit(Allocator*);
-  SlotCount usage() const;
+            private:
+                VariantSlot *slot_;
+                SlotId id_;
+            };
 
-  static SlotCount bytesToSlots(size_t);
-  static size_t slotsToBytes(SlotCount);
+            class VariantPool {
+            public:
+                void create(SlotCount cap, Allocator *allocator);
 
- private:
-  SlotCount capacity_;
-  SlotCount usage_;
-  VariantSlot* slots_;
-};
+                void destroy(Allocator *allocator);
+
+                SlotWithId allocSlot();
+
+                VariantSlot *getSlot(SlotId id) const;
+
+                void clear();
+
+                void shrinkToFit(Allocator *);
+
+                SlotCount usage() const;
+
+                static SlotCount bytesToSlots(size_t);
+
+                static size_t slotsToBytes(SlotCount);
+
+            private:
+                SlotCount capacity_;
+                SlotCount usage_;
+                VariantSlot *slots_;
+            };
 
 ARDUINOJSON_END_PRIVATE_NAMESPACE

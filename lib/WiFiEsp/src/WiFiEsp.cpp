@@ -19,161 +19,137 @@ along with The Arduino WiFiEsp library.  If not, see
 #include "WiFiEsp.h"
 
 
-int16_t 	WiFiEspClass::_state[MAX_SOCK_NUM] = { NA_STATE, NA_STATE, NA_STATE, NA_STATE };
-uint16_t 	WiFiEspClass::_server_port[MAX_SOCK_NUM] = { 0, 0, 0, 0 };
+int16_t    WiFiEspClass::_state[MAX_SOCK_NUM] = {NA_STATE, NA_STATE, NA_STATE, NA_STATE};
+uint16_t    WiFiEspClass::_server_port[MAX_SOCK_NUM] = {0, 0, 0, 0};
 
 
 uint8_t WiFiEspClass::espMode = 0;
 
 
-WiFiEspClass::WiFiEspClass()
-{
+WiFiEspClass::WiFiEspClass() {
 
 }
 
-void WiFiEspClass::init(Stream* espSerial)
-{
+void WiFiEspClass::init(Stream *espSerial) {
     LOGINFO(F("Initializing ESP module"));
-	EspDrv::wifiDriverInit(espSerial);
+    EspDrv::wifiDriverInit(espSerial);
 }
 
 
-
-char* WiFiEspClass::firmwareVersion()
-{
-	return EspDrv::getFwVersion();
+char *WiFiEspClass::firmwareVersion() {
+    return EspDrv::getFwVersion();
 }
 
 
-int WiFiEspClass::begin(const char* ssid, const char* passphrase)
-{
+int WiFiEspClass::begin(const char *ssid, const char *passphrase) {
     espMode = 1;
-	if (EspDrv::wifiConnect(ssid, passphrase))
-		return WL_CONNECTED;
+    if (EspDrv::wifiConnect(ssid, passphrase))
+        return WL_CONNECTED;
 
-	return WL_CONNECT_FAILED;
+    return WL_CONNECT_FAILED;
 }
 
 
-int WiFiEspClass::beginAP(const char* ssid, uint8_t channel, const char* pwd, uint8_t enc, bool apOnly)
-{
-	if(apOnly)
+int WiFiEspClass::beginAP(const char *ssid, uint8_t channel, const char *pwd, uint8_t enc, bool apOnly) {
+    if (apOnly)
         espMode = 2;
     else
         espMode = 3;
-    
+
     if (EspDrv::wifiStartAP(ssid, pwd, channel, enc, espMode))
-		return WL_CONNECTED;
+        return WL_CONNECTED;
 
-	return WL_CONNECT_FAILED;
+    return WL_CONNECT_FAILED;
 }
 
-int WiFiEspClass::beginAP(const char* ssid)
-{
-	return beginAP(ssid, 10, "", 0);
+int WiFiEspClass::beginAP(const char *ssid) {
+    return beginAP(ssid, 10, "", 0);
 }
 
-int WiFiEspClass::beginAP(const char* ssid, uint8_t channel)
-{
-	return beginAP(ssid, channel, "", 0);
-}
-
-
-void WiFiEspClass::config(IPAddress ip)
-{
-	EspDrv::config(ip);
-}
-
-void WiFiEspClass::configAP(IPAddress ip)
-{
-	EspDrv::configAP(ip);
+int WiFiEspClass::beginAP(const char *ssid, uint8_t channel) {
+    return beginAP(ssid, channel, "", 0);
 }
 
 
+void WiFiEspClass::config(IPAddress ip) {
+    EspDrv::config(ip);
+}
 
-int WiFiEspClass::disconnect()
-{
+void WiFiEspClass::configAP(IPAddress ip) {
+    EspDrv::configAP(ip);
+}
+
+
+int WiFiEspClass::disconnect() {
     return EspDrv::disconnect();
 }
 
-uint8_t* WiFiEspClass::macAddress(uint8_t* mac)
-{
-	// TODO we don't need _mac variable
-	uint8_t* _mac = EspDrv::getMacAddress();
-	memcpy(mac, _mac, WL_MAC_ADDR_LENGTH);
+uint8_t *WiFiEspClass::macAddress(uint8_t *mac) {
+    // TODO we don't need _mac variable
+    uint8_t *_mac = EspDrv::getMacAddress();
+    memcpy(mac, _mac, WL_MAC_ADDR_LENGTH);
     return mac;
 }
 
-IPAddress WiFiEspClass::localIP()
-{
-	IPAddress ret;
-	if(espMode==1)
-		EspDrv::getIpAddress(ret);
-	else
-		EspDrv::getIpAddressAP(ret);
-	return ret;
+IPAddress WiFiEspClass::localIP() {
+    IPAddress ret;
+    if (espMode == 1)
+        EspDrv::getIpAddress(ret);
+    else
+        EspDrv::getIpAddressAP(ret);
+    return ret;
 }
 
-IPAddress WiFiEspClass::subnetMask()
-{
-	IPAddress mask;
-	if(espMode==1)
-    EspDrv::getNetmask(mask);
-	return mask;
+IPAddress WiFiEspClass::subnetMask() {
+    IPAddress mask;
+    if (espMode == 1)
+        EspDrv::getNetmask(mask);
+    return mask;
 }
 
-IPAddress WiFiEspClass::gatewayIP()
-{
-	IPAddress gw;
-	if(espMode==1)
-		EspDrv::getGateway(gw);
-	return gw;
+IPAddress WiFiEspClass::gatewayIP() {
+    IPAddress gw;
+    if (espMode == 1)
+        EspDrv::getGateway(gw);
+    return gw;
 }
 
 
-char* WiFiEspClass::SSID()
-{
+char *WiFiEspClass::SSID() {
     return EspDrv::getCurrentSSID();
 }
 
-uint8_t* WiFiEspClass::BSSID(uint8_t* bssid)
-{
-	// TODO we don't need _bssid
-	uint8_t* _bssid = EspDrv::getCurrentBSSID();
-	memcpy(bssid, _bssid, WL_MAC_ADDR_LENGTH);
+uint8_t *WiFiEspClass::BSSID(uint8_t *bssid) {
+    // TODO we don't need _bssid
+    uint8_t *_bssid = EspDrv::getCurrentBSSID();
+    memcpy(bssid, _bssid, WL_MAC_ADDR_LENGTH);
     return bssid;
 }
 
-int32_t WiFiEspClass::RSSI()
-{
+int32_t WiFiEspClass::RSSI() {
     return EspDrv::getCurrentRSSI();
 }
 
 
-int8_t WiFiEspClass::scanNetworks()
-{
-	return EspDrv::getScanNetworks();
+int8_t WiFiEspClass::scanNetworks() {
+    return EspDrv::getScanNetworks();
 }
 
-char* WiFiEspClass::SSID(uint8_t networkItem)
-{
-	return EspDrv::getSSIDNetoworks(networkItem);
+char *WiFiEspClass::SSID(uint8_t networkItem) {
+    return EspDrv::getSSIDNetoworks(networkItem);
 }
 
-int32_t WiFiEspClass::RSSI(uint8_t networkItem)
-{
-	return EspDrv::getRSSINetoworks(networkItem);
+int32_t WiFiEspClass::RSSI(uint8_t networkItem) {
+    return EspDrv::getRSSINetoworks(networkItem);
 }
 
-uint8_t WiFiEspClass::encryptionType(uint8_t networkItem)
-{
+uint8_t WiFiEspClass::encryptionType(uint8_t networkItem) {
     return EspDrv::getEncTypeNetowrks(networkItem);
 }
 
 
-uint8_t WiFiEspClass::status()
-{
-	return EspDrv::getConnectionStatus();
+uint8_t WiFiEspClass::status() {
+    return EspDrv::getConnectionStatus();
 }
 
 
@@ -182,9 +158,8 @@ uint8_t WiFiEspClass::status()
 // Non standard methods
 ////////////////////////////////////////////////////////////////////////////
 
-void WiFiEspClass::reset(void)
-{
-	EspDrv::reset();
+void WiFiEspClass::reset(void) {
+    EspDrv::reset();
 }
 
 
@@ -201,32 +176,26 @@ delay(ESP8266_HARD_RESET_DURATION);
 */
 
 
-bool WiFiEspClass::ping(const char *host)
-{
-	return EspDrv::ping(host);
+bool WiFiEspClass::ping(const char *host) {
+    return EspDrv::ping(host);
 }
 
-uint8_t WiFiEspClass::getFreeSocket()
-{
-  // ESP Module assigns socket numbers in ascending order, so we will assign them in descending order
-    for (int i = MAX_SOCK_NUM - 1; i >= 0; i--)
-	{
-      if (_state[i] == NA_STATE)
-      {
-          return i;
-      }
+uint8_t WiFiEspClass::getFreeSocket() {
+    // ESP Module assigns socket numbers in ascending order, so we will assign them in descending order
+    for (int i = MAX_SOCK_NUM - 1; i >= 0; i--) {
+        if (_state[i] == NA_STATE) {
+            return i;
+        }
     }
     return SOCK_NOT_AVAIL;
 }
 
-void WiFiEspClass::allocateSocket(uint8_t sock)
-{
-  _state[sock] = sock;
+void WiFiEspClass::allocateSocket(uint8_t sock) {
+    _state[sock] = sock;
 }
 
-void WiFiEspClass::releaseSocket(uint8_t sock)
-{
-  _state[sock] = NA_STATE;
+void WiFiEspClass::releaseSocket(uint8_t sock) {
+    _state[sock] = NA_STATE;
 }
 
 

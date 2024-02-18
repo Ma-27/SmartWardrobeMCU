@@ -17,29 +17,24 @@
 // - For ESP8266: Connect the sensor to GPIO2 or D4.
 DHT11 dht11(2);
 
-void setup()
-{
+void setup() {
     // Initialize serial communication to allow debugging and data readout.
     // Using a baud rate of 9600 bps.
     Serial.begin(9600);
 }
 
-void loop()
-{
+void loop() {
     // Attempt to read the humidity value from the DHT11 sensor.
     int humidity = dht11.readHumidity();
 
     // Check the result of the reading.
     // If there's no error, print the humidity value.
     // If there's an error, print the appropriate error message.
-    if (humidity != DHT11::ERROR_CHECKSUM && humidity != DHT11::ERROR_TIMEOUT)
-    {
+    if (humidity != DHT11::ERROR_CHECKSUM && humidity != DHT11::ERROR_TIMEOUT) {
         Serial.print("Humidity: ");
         Serial.print(humidity);
         Serial.println(" %");
-    }
-    else
-    {
+    } else {
         Serial.println(DHT11::getErrorString(humidity));
     }
 

@@ -184,7 +184,7 @@ In addition to the two standard types and the sensor type enum, all drivers base
 ```c++
 bool getEvent(sensors_event_t*);
 ```
-Calling this function will populate the supplied sensors\_event\_t reference with the latest available sensor data.  You should call this function as often as you want to update your data.
+Calling this function will populate the supplied sensors\_event\_t reference with the latest available sensor data.  You should call this function as often as you want to updateTemperatureAndHumidity your data.
 
 ```c++
 void getSensor(sensor_t*);

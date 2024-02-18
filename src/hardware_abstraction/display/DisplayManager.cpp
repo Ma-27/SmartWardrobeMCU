@@ -10,7 +10,7 @@
 #include "utility/ProjectConfig.h"
 
 // 初始化静态成员变量
-DisplayManager* DisplayManager::instance = nullptr;
+DisplayManager *DisplayManager::instance = nullptr;
 
 // 私有构造函数
 DisplayManager::DisplayManager(uint8_t addr) : address(addr) {
@@ -18,7 +18,7 @@ DisplayManager::DisplayManager(uint8_t addr) : address(addr) {
 }
 
 // 获取单例实例的方法
-DisplayManager* DisplayManager::getInstance() {
+DisplayManager *DisplayManager::getInstance() {
     if (instance == nullptr) {
         instance = new DisplayManager(ProjectConfig::LCD_ADDRESS);
         instance->initDisplayManager();
@@ -36,9 +36,12 @@ void DisplayManager::initDisplayManager() {
 /**
     * 实现Subscriber接口要求的update方法。
     * 更新网络连接状态到LCD屏幕上。
-    * @param message 收到的消息（收到它的子类的消息，int类型号）
+    * @param message 收到的消息
+    * @param messageType 收到的消息类型，int类型号
     */
-void DisplayManager::update(const Message &message) {
+void DisplayManager::update(const Message &message, int messageType) {
+    if (messageType != MessageType::NETWORK_STATUS_CHANGE) return;
+
     DataManager *dataManager = DataManager::getInstance();
     // 需要将Message对象转换为具体类型，消息类型
     const auto &networkMessage = static_cast<const NetworkStatusMessage &>(message);

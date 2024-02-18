@@ -1,6 +1,9 @@
-//
-// Created by Mamh on 2024/2/6.
-//
+/**
+ * @description:
+ * @author: Mamh
+ * @email: mamhsl@163.com
+ * @date: 2024/2/4 上午 9:25
+ */
 
 // Subscriber.h
 #ifndef SUBSCRIBER_H
@@ -16,7 +19,7 @@ public:
     virtual ~Subscriber() = default;
 
     // 使用模板声明一个泛型的update方法
-    virtual void update(const Message &message) = 0;
+    virtual void update(const Message &message, int messageType) = 0;
 };
 
 #endif

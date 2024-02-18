@@ -37,6 +37,7 @@ private:
 public:
     // 外部不可见默认的构造方法
     DataManager(const DataManager &) = delete;
+
     DataManager &operator=(const DataManager &) = delete;
 
     // 获取单例对象的方法
@@ -53,6 +54,9 @@ public:
 
     // 光照强度
     int light;
+
+    // 连接信息
+    ConnectionStatus connectionStatus = ConnectionStatus::NotConnected; // 初始化为未连接
 };
 
 #endif

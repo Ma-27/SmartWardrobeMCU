@@ -42,9 +42,10 @@ public:
     /**
    * 实现Subscriber接口要求的update方法。
    * 更新网络连接状态到LCD屏幕上。
-   * @param message 收到的消息（收到它的子类的消息，int类型号）
+   * @param message 收到的消息
+   * @param messageType 收到的消息类型，int类型号
    */
-    void update(const Message &message) override;
+    void update(const Message &message, int messageType) override;
 
     // 显示温湿度的接口
     void displayHumidity(float humidity);

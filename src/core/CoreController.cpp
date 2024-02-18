@@ -9,6 +9,7 @@
 #include "core/CoreController.h"
 #include "core/CoreControllerBuilder.h"
 #include "utility/ProjectConfig.h"
+#include "data/DataChangeListener.h"
 
 CoreController *CoreController::instance = nullptr;
 
@@ -37,6 +38,11 @@ void CoreController::updateTemperatureAndHumidity() {
  * TODO 要严格注意其执行顺序
  */
 void CoreController::init() {
+    // 为DataManager订阅数据更新。
+    DataChangeListener *dataChangeListener = DataChangeListener::getInstance();
+    dataChangeListener->subscribeDataChange();
+
+
     // 连接网络。
     bool result = connectToWifi();
 

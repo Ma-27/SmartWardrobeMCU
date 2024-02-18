@@ -1,12 +1,8 @@
-//
-// Created by Mamh on 2024/2/6.
-//
-
 /**
  * @description:
  * @author: Mamh
  * @email: mamhsl@163.com
- * @date: 2024/2/6 上午 08:08
+ * @date: 2024/2/3 上午 08:08
  */
 
 // EventManager.h TODO 使用多态基类作为消息的方法来实现发布-订阅模式

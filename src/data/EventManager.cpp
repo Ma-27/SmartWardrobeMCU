@@ -46,7 +46,7 @@ void EventManager::unsubscribe(int messageType, Subscriber *subscriber) {
 
 /** 通知方法，根据消息类型通知对应的订阅者集合。
  * 这里需要考虑如何将基类作为消息的message转发给Subscriber。
-    因为Subscriber的update方法期望一个特定类型的参数（比如String），这个特定参数是的基类是Message。
+   因为Subscriber的update方法期望一个特定类型的参数（比如String），这个特定参数是的基类是Message。
  * @param messageType 消息的类型号（代码中可见消息类型）
  * @param message 要发送的消息
  */
@@ -64,7 +64,7 @@ void EventManager::notify(int messageType, const Message &message) {
             // Serial.flush(); // 确保消息发送完毕
 
             // 给订阅者更新数据
-            subscriber->update(message);
+            subscriber->update(message, messageType);
         }
         // 将订阅者的数目保存打印
         dataManager->saveData("counting looper nums: ", false);

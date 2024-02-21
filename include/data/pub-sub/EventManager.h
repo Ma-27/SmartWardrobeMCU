@@ -12,8 +12,9 @@
 // 前向声明Subscriber类
 class Subscriber; // 前向声明，代替#include "data/pub-sub/Subscriber.h"
 
-#include <ArduinoSTL.h>
-#include <Arduino.h>
+#undef min
+#undef max
+
 #include <map>
 #include <vector>
 #include <algorithm>

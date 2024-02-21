@@ -1,6 +1,8 @@
 # 物联网智能衣柜设计-Arduino硬件部分源代码
 
-### 架构
+使用Arduino due开发板，基于C++语言，实现智能衣柜的硬件部分。ESP8266模块作为网络通信模块，DHT11传感器作为温湿度传感器，步进电机作为衣架控制模块，LED灯作为灯光控制模块。
+
+## 架构
 
 架构不仅包括MVC的元素，还融合了模块化的思想。
 
@@ -121,7 +123,13 @@
 
 `CoreController`通过`HardwareAbstraction`层与各个硬件模块进行交互，而`HardwareAbstraction`层进一步细分为`sensors`、`display`和`actuators`子模块，每个子模块负责特定类型硬件的抽象和实现。这种分层和模块化的设计使得系统更易于扩展和维护，同时也方便针对特定硬件类别的优化。 此架构允许系统的每个部分独立工作，并通过定义好的接口与其他部分通信。这样的设计有助于在不同层之间保持清晰的边界，易于测试和维护。此外，如果将来需要更换传感器或执行器硬件，只需更新相应的硬件抽象层代码，而不会影响到核心控制逻辑。
 
-### Arduino的接线
+## Arduino的接线
+
+2 - DHT11 DATA
+18 TX1-RX1 ESP8266
+19 RX1-TX1 ESP8266
+20 SDA-SDA LED
+21 SCL-SCL LED
 
 // 设置步进电机引脚，总步数，每步的步长（以微秒为单位）
 Unistep2 stepper(23, 25, 27, 29, 4096, 4096);
@@ -131,7 +139,7 @@ Unistep2 stepper(23, 25, 27, 29, 4096, 4096);
 ### 串口打印调试信息的方法
 
 //FIXME
-DataManager::getInstance()->sendData(String(humidity) + "这里是要发送的数据" + String(temperature), true);
+DataManager::getInstance()->sendData("this is the data ", true);
 
 测试
 https://docs.platformio.org/en/latest/advanced/unit-testing/index.html

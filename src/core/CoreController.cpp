@@ -6,6 +6,7 @@
  */
 
 
+#include <avr/dtostrf.h>
 #include "core/CoreController.h"
 #include "core/CoreControllerBuilder.h"
 #include "utility/ProjectConfig.h"

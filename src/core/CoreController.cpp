@@ -48,6 +48,7 @@ void CoreController::init() {
     // 使用Lambda表达式安排updateTemperatureAndHumidity作为任务， 更新温湿度
     scheduler.addTask([this]() { this->updateTemperatureAndHumidity(); }, ProjectConfig::UPDATE_DHT_TIME);
 
+    // 上传数据到云平台
     scheduler.addTask([this]() { this->uploadDataToPlatform(); }, ProjectConfig::UPLOAD_DATA_TIME);
 }
 
@@ -62,32 +63,8 @@ void CoreController::looper() {
 
 // 连接到iot服务器并且握手
 bool CoreController::connectToWifi() {
-    bool result = true;
-    // 如果其中一个失败了，那就返回失败。
-
-    // 提示正在连接的信息
-    data->saveData("CONNECTING TO WIFI", true);
-    network->setConnectionStatus(ConnectionStatus::ConnectingToWiFi);
-
-    // 连接到Wi-Fi网络
-    result = network->connectWifi() && result;
-
-    // 提示成功连上了AP的信息
-    if (result) {
-        data->saveData("CONNECT SUCCEEDED TO WIFI", true);
-        network->setConnectionStatus(ConnectionStatus::WiFiConnected);
-    }
-
-    // 检验服务器发回的信息正确性
-    result = network->readServerShakehands() && result;
-
-    // 提示成功连上了iot云端平台的信息
-    if (result) {
-        data->saveData("SERVER CONNECTED", true);
-        network->setConnectionStatus(ConnectionStatus::ServerConnected);
-    }
-
-    return result;
+    //
+    return network->connectToWifi();
 }
 
 
@@ -105,4 +82,5 @@ void CoreController::uploadDataToPlatform() {
     dtostrf(data->humidity, 2, 2, c + 5);
     network->uploadDataToPlatform(String(c));
 }
+
 

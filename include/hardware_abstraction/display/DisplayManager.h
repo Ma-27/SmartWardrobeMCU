@@ -11,6 +11,7 @@
 #include "LiquidCrystal_PCF8574.h"
 #include "data/pub-sub/Subscriber.h"
 #include "data/pub-sub/EventManager.h"
+#include "hardware_abstraction/display/LCDManager.h"
 
 /**
  * 显示管理器负责管理与显示相关的所有操作，如LED屏幕显示。但不负责管理其他诸如亮灯，串口等等功能。
@@ -25,17 +26,20 @@ private:
     uint8_t address;
 
     // 私有构造函数
-    DisplayManager(uint8_t address);
-
-    // 私有复制构造函数和赋值操作符以防止复制
-    DisplayManager(const DisplayManager &);
-
-    DisplayManager &operator=(const DisplayManager &);
+    DisplayManager();
 
     // 保存事件接收器的一个对象，为了订阅并且接收网络更新的信息。
     EventManager *eventManager;
 
+    // 添加LCDManager引用
+    LCDManager *lcdManager;
+
 public:
+    // 禁止复制构造函数和赋值操作
+    DisplayManager(const DisplayManager &) = delete;
+
+    DisplayManager &operator=(const DisplayManager &) = delete;
+
     // 获取单例对象的静态方法
     static DisplayManager *getInstance();
 
@@ -49,7 +53,6 @@ public:
 
     // 显示温湿度的接口
     void displayHumidity(float humidity);
-
     void displayTemperature(float temperature);
 
     // 在屏幕上方一行显示info
@@ -58,6 +61,7 @@ public:
     // 在屏幕下方一行显示info
     void displayBelow(String info);
 
+    // 初始化显示管理器
     void initDisplayManager();
 };
 

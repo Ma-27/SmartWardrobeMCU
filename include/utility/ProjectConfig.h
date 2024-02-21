@@ -19,8 +19,8 @@ public:
     // 更新温湿度数据的频率,单位为ms
     static const int UPDATE_DHT_TIME = 500;
 
-    // 串口和单片机的波特率设为9600.
-    static const long BAUD = 9600;
+    // 串口和单片机的波特率设为115200.
+    static const long BAUD = 115200;
 
     // 串口和单片机的波特率设为115200.
     static const long WIFI_BAUD = 115200;
@@ -48,6 +48,14 @@ public:
     // 更新温湿度数据的频率,单位为ms(30S)
     static const int UPLOAD_DATA_TIME = 30000;
 
+    // 光敏电阻连接的模拟输入引脚
+    static const int lightSensorPin = A0;
+
+    // 可变电阻连接的模拟输入引脚
+    static const int potentiometerPin = A1;
+
+    // LED连接的数字输出引脚
+    static const int lightPin = DAC0;
 };
 
 #endif // PROJECT_CONFIG_H

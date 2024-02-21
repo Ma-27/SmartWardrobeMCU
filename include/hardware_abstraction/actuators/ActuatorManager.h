@@ -1,20 +1,18 @@
-//
-// Created by Mamh on 2024/2/2.
-//
-
 /**
- * **执行器管理器** (`ActuatorManager`)
-    - 负责管理所有执行器，如LED灯、步进电机等等可以被控制驱动的电子单元。
-    - 根据核心控制单元的指令执行动作。
+ * @description: 执行器管理器** (`ActuatorManager`)
+ * @author: Mamh
+ * @email: mamhsl@163.com
+ * @date: 2024/2/2 上午 11:26
  */
-
 
 
 #ifndef ACTUATOR_MANAGER_H
 #define ACTUATOR_MANAGER_H
 
 /**
- * 执行器管理层，负责提供执行器的接口，执行器的初始化和释放，执行器状态的监测，执行器的动作执行处理等等。
+ * **执行器管理器** (`ActuatorManager`)
+    - 负责管理所有执行器，如LED灯、步进电机等等可以被控制驱动的电子单元。
+    - 根据核心控制单元的指令执行动作。
  */
 class ActuatorManager {
 private:

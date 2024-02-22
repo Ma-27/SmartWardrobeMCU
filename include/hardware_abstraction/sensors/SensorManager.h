@@ -11,6 +11,7 @@
 #include "DHT.h"
 #include "utility/ProjectConfig.h" // 引入配置类
 #include "TemperatureHumiditySensor.h"
+#include "LightSensor.h"
 
 /**
  * **传感器管理器** (`SensorManager`)
@@ -28,6 +29,9 @@ private:
     // 温湿度传感器实例
     TemperatureHumiditySensor *tempHumSensor;
 
+    // 光照传感器实例
+    LightSensor *lightSensor;
+
 public:
     // 禁止复制构造函数和赋值操作
     SensorManager(const SensorManager&) = delete;
@@ -41,6 +45,9 @@ public:
 
     // 读取温度
     float readTemperature();
+
+    // 读取光照强度
+    int updateLightIntensity();
 };
 
 #endif // SENSOR_MANAGER_H

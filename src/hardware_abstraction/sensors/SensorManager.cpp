@@ -6,6 +6,7 @@
  */
 
 #include "hardware_abstraction/sensors/SensorManager.h"
+#include "hardware_abstraction/sensors/LightSensor.h"
 
 SensorManager* SensorManager::instance = nullptr;
 
@@ -21,6 +22,9 @@ SensorManager* SensorManager::getInstance() {
 SensorManager::SensorManager() {
     // 初始化温湿度传感器实例
     tempHumSensor = TemperatureHumiditySensor::getInstance(ProjectConfig::DHTPIN, ProjectConfig::DHTTYPE);
+
+    // 初始化光照传感器实例
+    lightSensor = LightSensor::getInstance();
 }
 
 // 读取湿度
@@ -33,5 +37,10 @@ float SensorManager::readHumidity() {
 float SensorManager::readTemperature() {
     // 使用温湿度传感器实例读取温度
     return tempHumSensor->readTemperature();
+}
+
+int SensorManager::updateLightIntensity() {
+    // 使用光照传感器实例读取光照强度
+    return lightSensor->readLightIntensity();
 }
 

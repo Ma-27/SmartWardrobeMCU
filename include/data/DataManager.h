@@ -46,17 +46,20 @@ public:
     // 发送数据的方法
     void saveData(const String &data, bool SerialPrint);
 
-    // 湿度
-    float humidity;
-
-    // 湿度
-    float temperature;
+    // 连接信息
+    ConnectionStatus connectionStatus = ConnectionStatus::NotConnected; // 初始化为未连接
 
     // 光照强度
     int light;
 
-    // 连接信息
-    ConnectionStatus connectionStatus = ConnectionStatus::NotConnected; // 初始化为未连接
+    // 电位器值
+    int potentiometerValue = 0;
+
+    // 湿度
+    float humidity = 0.0f;
+
+    // 湿度
+    float temperature = 0.0f;
 };
 
 #endif

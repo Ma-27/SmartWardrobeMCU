@@ -63,7 +63,7 @@ void CoreController::looper() {
 
 // 连接到iot服务器并且握手
 bool CoreController::connectToWifi() {
-    //
+    // 连接到指定的Wi-Fi接入点AP，接入互联网
     return network->connectToWifi();
 }
 

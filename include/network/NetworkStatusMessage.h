@@ -1,6 +1,9 @@
-//
-// Created by Mamh on 2024/2/6.
-//
+/**
+ * @description:
+ * @author: Mamh
+ * @email: mamhsl@163.com
+ * @date: 2024/2/6 上午 08:11
+ */
 
 // NetworkStatusMessage.h
 #ifndef NETWORK_STATUS_MESSAGE_H

@@ -10,24 +10,46 @@
 
 #include "NetworkStatusMessage.h"
 #include "network/ServerConnector.h"
+#include "data/pub-sub/Subscriber.h"
+#include "data/pub-sub/EventManager.h"
+#include "NetworkDataHandler.h"
 
 class DataManager; // 前向声明
 class EventManager; // EventManager也在这里使用，前向声明
 class ServerConnector; // ServerConnector也在这里使用，前向声明
+class NetworkDataHandler; // NetworkDataHandler也在这里使用，前向声明
 
 /**
  * 网络抽象层，负责提供网络和设备的接口，网络的连接和释放，网络状态的监测，网络的数据收发处理等等。
  */
-class NetworkManager {
+class NetworkManager : public Subscriber {
 private:
     static NetworkManager *instance; // 静态公共私有实例指针
 
     DataManager *dataManager;
     EventManager *eventManager;
     ServerConnector *serverConnector;
+    NetworkDataHandler *networkDataHandler;
 
     // 私有化构造函数
     NetworkManager();
+
+    void initNetworkManager();
+
+    // 上传数据到云平台
+    bool uploadDataToPlatform();
+
+    // 获得服务器的握手信息，如果显示连接上了，那就ok了
+    bool readServerShakehands();
+
+    /**
+    * 实现Subscriber接口要求的update方法。
+    * 将温湿度等数据实时传送到服务器。
+    * @param message 收到的消息
+    * @param messageType 收到的消息类型，int类型号
+    */
+    void update(const Message &message, int messageType) override;
+
 
 public:
     // 删除拷贝构造函数和赋值操作符，确保单例的唯一性
@@ -44,9 +66,6 @@ public:
     // 设置当前的连接状态。并且发布网络状态更新事件
     void setConnectionStatus(ConnectionStatus status);
 
-    // 获得服务器的握手信息，如果显示连接上了，那就ok了
-    bool readServerShakehands();
-
     // 测试AT+RST 复位连接
     bool resetConnection();
 
@@ -56,8 +75,7 @@ public:
     // 连接到指定的Wi-Fi接入点AP，接入互联网
     bool connectToWifi();
 
-    // 上传数据到云平台
-    bool uploadDataToPlatform(String data);
+
 };
 
 #endif

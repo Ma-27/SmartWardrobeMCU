@@ -28,7 +28,7 @@ ServerConnector::ServerConnector() {
 // 执行AT测试和AT命令连接
 bool ServerConnector::executeAT_Setting(const char *data, const char *keyword, unsigned long time_out) {
     // 打印接收到的每行数据
-    dataManager->saveData("Starting Command: " + String(data), false);
+    dataManager->logData("Starting Command: " + String(data), false);
 
     // 使用Serial1连接Arduino和esp01
     Serial1.println(data);
@@ -43,17 +43,17 @@ bool ServerConnector::executeAT_Setting(const char *data, const char *keyword, u
         if (Serial1.available()) {
             readData = Serial1.readStringUntil('\n');
             // 打印接收到的每行数据
-            dataManager->saveData("Received: " + readData, false);
+            dataManager->logData("Received: " + readData, false);
             if (readData.indexOf(keyword) >= 0) {
-                dataManager->saveData("-----------------Received expected response:" + readData + "-----------------",
-                                      false);   // 收到预期响应
+                dataManager->logData("-----------------Received expected response:" + readData + "-----------------",
+                                     false);   // 收到预期响应
                 return true;                                                // 找到关键词
             }
         }
     }
 
     // 使用Serial打印超时调试信息
-    dataManager->saveData("-----------------Time Out for ERROR: " + String(data) + "-----------------", true);
+    dataManager->logData("-----------------Time Out for ERROR: " + String(data) + "-----------------", true);
     return false;
 }
 
@@ -63,7 +63,7 @@ bool ServerConnector::executeAT_Setting(const char *data, const char *keyword, u
 bool ServerConnector::configWifiSettings() {
     bool success = true;
     // 开始连接wifi
-    dataManager->saveData("Wi-Fi Connecting", false);
+    dataManager->logData("Wi-Fi Connecting", false);
 
     // AT 测试 esp8266能否工作
     success = executeAT_Setting("AT", "OK", 2000) && success;
@@ -115,7 +115,7 @@ bool ServerConnector::readServerShakehands() {
     // 用于存储从服务器接收到的数据
     String response = "";
     // 提示信息
-    dataManager->saveData("Waiting for server response...", false);
+    dataManager->logData("Waiting for server response...", false);
 
     // 检查是否有数据可读，或者是否超时
     while ((millis() - startTime) < timeout) {
@@ -138,16 +138,16 @@ bool ServerConnector::readServerShakehands() {
 
     // 如果接收到了响应
     if (response.length() > 0) {
-        dataManager->saveData("Received response from server:", false);
+        dataManager->logData("Received response from server:", false);
         // 打印响应
-        dataManager->saveData(response, false);
+        dataManager->logData(response, false);
     } else {
         // 超时，没有接收到响应
-        dataManager->saveData("No response from server (timeout)", true);
+        dataManager->logData("No response from server (timeout)", true);
     }
 
     if (success) {
-        dataManager->saveData("-----------------Device successfully online.-----------------", false);
+        dataManager->logData("-----------------Device successfully online.-----------------", false);
     }
     return success;
 }

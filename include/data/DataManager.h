@@ -28,6 +28,7 @@ private:
     // FIXME 存储数据模式有待优化
     // 假设存储的是这个数据
     String storedData;
+
     // 串口管理器
     SerialManager *serialManager;
 
@@ -44,7 +45,7 @@ public:
     static DataManager *getInstance();
 
     // 发送数据的方法
-    void saveData(const String &data, bool SerialPrint);
+    void logData(const String &data, bool SerialPrint);
 
     // 连接信息
     ConnectionStatus connectionStatus = ConnectionStatus::NotConnected; // 初始化为未连接

@@ -144,13 +144,22 @@ Unistep2 stepper(23, 25, 27, 29, 4096, 4096);
 
 23/25/27/29 步进电机 IN 1 2 3 4
 
-### 串口打印调试信息的方法
+## 关键API
+
+### 1. 保存串口信息到日志系统，选择是否打印
 
 //FIXME
-DataManager::getInstance()->sendData("this is the data ", true);
+DataManager::getInstance()->logData("this is the data ", true);
 
-测试
-https://docs.platformio.org/en/latest/advanced/unit-testing/index.html
+### 2. 发布事件和更新事件
+
+// 发布网络状态更新消息
+
+```c
+XXXXXXXMessage message(msg);
+
+eventManager->notify(MESSAGE_TYPE, message);
+```
 
 ## TODO 日志系统
 

@@ -50,8 +50,6 @@ private:
     // 任务调度器。获取TaskScheduler的单例实例
     TaskScheduler &scheduler = TaskScheduler::getInstance();
 
-    // 将数据上传到云平台
-    void uploadDataToPlatform();
 
 public:
     // 获取单例对象的静态方法
@@ -75,10 +73,6 @@ public:
     DataManager* getDataManager() const {
         return data;
     }
-
-    // 功能定义
-    // 更新温湿度
-    void updateTemperatureAndHumidity();
 
     // 连接到wif网络
     bool connectToWifi();

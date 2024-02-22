@@ -29,7 +29,7 @@ void setup() {
         controller = CoreController::getInstance();
         // 再尝试初始化一遍，如果还不行就报错
         if (!controller)
-            DataManager::getInstance()->saveData("Empty controller!", true);
+            DataManager::getInstance()->logData("Empty controller!", true);
     }
 }
 

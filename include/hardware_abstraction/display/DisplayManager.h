@@ -34,6 +34,17 @@ private:
     // 添加LCDManager引用
     LCDManager *lcdManager;
 
+    /**
+    * 实现Subscriber接口要求的update方法。
+    * 更新网络连接状态到LCD屏幕上。
+    * @param message 收到的消息
+    * @param messageType 收到的消息类型，int类型号
+    */
+    void update(const Message &message, int messageType) override;
+
+    // 初始化显示管理器
+    void initDisplayManager();
+
 public:
     // 禁止复制构造函数和赋值操作
     DisplayManager(const DisplayManager &) = delete;
@@ -43,13 +54,6 @@ public:
     // 获取单例对象的静态方法
     static DisplayManager *getInstance();
 
-    /**
-   * 实现Subscriber接口要求的update方法。
-   * 更新网络连接状态到LCD屏幕上。
-   * @param message 收到的消息
-   * @param messageType 收到的消息类型，int类型号
-   */
-    void update(const Message &message, int messageType) override;
 
     // 显示温湿度的接口
     void displayHumidity(float humidity);
@@ -60,9 +64,6 @@ public:
 
     // 在屏幕下方一行显示info
     void displayBelow(String info);
-
-    // 初始化显示管理器
-    void initDisplayManager();
 };
 
 #endif

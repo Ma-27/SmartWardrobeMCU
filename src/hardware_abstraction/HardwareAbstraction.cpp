@@ -9,6 +9,8 @@
 #include "hardware_abstraction/sensors/SensorManager.h"  // 确保包含SensorManager的头文件
 #include "utility/ProjectConfig.h"
 #include "data/DataManager.h"
+#include "core/TaskScheduler.h"
+#include "core/CoreController.h"
 
 // 初始化静态实例指针
 HardwareAbstraction *HardwareAbstraction::instance = nullptr;
@@ -34,7 +36,35 @@ void HardwareAbstraction::initHAL() {
     sensorManager = SensorManager::getInstance();
     // 获取数据中心的实例
     dataManager = DataManager::getInstance();
+
+    // 获得处理pub-sub的对象的单例
+    eventManager = EventManager::getInstance();
+    // 订阅调度器准备好了的消息。准备好了之后就添加任务到调度器一直调度。
+    eventManager->subscribe(TASK_SCHEDULER_READY, this);
 }
+
+
+/**
+* 实现Subscriber接口要求的update方法。
+* 一旦任务调度器准备好了，就将更新温湿度等传感器的任务添加到队列。
+* @param message 收到的消息
+* @param messageType 收到的消息类型，int类型号
+*/
+void HardwareAbstraction::update(const Message &message, int messageType) {
+    switch (messageType) {
+        case TASK_SCHEDULER_READY:
+            dataManager->logData("init task scheduler ready from hardware abstraction", false);
+
+            // 负责更新温湿度，此过程由HardwareAbstraction层进行。
+            TaskScheduler::getInstance().addTask([this]() { this->processTemperatureAndHumidity(true); },
+                                                 ProjectConfig::UPDATE_DHT_TIME);
+            break;
+        default:
+            // DO NOTHING
+            dataManager->logData("init message error(task scheduler)", true);
+    }
+}
+
 
 
 /** 采集温湿度并且显示在LCD屏幕上

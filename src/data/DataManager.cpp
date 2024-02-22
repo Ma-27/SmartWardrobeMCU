@@ -34,7 +34,7 @@ DataManager *DataManager::getInstance() {
  * @param data
  * @param SerialPrint 决定数据是否要打印到串口
  */
-void DataManager::saveData(const String &data, bool SerialPrint) {
+void DataManager::logData(const String &data, bool SerialPrint) {
     storedData = data; // 简单示例：存储数据
     if (SerialPrint) {
         serialManager->println(data); // 调用 SerialManager 的 println 方法打印数据

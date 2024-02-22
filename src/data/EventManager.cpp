@@ -59,7 +59,7 @@ void EventManager::notify(int messageType, const Message &message) {
         for (auto *subscriber: subscribersMap[messageType]) {
             i++;
             // 将订阅者的地址保存打印
-            // dataManager->saveData("address of subscriber", false);
+            // dataManager->logData("address of subscriber", false);
             // Serial.println((uintptr_t)subscriber, HEX);
             // Serial.flush(); // 确保消息发送完毕
 
@@ -67,8 +67,8 @@ void EventManager::notify(int messageType, const Message &message) {
             subscriber->update(message, messageType);
         }
         // 将订阅者的数目保存打印
-        dataManager->saveData("counting looper nums: ", false);
-        dataManager->saveData(String(i), false);
+        dataManager->logData("counting looper nums: ", false);
+        dataManager->logData(String(i), false);
     }
 }
 

@@ -71,7 +71,7 @@ void DisplayManager::update(const Message &message, int messageType) {
 
     // 在屏幕下方区域显示网络连接状态
     displayBelow(data);
-    dataManager->saveData(data, false);
+    dataManager->logData(data, false);
 }
 
 

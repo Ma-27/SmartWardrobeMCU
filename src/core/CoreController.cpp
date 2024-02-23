@@ -42,6 +42,12 @@ void CoreController::init() {
     // 连接网络。
     bool result = connectToWifi();
 
+    if (!result) {
+        // 如果连接失败，记录日志
+        data->logData("Failed to connect to Wi-Fi", false);
+        data->connectionStatus = ConnectionStatus::ERROR;
+    }
+
     // 返回连接结果,1表示成功，0表示失败。
     data->logData(String(result), false);
 

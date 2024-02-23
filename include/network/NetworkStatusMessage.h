@@ -15,7 +15,8 @@ enum class ConnectionStatus {
     NotConnected = 0,
     ConnectingToWiFi = 1,
     WiFiConnected = 2,
-    ServerConnected = 3
+    ServerConnected = 3,
+    ERROR = 4
 };
 
 

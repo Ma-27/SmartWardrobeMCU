@@ -18,18 +18,22 @@ class DataManager; // 前向声明
 class EventManager; // EventManager也在这里使用，前向声明
 class ServerConnector; // ServerConnector也在这里使用，前向声明
 class NetworkDataHandler; // NetworkDataHandler也在这里使用，前向声明
+class DisplayManager; // DisplayManager也在这里使用，前向声明
 
 /**
  * 网络抽象层，负责提供网络和设备的接口，网络的连接和释放，网络状态的监测，网络的数据收发处理等等。
  */
 class NetworkManager : public Subscriber {
 private:
-    static NetworkManager *instance; // 静态公共私有实例指针
+    // 静态公共私有实例指针
+    static NetworkManager *instance;
 
     DataManager *dataManager;
     EventManager *eventManager;
     ServerConnector *serverConnector;
     NetworkDataHandler *networkDataHandler;
+
+    DisplayManager *displayManager;
 
     // 私有化构造函数
     NetworkManager();

@@ -13,6 +13,8 @@
 #include "data/pub-sub/EventManager.h"
 #include "hardware_abstraction/display/LCDManager.h"
 
+class DataManager; // 前向声明
+
 /**
  * 显示管理器负责管理与显示相关的所有操作，如LED屏幕显示。但不负责管理其他诸如亮灯，串口等等功能。
  * 显示管理器为上层提供显示字符相关的接口。但隐藏了具体硬件实现信息。
@@ -33,6 +35,9 @@ private:
 
     // 添加LCDManager引用
     LCDManager *lcdManager;
+
+    // 添加DataManager引用
+    DataManager *dataManager;
 
     /**
     * 实现Subscriber接口要求的update方法。
@@ -59,11 +64,16 @@ public:
     void displayHumidity(float humidity);
     void displayTemperature(float temperature);
 
+    // 显示进度条
+    void displayProgressBar(int value, int position);
+
     // 在屏幕上方一行显示info
     void displayUpper(String info);
 
     // 在屏幕下方一行显示info
     void displayBelow(String info);
+
+    void showConnectionStage(const Message &message);
 };
 
 #endif

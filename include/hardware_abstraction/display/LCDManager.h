@@ -36,7 +36,8 @@ public:
 
     void displayBelow(const String &info);
 
-    // 其他LCD相关的操作
+    // 显示进度条
+    void displayProgressBar(int percentage, int position);
 };
 
 #endif // LCD_MANAGER_H

@@ -30,12 +30,15 @@ HardwareAbstraction::HardwareAbstraction() {
 
 // 初始化所有硬件组件，将原本在构造函数中的初始化逻辑转移到一个单独的init方法中
 void HardwareAbstraction::initHAL() {
+    // 获取数据中心的实例
+    dataManager = DataManager::getInstance();
+
     // 获取显示组件的实例
     displayManager = DisplayManager::getInstance();
     // 获取传感器组件的实例
     sensorManager = SensorManager::getInstance();
-    // 获取数据中心的实例
-    dataManager = DataManager::getInstance();
+    // 获取执行器组件的实例
+    actuatorManager = ActuatorManager::getInstance();
 
     // 获得处理pub-sub的对象的单例
     eventManager = EventManager::getInstance();
@@ -58,13 +61,16 @@ void HardwareAbstraction::update(const Message &message, int messageType) {
             // 负责更新温湿度，此过程由HardwareAbstraction层进行。
             TaskScheduler::getInstance().addTask([this]() { this->processTemperatureAndHumidity(true); },
                                                  ProjectConfig::UPDATE_DHT_TIME);
+
+            // 负责根据光照强度控制灯，此过程由HardwareAbstraction层进行。
+            TaskScheduler::getInstance().addTask([this]() { this->processLight(true); },
+                                                 ProjectConfig::UPDATE_LIGHT_TIME);
             break;
         default:
             // DO NOTHING
             dataManager->logData("init message error(task scheduler)", true);
     }
 }
-
 
 
 /** 采集温湿度并且显示在LCD屏幕上
@@ -83,5 +89,28 @@ void HardwareAbstraction::processTemperatureAndHumidity(boolean enabled) {
 
 // 其他管理器的接口方法实现，如传感器数据读取和执行器控制
 
+/**
+ * 采集光照强度和用户输入，针对用户输出综合判断是否开启灯
+ * @param enabled 是否启用该功能
+ */
+void HardwareAbstraction::processLight(bool enabled) {
+    if (!enabled) return;
+
+    // 读取光照强度
+    dataManager->lightIntensity = sensorManager->updateLightIntensity();
+    dataManager->logData("Light intensity: " + String(dataManager->lightIntensity), false);
+
+    // 读取用户输入电位器的值
+    dataManager->potentiometerValue = sensorManager->updatePotentiometerValue();
+    dataManager->logData("User roll Potentiometer: " + String(dataManager->potentiometerValue), false);
+
+    // 根据光照强度和用户输入综合判断是否开启灯
+    dataManager->light = sensorManager->recommendLightIntensity(dataManager->lightIntensity,
+                                                                dataManager->potentiometerValue);
+    dataManager->logData("recommend light intensity: " + String(dataManager->light), false);
+
+    // 控制执行器开灯或者关灯
+    actuatorManager->setLightIntensity(dataManager->light);
+}
 
 

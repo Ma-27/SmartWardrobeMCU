@@ -22,13 +22,15 @@ LightSensor *LightSensor::getInstance() {
 LightSensor::LightSensor() {
     lightSensorPin = ProjectConfig::lightSensorPin;
     pinMode(lightSensorPin, INPUT);
+    dataManager = DataManager::getInstance();
 }
 
 
 // 读取光照强度
 int LightSensor::readLightIntensity() {
     int sensorValue = analogRead(lightSensorPin);
-    return mapLightIntensity(sensorValue);
+    dataManager->light = mapLightIntensity(sensorValue);
+    return dataManager->light;
 }
 
 // 将光敏电阻的值映射到光照强度

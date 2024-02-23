@@ -9,6 +9,7 @@
 #include "LiquidCrystal_PCF8574.h"
 #include "utility/ProjectConfig.h"
 #include "hardware_abstraction/display/LCDManager.h"
+#include "core/TaskScheduler.h"
 
 // 初始化静态成员变量
 DisplayManager *DisplayManager::instance = nullptr;
@@ -29,6 +30,9 @@ DisplayManager *DisplayManager::getInstance() {
 }
 
 void DisplayManager::initDisplayManager() {
+    // 获得处理数据的对象的单例
+    dataManager = DataManager::getInstance();
+
     // 获得处理pub-sub的对象的单例
     eventManager = EventManager::getInstance();
     // 订阅NETWORK_STATUS_CHANGE消息
@@ -45,10 +49,23 @@ void DisplayManager::initDisplayManager() {
     * @param messageType 收到的消息类型，int类型号
     */
 void DisplayManager::update(const Message &message, int messageType) {
-    if (messageType != MessageType::NETWORK_STATUS_CHANGE) return;
+    switch (messageType) {
+        case TASK_SCHEDULER_READY:
+            break;
+        case NETWORK_STATUS_CHANGE:
+            showConnectionStage(message);
+            break;
+        default:
+            // DO NOTHING
+            break;
+    }
+}
 
-    DataManager *dataManager = DataManager::getInstance();
-    // 需要将Message对象转换为具体类型，消息类型
+/**
+ * 显示网络连接状态,进行到哪一个大步骤了
+ * @param message
+ */
+void DisplayManager::showConnectionStage(const Message &message) {// 需要将Message对象转换为具体类型，消息类型
     const auto &networkMessage = static_cast<const NetworkStatusMessage &>(message);
     ConnectionStatus status = networkMessage.getStatus();
     String data;
@@ -65,13 +82,18 @@ void DisplayManager::update(const Message &message, int messageType) {
         case ConnectionStatus::ServerConnected:
             data = "Server Connected";
             break;
+        case ConnectionStatus::ERROR:
+            data = "Fail to Connect";
+            break;
         default:
             data = "Unknown Status";
     }
 
-    // 在屏幕下方区域显示网络连接状态
-    displayBelow(data);
+    // 在屏幕上方区域显示网络连接状态
+    displayUpper(data);
     dataManager->logData(data, false);
+    // 延时0.5秒为了让用户看清楚
+    delay(500);
 }
 
 
@@ -100,5 +122,15 @@ void DisplayManager::displayUpper(String info) {
 void DisplayManager::displayBelow(String info) {
     lcdManager->displayBelow(info);
 }
+
+/** 显示进度条
+ *
+ * @param percentage 百分比例，应该介于0-100之间
+ * @param position 显示位置，0为上方，1为下方
+ */
+void DisplayManager::displayProgressBar(int percentage, int position) {
+    lcdManager->displayProgressBar(percentage, position);
+}
+
 
 

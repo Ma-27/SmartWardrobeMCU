@@ -9,6 +9,7 @@
 #define LIGHTSENSOR_H
 
 #include <Arduino.h>
+#include "data/DataManager.h"
 
 // LightSensor类定义
 class LightSensor {
@@ -30,6 +31,9 @@ private:
 
     // 唯一实例
     static LightSensor *instance;
+
+    // 数据管理器实例
+    DataManager *dataManager;
 
     // 光敏电阻连接的模拟输入引脚
     int lightSensorPin;

@@ -50,10 +50,13 @@ public:
     // 连接信息
     ConnectionStatus connectionStatus = ConnectionStatus::NotConnected; // 初始化为未连接
 
-    // 光照强度
+    // 灯光的亮度
     int light;
 
-    // 电位器值
+    // 光照强度(0-100)已经经过转化，原值是0-1023
+    int lightIntensity;
+
+    // 电位器值（0-100），原值是0-1023
     int potentiometerValue = 0;
 
     // 湿度
@@ -61,6 +64,9 @@ public:
 
     // 湿度
     float temperature = 0.0f;
+
+    // 网络连接进度
+    int connectingProgress = 0;
 };
 
 #endif

@@ -13,8 +13,10 @@
 
 #include "Arduino.h"
 #include "data/DataManager.h"
+#include "hardware_abstraction/display/DisplayManager.h"
 
 class DataManager; // 前向声明
+class DisplayManager;
 
 
 class ServerConnector {
@@ -24,6 +26,8 @@ private:
 
     // 数据管理器实例
     DataManager *dataManager;
+
+    DisplayManager *displayManager;
 
     // 私有构造函数，遵循单例模式
     ServerConnector();

@@ -22,6 +22,9 @@ ServerConnector *ServerConnector::getInstance() {
 ServerConnector::ServerConnector() {
     // 获得DataManager实例
     dataManager = DataManager::getInstance();
+
+    // 获得DisplayManager实例
+    displayManager = DisplayManager::getInstance();
 }
 
 
@@ -67,33 +70,50 @@ bool ServerConnector::configWifiSettings() {
 
     // AT 测试 esp8266能否工作
     success = executeAT_Setting("AT", "OK", 2000) && success;
+    // 增加进度条，在屏幕上显示
+    dataManager->connectingProgress = dataManager->connectingProgress + 10;
+    displayManager->displayProgressBar(dataManager->connectingProgress, 1);
 
     // 设置工作模式。1：station模式；2：ap模式；3：ap+station模式
     success = executeAT_Setting("AT+CWMODE=3", "OK", 1000) && success;
+    dataManager->connectingProgress = dataManager->connectingProgress + 10;
+    displayManager->displayProgressBar(dataManager->connectingProgress, 1);
 
     // 加入当前Wi-Fi热点无线网络
     success = executeAT_Setting("AT+CWJAP=\"" WIFI_SSID "\",\"" WIFI_PASSWORD "\"", "WIFI CONNECTED", 20000) && success;
+    dataManager->connectingProgress = dataManager->connectingProgress + 10;
+    displayManager->displayProgressBar(dataManager->connectingProgress, 1);
 
     // 调试发现下一条指令在响应前一条指令中，故delay 3.5s
     delay(3500);
 
     // 查询本机IP
     success = executeAT_Setting("AT+CIFSR", "OK", 2000) && success;
+    dataManager->connectingProgress = dataManager->connectingProgress + 10;
+    displayManager->displayProgressBar(dataManager->connectingProgress, 1);
 
     // FIXME 这里曾经有报错，但是调试发现不影响，它并不会返回OK。
     // 连接服务器，这里TCP为TCP透传、183.230.40.33为服务器IP地址，80为端口号
     success = executeAT_Setting("AT+CIPSTART=\"TCP\",\"183.230.40.40\",1811", "AT+CIPSTART=\"TCP\"", 3000) &&
               success;
+    dataManager->connectingProgress = dataManager->connectingProgress + 10;
+    displayManager->displayProgressBar(dataManager->connectingProgress, 1);
 
     // AT+CIPMUX=1 1：开启多连接；0：单链接 Warning:CIPMUX and CIPSERVER must be 0。
     // FIXME OK  关键词可能是OK。这是实验结果
     success = executeAT_Setting("AT+CIPMUX=1", "link is builded", 2000) && success;
+    dataManager->connectingProgress = dataManager->connectingProgress + 10;
+    displayManager->displayProgressBar(dataManager->connectingProgress, 1);
 
     // 设置透传模式。0非透传模式；1透传模式
     success = executeAT_Setting("AT+CIPMODE=1", "OK", 2000) && success;
+    dataManager->connectingProgress = dataManager->connectingProgress + 10;
+    displayManager->displayProgressBar(dataManager->connectingProgress, 1);
 
     // 尝试发送AT+CIPSEND指令
     success = executeAT_Setting("AT+CIPSEND", "OK", 5000) && success;
+    dataManager->connectingProgress = dataManager->connectingProgress + 10;
+    displayManager->displayProgressBar(dataManager->connectingProgress, 1);
 
     // 向OpenIot（中国移动物联网平台）发送身份识别信息：私钥
     Serial1.println(IOT_PLATFORM_PRIVATE_KEY);

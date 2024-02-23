@@ -46,6 +46,9 @@ void NetworkManager::initNetworkManager() {
 
     // 订阅调度器准备好了的消息。准备好了之后就添加发送数据的任务让调度器一直调度。
     eventManager->subscribe(TASK_SCHEDULER_READY, this);
+
+    // 获得DisplayManager实例
+    displayManager = DisplayManager::getInstance();
 }
 
 
@@ -93,15 +96,23 @@ bool NetworkManager::connectToWifi() {
     }
 
     // 检验服务器发回的信息正确性
-    result = readServerShakehands() && result;
+    bool tempResult = readServerShakehands();
+    result = tempResult && result;
+
+    // 提示进度条
+    dataManager->connectingProgress = dataManager->connectingProgress + 10;
+    displayManager->displayProgressBar(dataManager->connectingProgress, 1);
 
     // 提示成功连上了iot云端平台的信息
-    if (result) {
+    if (tempResult) {
         dataManager->logData("SERVER CONNECTED", true);
         setConnectionStatus(ConnectionStatus::ServerConnected);
+    } else {
+        dataManager->logData("SERVER CONNECTED FAILED", true);
+        setConnectionStatus(ConnectionStatus::ERROR);
     }
 
-    return result;
+    return tempResult;
 }
 
 /**

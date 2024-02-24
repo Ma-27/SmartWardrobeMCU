@@ -11,16 +11,16 @@
 
 #include <Arduino.h>
 
-#include "ustd_platform.h"
+#undef min
+#undef max
 
-//sub functionality
-#include "ustd_functional.h"
+#include "functional"
 
 class TaskScheduler {
 public:
     // 定义任务回调函数的类型
     // 使用std::function而不是原始的函数指针
-    using TaskCallback = ustd::function<void(void)>;
+    using TaskCallback = std::function<void(void)>;
 
     // 获取单例对象的引用
     static TaskScheduler &getInstance();

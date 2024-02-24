@@ -1,6 +1,9 @@
-//
-// Created by Mamh on 2024/2/2.
-//
+/**
+ * @description:
+ * @author: Mamh
+ * @email: mamhsl@163.com
+ * @date: 2024/2/2 上午 09:32
+ */
 
 #ifndef SMARTWARDOBE_MCU_C_SOURCE_UTILITY_H
 #define SMARTWARDOBE_MCU_C_SOURCE_UTILITY_H

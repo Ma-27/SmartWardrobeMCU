@@ -28,6 +28,7 @@ private:
     // FIXME 存储数据模式有待优化
     // 假设存储的是这个数据
     String storedData;
+
     // 串口管理器
     SerialManager *serialManager;
 
@@ -44,19 +45,28 @@ public:
     static DataManager *getInstance();
 
     // 发送数据的方法
-    void saveData(const String &data, bool SerialPrint);
-
-    // 湿度
-    float humidity;
-
-    // 湿度
-    float temperature;
-
-    // 光照强度
-    int light;
+    void logData(const String &data, bool SerialPrint);
 
     // 连接信息
     ConnectionStatus connectionStatus = ConnectionStatus::NotConnected; // 初始化为未连接
+
+    // 灯光的亮度
+    int light;
+
+    // 光照强度(0-100)已经经过转化，原值是0-1023
+    int lightIntensity;
+
+    // 电位器值（0-100），原值是0-1023
+    int potentiometerValue = 0;
+
+    // 湿度
+    float humidity = 0.0f;
+
+    // 湿度
+    float temperature = 0.0f;
+
+    // 网络连接进度
+    int connectingProgress = 0;
 };
 
 #endif

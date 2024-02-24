@@ -1,6 +1,9 @@
-//
-// Created by Mamh on 2024/2/4.
-//
+/**
+ * @description:
+ * @author: Mamh
+ * @email: mamhsl@163.com
+ * @date: 2024/2/4 上午 08:56
+ */
 
 #include "data/SerialManager.h"
 

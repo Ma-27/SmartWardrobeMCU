@@ -17,10 +17,10 @@
 class ProjectConfig {
 public:
     // 更新温湿度数据的频率,单位为ms
-    static const int UPDATE_DHT_TIME = 500;
+    static const int UPDATE_DHT_TIME = 100;
 
-    // 串口和单片机的波特率设为9600.
-    static const long BAUD = 9600;
+    // 串口和单片机的波特率设为115200.
+    static const long BAUD = 115200;
 
     // 串口和单片机的波特率设为115200.
     static const long WIFI_BAUD = 115200;
@@ -38,7 +38,7 @@ public:
 
     // FIXME
     // 定义WiFi名称和密码为静态成员变量
-#define WIFI_SSID "mamh"
+#define WIFI_SSID "3-1-1202"
 #define WIFI_PASSWORD "mamh2015"
 
     // FIXME
@@ -48,6 +48,17 @@ public:
     // 更新温湿度数据的频率,单位为ms(30S)
     static const int UPLOAD_DATA_TIME = 30000;
 
+    // 光敏电阻连接的模拟输入引脚
+    static const int lightSensorPin = A0;
+
+    // 可变电阻连接的模拟输入引脚
+    static const int potentiometerPin = A1;
+
+    // LED连接的数字输出引脚
+    static const int lightPin = DAC0;
+
+    // 更新光照强度和控制灯开关的频率,单位为ms
+    static const int UPDATE_LIGHT_TIME = 100;
 };
 
 #endif // PROJECT_CONFIG_H

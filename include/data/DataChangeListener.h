@@ -42,13 +42,6 @@ public:
     */
     void subscribeDataChange();
 
-    /**
-     * 处理接收到的消息，根据消息类型更新DataManager中的数据
-     *
-     * @param message 接收到的消息内容
-     * @param messageType 消息的类型
-     */
-    virtual void update(const Message &message, int messageType) override;
 
 private:
     // 单例实例
@@ -68,6 +61,15 @@ private:
      *  保存事件接收器的一个对象，用于订阅并且接收网络更新的信息。
      */
     EventManager *eventManager;
+
+
+    /**
+     * 处理接收到的消息，根据消息类型更新DataManager中的数据
+     *
+     * @param message 接收到的消息内容
+     * @param messageType 消息的类型
+     */
+    void update(const Message &message, int messageType) override;
 };
 
 #endif

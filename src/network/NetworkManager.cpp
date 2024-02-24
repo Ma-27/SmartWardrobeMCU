@@ -7,9 +7,11 @@
 
 #include <HardwareSerial.h>
 #include <Arduino.h>
+#include <avr/dtostrf.h>
 #include "network/NetworkManager.h"
 #include "data/DataManager.h"
 #include "utility/ProjectConfig.h"
+#include "core/TaskScheduler.h"
 
 // 初始化静态实例指针
 NetworkManager *NetworkManager::instance = nullptr;
@@ -18,91 +20,99 @@ NetworkManager *NetworkManager::instance = nullptr;
 NetworkManager *NetworkManager::getInstance() {
     if (instance == nullptr) {
         instance = new NetworkManager();
+        instance->initNetworkManager();
     }
     return instance;
 }
 
-// 初始化所有硬件组件，这是该类的默认构造函数
+// 这是该类的默认构造函数。但是为了防止单例创造不完全问题，必须留空
 NetworkManager::NetworkManager() {
+    // KEEP IT EMPTY
+}
+
+// 初始化所有网络相关的组件，
+void NetworkManager::initNetworkManager() {
     // 获得DataManager实例
     dataManager = DataManager::getInstance();
 
     // 获得EventManager实例
     eventManager = EventManager::getInstance();
+
+    // 获得ServerConnector实例
+    serverConnector = ServerConnector::getInstance();
+
+    // 获得NetworkDataHandler实例
+    networkDataHandler = NetworkDataHandler::getInstance();
+
+    // 订阅调度器准备好了的消息。准备好了之后就添加发送数据的任务让调度器一直调度。
+    eventManager->subscribe(TASK_SCHEDULER_READY, this);
+
+    // 获得DisplayManager实例
+    displayManager = DisplayManager::getInstance();
 }
 
-
-// 执行AT测试和AT命令连接
-bool NetworkManager::executeAT_Setting(const char *data, const char *keyword, unsigned long time_out) {
-    // 使用Serial1连接Arduino和esp01
-    Serial1.println(data);
-    Serial1.flush();
-    // 延时以等待模块响应
-    delay(100);
-
-    unsigned long start = millis();
-    String readData = "";
-
-    while (millis() - start < time_out) {
-        if (Serial1.available()) {
-            readData = Serial1.readStringUntil('\n');
-            // 打印接收到的每行数据
-            dataManager->saveData("Received: " + readData, false);
-            if (readData.indexOf(keyword) >= 0) {
-                dataManager->saveData("-----------------Received expected response:" + readData + "-----------------",
-                                      false);   // 收到预期响应
-                return true;                                                // 找到关键词
-            }
-        }
-    }
-
-    // 使用Serial打印超时调试信息
-    dataManager->saveData("-----------------Time Out for ERROR: " + String(data) + "-----------------", true);
-    return false;
-}
 
 /**
- * 连接到指定的Wi-Fi接入点AP，接入互联网
+ * 实现Subscriber接口要求的update方法。
+ * 将温湿度等数据实时传送到服务器。
+ * @param message 收到的消息
+ * @param messageType 收到的消息类型，int类型号
  */
-bool NetworkManager::connectWifi() {
-    bool success = true;
-    // 开始连接wifi
-    dataManager->saveData("Wi-Fi Connecting", false);
+void NetworkManager::update(const Message &message, int messageType) {
+    switch (messageType) {
+        case TASK_SCHEDULER_READY:
+            dataManager->logData("init task scheduler ready from network manager", false);
 
-    // AT 测试 esp8266能否工作
-    success = executeAT_Setting("AT", "OK", 2000) && success;
+            // 负责上传数据到云平台，此过程由NetworkManager层进行。
+            TaskScheduler::getInstance().addTask([this]() { this->uploadDataToPlatform(); },
+                                                 ProjectConfig::UPLOAD_DATA_TIME);
+            break;
+        default:
+            // DO NOTHING
+            dataManager->logData("init message error(task scheduler)", true);
+    }
 
-    // 设置工作模式。1：station模式；2：ap模式；3：ap+station模式
-    success = executeAT_Setting("AT+CWMODE=3", "OK", 1000) && success;
+}
 
-    // 加入当前Wi-Fi热点无线网络
-    success = executeAT_Setting("AT+CWJAP=\"" WIFI_SSID "\",\"" WIFI_PASSWORD "\"", "WIFI CONNECTED", 20000) && success;
 
-    // 调试发现下一条指令在响应前一条指令中，故delay 3.5s
-    delay(3500);
+/**
+ * 连接到指定的Wi-Fi接入点AP，接入互联网。同时配置各种网络设置。
+ */
+bool NetworkManager::connectToWifi() {
+    bool result = true;
+    // 如果其中一个失败了，那就返回失败。
 
-    // 查询本机IP
-    success = executeAT_Setting("AT+CIFSR", "OK", 2000) && success;
+    // 提示正在连接的信息
+    dataManager->logData("CONNECTING TO WIFI", true);
+    setConnectionStatus(ConnectionStatus::ConnectingToWiFi);
 
-    // FIXME 这里曾经有报错，但是调试发现不影响，它并不会返回OK。
-    // 连接服务器，这里TCP为TCP透传、183.230.40.33为服务器IP地址，80为端口号
-    success = executeAT_Setting("AT+CIPSTART=\"TCP\",\"183.230.40.40\",1811", "CIFSRAT+CIPSTART=\"TCP\"", 5000) &&
-              success;
+    // 连接到Wi-Fi网络
+    result = serverConnector->configWifiSettings() && result;
 
-    // AT+CIPMUX=1 1：开启多连接；0：单链接 Warning:CIPMUX and CIPSERVER must be 0。
-    // FIXME OK  关键词可能是OK。这是实验结果
-    success = executeAT_Setting("AT+CIPMUX=1", "link is builded", 2000) && success;
+    // 提示成功连上了AP的信息
+    if (result) {
+        dataManager->logData("CONNECT SUCCEEDED TO WIFI", true);
+        setConnectionStatus(ConnectionStatus::WiFiConnected);
+    }
 
-    // 设置透传模式。0非透传模式；1透传模式
-    success = executeAT_Setting("AT+CIPMODE=1", "OK", 2000) && success;
+    // 检验服务器发回的信息正确性
+    bool tempResult = readServerShakehands();
+    result = tempResult && result;
 
-    // 尝试发送AT+CIPSEND指令
-    success = executeAT_Setting("AT+CIPSEND", "OK", 5000) && success;
+    // 提示进度条
+    dataManager->connectingProgress = dataManager->connectingProgress + 10;
+    displayManager->displayProgressBar(dataManager->connectingProgress, 1);
 
-    // 向OpenIot（中国移动物联网平台）发送身份识别信息：私钥
-    Serial1.println(IOT_PLATFORM_PRIVATE_KEY);
+    // 提示成功连上了iot云端平台的信息
+    if (tempResult) {
+        dataManager->logData("SERVER CONNECTED", true);
+        setConnectionStatus(ConnectionStatus::ServerConnected);
+    } else {
+        dataManager->logData("SERVER CONNECTED FAILED", true);
+        setConnectionStatus(ConnectionStatus::ERROR);
+    }
 
-    return success;
+    return tempResult;
 }
 
 /**
@@ -110,71 +120,30 @@ bool NetworkManager::connectWifi() {
  * @return 返回是否成功
  */
 bool NetworkManager::readServerShakehands() {
-    // 用来标记是否获得服务器端预期响应
-    bool success = false;
-    // 获取当前时间
-    unsigned long startTime = millis();
-    // 设置超时时间，例如5秒
-    unsigned long timeout = 5000;
-    // 用于存储从服务器接收到的数据
-    String response = "";
-    // 提示信息
-    dataManager->saveData("Waiting for server response...", false);
-
-    // 检查是否有数据可读，或者是否超时
-    while ((millis() - startTime) < timeout) {
-        if (Serial1.available()) { // 如果有数据可读
-            // 读取一个字符
-            char c = Serial1.read();
-            // 将字符添加到响应字符串中
-            response += c;
-        }
-
-        // 检查是否接收到结束标志，例如，某些特定的字符或字符串
-        // 这里需要根据服务器的响应格式来决定何时结束读取
-        // 例如，如果服务器在消息结束时发送特定字符串，如"END"，则可以这样检查：
-        if (response.endsWith("received")) {
-            success = true;
-            // 已经获得预期响应了，跳出循环
-            break;
-        }
-    }
-
-    // 如果接收到了响应
-    if (response.length() > 0) {
-        dataManager->saveData("Received response from server:", false);
-        // 打印响应
-        dataManager->saveData(response, false);
-    } else {
-        // 超时，没有接收到响应
-        dataManager->saveData("No response from server (timeout)", true);
-    }
-
-    if (success) {
-        dataManager->saveData("-----------------Device successfully online.-----------------", false);
-    }
-    return success;
+    return serverConnector->readServerShakehands();
 }
 
 // 断开和当前路由器的连接
 bool NetworkManager::disconnect() {
-    return executeAT_Setting("AT+CWQAP", "OK", 2000);
+    return serverConnector->disconnectFromServer();
 }
 
 // 测试AT+RST 复位连接
 bool NetworkManager::resetConnection() {
-    return executeAT_Setting("AT+RST", "OK", 5000);           // 增加超时时间;
+    return serverConnector->resetConnection();
 }
 
 
 // 添加用于获取和设置当前网络状态的方法
 ConnectionStatus NetworkManager::getCurrentStatus() {
-    return instance->connectionStatus;
+    return dataManager->connectionStatus;
 }
 
-// 设置当前的连接状态。
+/**设置当前的连接状态。并且发布网络状态更新事件
+ * @param status 待设置的网络状态
+ */
 void NetworkManager::setConnectionStatus(ConnectionStatus status) {
-    connectionStatus = status;
+    dataManager->connectionStatus = status;
 
     // 发布网络状态更新消息
     NetworkStatusMessage message(status);
@@ -185,9 +154,16 @@ void NetworkManager::setConnectionStatus(ConnectionStatus status) {
     Serial.flush();
 }
 
-bool NetworkManager::uploadDataToPlatform(String data) {
-    Serial1.println(data);
-    dataManager->saveData(data, true);
-    return true;
+// 上传数据到云平台
+bool NetworkManager::uploadDataToPlatform() {
+    char c[100];
+    // sprintf 在 Arduino 中无法转换浮点数
+    dtostrf(dataManager->temperature, 2, 2, c);
+    dtostrf(dataManager->humidity, 2, 2, c + 5);
+    // 保存打印数据到本地
+    dataManager->logData("Uploading:" + String(c), true);
+
+    // 调用数据收发类收发数据
+    return networkDataHandler->sendData(c);
 }
 

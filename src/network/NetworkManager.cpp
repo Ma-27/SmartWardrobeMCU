@@ -63,8 +63,9 @@ void NetworkManager::update(const Message &message, int messageType) {
         case TASK_SCHEDULER_READY:
             dataManager->logData("init task scheduler ready from network manager", false);
 
+            // FIXME NETWORK 这里不传数据了，只测试功能，以后会删除
             // 负责上传数据到云平台，此过程由NetworkManager层进行。
-            TaskScheduler::getInstance().addTask([this]() { this->uploadDataToPlatform(); },
+            TaskScheduler::getInstance().addTask([this]() { this->uploadDataToPlatform(false); },
                                                  ProjectConfig::UPLOAD_DATA_TIME);
             break;
         default:
@@ -155,7 +156,9 @@ void NetworkManager::setConnectionStatus(ConnectionStatus status) {
 }
 
 // 上传数据到云平台
-bool NetworkManager::uploadDataToPlatform() {
+bool NetworkManager::uploadDataToPlatform(bool enable) {
+    if (!enable) return false;
+
     char c[100];
     // sprintf 在 Arduino 中无法转换浮点数
     dtostrf(dataManager->temperature, 2, 2, c);

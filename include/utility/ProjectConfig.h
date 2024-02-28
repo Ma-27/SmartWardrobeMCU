@@ -59,6 +59,9 @@ public:
 
     // 更新光照强度和控制灯开关的频率,单位为ms
     static const int UPDATE_LIGHT_TIME = 100;
+
+    // 循环命令的频率,单位为ms
+    static const int QUERY_SERIAL_TIME = 10;
 };
 
 #endif // PROJECT_CONFIG_H

@@ -12,6 +12,9 @@
 #include "data/pub-sub/Message.h"
 #include "data/pub-sub/EventManager.h"
 #include "hardware_abstraction/actuators/Light.h"
+#include "data/pub-sub/Subscriber.h"
+
+class SerialManager;
 
 /**
  * **执行器管理器** (`ActuatorManager`)

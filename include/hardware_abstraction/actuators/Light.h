@@ -5,6 +5,9 @@
  * @date: 2024/2/23 下午 08:45
  */
 
+#ifndef LIGHT_H
+#define LIGHT_H
+
 #include <Arduino.h>
 #include "utility/ProjectConfig.h"
 
@@ -30,3 +33,5 @@ public:
     // 设置灯光强度
     void setLightIntensity(int intensity);
 };
+
+#endif // LIGHT_H

@@ -38,7 +38,7 @@ public:
 
     // FIXME
     // 定义WiFi名称和密码为静态成员变量
-#define WIFI_SSID "3-1-1202"
+#define WIFI_SSID "mamh"
 #define WIFI_PASSWORD "mamh2015"
 
     // FIXME
@@ -62,6 +62,9 @@ public:
 
     // 循环命令的频率,单位为ms
     static const int QUERY_SERIAL_TIME = 10;
+
+    // 检查摄像头中断标志位的延迟时间.
+    static const long CHECK_CAMERA_INTERRUPT_DELAY = 0;
 };
 
 #endif // PROJECT_CONFIG_H

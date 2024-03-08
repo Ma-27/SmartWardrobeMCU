@@ -59,12 +59,12 @@ void NetworkManager::initNetworkManager() {
  * @param messageType 收到的消息类型，int类型号
  */
 void NetworkManager::update(const Message &message, int messageType) {
+    dataManager->logData("init task scheduler ready from network manager", false);
+
     switch (messageType) {
         case TASK_SCHEDULER_READY:
-            dataManager->logData("init task scheduler ready from network manager", false);
-
             // 负责上传数据到云平台，此过程由NetworkManager层进行。
-            TaskScheduler::getInstance().addTask([this]() { this->uploadDataToPlatform(); },
+            TaskScheduler::getInstance().addTask([this]() { this->uploadDataToPlatform(true); },
                                                  ProjectConfig::UPLOAD_DATA_TIME);
             break;
         default:
@@ -155,7 +155,9 @@ void NetworkManager::setConnectionStatus(ConnectionStatus status) {
 }
 
 // 上传数据到云平台
-bool NetworkManager::uploadDataToPlatform() {
+bool NetworkManager::uploadDataToPlatform(bool enable) {
+    if (!enable) return false;
+
     char c[100];
     // sprintf 在 Arduino 中无法转换浮点数
     dtostrf(dataManager->temperature, 2, 2, c);

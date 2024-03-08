@@ -5,7 +5,7 @@
  * @date: 2024/2/23 下午 08:45
  */
 
-#include "Light.h"
+#include "hardware_abstraction/actuators/Light.h"
 #include "utility/ProjectConfig.h"
 
 // 初始化静态实例指针

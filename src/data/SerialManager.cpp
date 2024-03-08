@@ -7,6 +7,7 @@
 
 #include "data/SerialManager.h"
 #include "core/TaskScheduler.h"
+#include "hardware_abstraction/sensors/Camera.h"
 
 SerialManager *SerialManager::instance = nullptr;
 
@@ -107,6 +108,10 @@ void SerialManager::executeCommand(String command) {
     else if (command.indexOf("light off") != -1) {
         // 执行关闭操作
         ActuatorManager::getInstance()->setLightIntensity(0);
+    } else if (command.indexOf("camera shot") != -1) {
+        // FIXME
+        // 摄影并打印到端口
+        Camera::getInstance()->captureImage();
     } else {
         // 未知命令
         Serial.println("Unknown command: " + command);

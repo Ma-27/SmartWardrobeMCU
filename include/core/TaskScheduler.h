@@ -25,11 +25,11 @@ public:
     // 获取单例对象的引用
     static TaskScheduler &getInstance();
 
-    // 添加任务函数（传入函数名）
-    void addTask(TaskCallback callback, unsigned long interval);
+    // 添加任务函数（传入函数名），返回taskID。
+    int addTask(TaskCallback callback, unsigned long interval);
 
     // 删除任务函数（传入任务id）
-    void deleteTask(int id);
+    int deleteTask(int id);
 
     // 每次的任务调度
     void run();
@@ -42,6 +42,9 @@ private:
 
     // 单例模式的自身实例
     static TaskScheduler *instance;
+
+    // 静态变量，用于存储上一个分配的ID
+    int lastId = 0;
 
     struct Task {
         // 任务的标识符

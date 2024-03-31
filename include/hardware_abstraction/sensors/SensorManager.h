@@ -24,7 +24,7 @@
     - 提供统一的接口供核心控制单元查询环境数据。
  */
 
-class SensorManager {
+class SensorManager : public CommandListener {
 private:
     static SensorManager *instance;
 
@@ -76,6 +76,12 @@ public:
     * @param potValue 用户输入的可变电阻值
     */
     int recommendLightIntensity(int lightIntensity, int potValue);
+
+    // 解析命令
+    bool parseCommand(const String &command) override;
+
+    // 具体解析是哪个负责执行命令，派发给相应的监听器
+    bool dispatchCommand(String &command, const String &tag, CommandListener *listener) override;
 };
 
 #endif // SENSOR_MANAGER_H

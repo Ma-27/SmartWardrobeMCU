@@ -63,7 +63,7 @@ void HardwareAbstraction::update(const Message &message, int messageType) {
                                                  ProjectConfig::UPDATE_DHT_TIME);
 
             // 负责根据光照强度控制灯，此过程由HardwareAbstraction层进行。
-            TaskScheduler::getInstance().addTask([this]() { this->processLight(true); },
+            TaskScheduler::getInstance().addTask([this]() { this->processLight(Light::getInstance()->isAutoControl); },
                                                  ProjectConfig::UPDATE_LIGHT_TIME);
             break;
         default:

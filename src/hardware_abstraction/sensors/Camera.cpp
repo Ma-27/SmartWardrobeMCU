@@ -30,23 +30,6 @@ Camera::Camera() {
     // KEEP IT EMPTY
 }
 
-// 这里才是真正的初始化方法。但是这里仅仅初始化必要的引脚方法等等。配置寄存器等到捕捉照片时再配置。
-void Camera::initCamera() {
-    interruptComing = false;
-    vsyncFlag = 0;
-
-    //IIC will start.
-    Wire.begin();
-
-    // 设置引脚模式
-    ioInit();
-
-    // 软件复位OV7670
-    digitalWrite(RESET, LOW);
-    delay(20);
-    digitalWrite(RESET, HIGH);
-}
-
 
 void Camera::captureImage() {
     // Serial.println("initializing CameraISR");
@@ -71,6 +54,70 @@ void Camera::captureImage() {
     TaskScheduler &scheduler = TaskScheduler::getInstance();
     taskID = scheduler.addTask([this]() { this->checkInterruption(true); },
                                ProjectConfig::CHECK_CAMERA_INTERRUPT_DELAY);
+}
+
+
+// 解析命令
+bool Camera::parseCommand(const String &command) {
+    // 移除字符串首尾的空白字符
+    String trimmedCommand = command;
+    trimmedCommand.trim();
+
+    if (trimmedCommand.length() > 0) {
+        // 如果命令不为空（即含有子层级的命令），递交处理
+        return dispatchCommand(trimmedCommand, "", this);
+    } else {
+        // 如果命令为空，返回false
+        return false;
+    }
+}
+
+// 具体解析是哪个负责执行命令，派发给相应的监听器
+bool Camera::dispatchCommand(String &command, const String &tag, CommandListener *listener) {
+    // 删除命令前的所有空格
+    command.trim();
+
+    // 去掉命令开头的"-"，以保留"-shot"的格式
+    String processedCommand = command.substring(1);
+    processedCommand.trim();
+
+    //  执行命令并且处理参数
+    if (processedCommand.startsWith("shot")) {
+        // 拍摄照片
+        captureImage();
+    } else if (processedCommand.startsWith("upload")) {
+        // FIXME 等待实现 上传照片
+
+    } else {
+        // 不继续向下处理
+        Serial.println("Unknown command in Camera: " + processedCommand);
+        return false;
+    }
+}
+
+
+
+
+
+// 以下为硬件驱动程序部分
+// ----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+// 这里才是真正的初始化方法。但是这里仅仅初始化必要的引脚方法等等。配置寄存器等到捕捉照片时再配置。
+void Camera::initCamera() {
+    interruptComing = false;
+    vsyncFlag = 0;
+
+    //IIC will start.
+    Wire.begin();
+
+    // 设置引脚模式
+    ioInit();
+
+    // 软件复位OV7670
+    digitalWrite(RESET, LOW);
+    delay(20);
+    digitalWrite(RESET, HIGH);
 }
 
 

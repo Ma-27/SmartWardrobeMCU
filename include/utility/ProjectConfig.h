@@ -22,7 +22,7 @@ public:
     // 串口和单片机的波特率设为115200.
     static const long BAUD = 115200;
 
-    // 串口和单片机的波特率设为115200.
+    // 单片机和ESP01通信的波特率设为115200.
     static const long WIFI_BAUD = 115200;
 
     // DHT数据线使用Arduino的2号引脚

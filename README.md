@@ -127,108 +127,17 @@
 
 ## 各个原件及功能介绍
 
-### OV7670 -FIFO（用于采集衣物品照片）
-
-OV7670 FIFO版本的摄像头模块是一种广泛应用于图像处理项目的低成本CMOS摄像头模块，它配备了一个3M的FIFO（First In First
-Out）内存缓冲区，用于存储摄像头捕获的图像数据，使得处理器可以以非实时的方式读取图像数据，从而降低对处理器实时性能的要求。下面是对引脚的详细解释：
-
-| 引脚名称     | 描述                                                 |
-|----------|----------------------------------------------------|
-| GND      | 地（Ground）：模块的电源负极。                                 |
-| 3.3V     | 电源正极：为模块提供3.3伏的电源。                                 |
-| SIOD     | SCCB串行数据线（Serial Data Line）：用于OV7670与微控制器之间的数据通信。  |
-| SIOC     | SCCB串行时钟线（Serial Clock Line）：控制SIOD数据线上数据传输的时钟信号。  |
-| VSYNC    | 帧同步信号（Vertical Sync）：指示一帧图像的开始。                    |
-| HREF     | 行同步信号（Horizontal Reference）：指示行的有效数据。              |
-| PWDN     | 功耗选择模式（Power Down）：控制模块的电源关闭，通常接地或悬空。              |
-| STR      | 拍照闪光控制端口（STROBE）：控制模块的电源关闭，通常接地或悬空。                |
-| OE       | 输出使能（Output Enable）：用于控制FIFO数据输出的使能信号。             |
-| RST      | 重置复位（Reset）：用于重置摄像头模块。                             |
-| RCK/RCLK | FIFO内存读取读时钟控制端（Read Clock）：用于从FIFO读取数据的时钟信号。       |
-| WR/WEN   | 写使能（Write Enable）：控制数据写入FIFO的使能信号。1有效，允许CMOS写入FIFO |
-| RRST     | 读重置（Read Reset）：用于重置FIFO的读指针。                      |
-| WRST     | 写重置（Write Reset）：用于重置FIFO的写指针。                     |
-| D0-D7    | 数据引脚（Data Pins）：8位并行数据输出引脚，传输图像数据。                 |
+[使用的原件和介绍](doc/hardware.md)
 
 ## Arduino的接线
 
-## 传感器和简单执行器
+[查看接线](doc/wire.md)
 
-2 - DHT11 DATA
-18 TX1-RX1 ESP8266
-19 RX1-TX1 ESP8266
-20 SDA-SDA LED
-21 SCL-SCL LED
-// 光敏电阻连接的模拟输入引脚
-static const int lightSensorPin = A0;
+## 测试和命令
 
-// 可变电阻连接的模拟输入引脚
-static const int potentiometerPin = A1;
+[查看命令如何调用的](doc/command.md)
 
-// LED连接的数字输出引脚
-static const int lightPin = DAC0;
-
-// 设置步进电机引脚，总步数，每步的步长（以微秒为单位）
-Unistep2 stepper(23, 25, 27, 29, 4096, 4096);
-
-23/25/27/29 步进电机 IN 1 2 3 4
-
-LED灯 正极DAC0 负极GND 串联55欧姆电阻
-
-### OV7670引脚图
-
-|       | 1       | 2          | 3            | 4        | 5    | 6    | 7    | 8    | 9     | 10     | 11     |
-|-------|---------|------------|--------------|----------|------|------|------|------|-------|--------|--------|
-| **1** | WRST  √ | WR(WEN)  √ | STR x        | RST    √ | D1 √ | D3 √ | D5 √ | D7 √ | VSY √ | SIOC √ | 3.3V √ |
-| **2** | RRST √  | OE √       | RCK(RCLK)  √ | PWDN √   | D0 √ | D2 √ | D4 √ | D6 √ | HREF  | SIOD √ | GND √  |
-
-OV7670引脚 Arduino Due引脚 描述 外上内里
-
-基础接线
-
-3v3 3v3
-
-gnd gnd
-
-reset 51
-
-pwdn gnd
-
-SIOD SDA + 1k pullup 黑线
-
-SIOC SCL + 1k pullup 白线
-
-OE 50
-
-VSYNC 3 垂直同步信号（谨慎移动，因为这个使用了中断）
-
-HREF 9 （别看错成6了）
-
-WRST 49 写复位
-
-RRST 48 读复位
-
-WEN 47 写使能
-
-RCLK 46 读时钟
-
-D0 44 数据线0 下
-
-D1 45 数据线1
-
-D2 42 数据线2 下
-
-D3 43 数据线3
-
-D4 40 数据线4 下
-
-D5 41 数据线5 上
-
-D6 38 数据线6 下
-
-D7 39 数据线7 上
-
-## 关键API
+关键API
 
 ### 1. 保存串口信息到日志系统，选择是否打印
 
@@ -247,84 +156,5 @@ XXXXXXXMessage message(msg);
 eventManager->notify(MESSAGE_TYPE, message);
 ```
 
-## TODO 日志系统
-
-创建一个简单的日志库，用于记录和输出调试信息。这个库可以提供基本的日志功能，如输出错误、警告和信息日志到串口或者SD卡。您可以定义不同的日志级别，并在运行时根据需要启用或禁用特定级别的日志。
-
-### 日志系统设计思路：
-
-1. **日志级别**：定义不同的日志级别（如DEBUG、INFO、WARNING、ERROR）。
-2. **输出目标**：选择日志输出的目标，如串口（Serial Monitor）或SD卡。
-3. **时间戳**：为每条日志添加时间戳，以便追踪事件发生的时间。
-4. **格式化**：提供格式化日志消息的功能，使日志条目易于阅读和分析。
-
-### 示例代码：
-
-```cpp
-// LogSystem.h
-#ifndef
-LOGSYSTEM_H
-#define
-LOGSYSTEM_H
-
-#include
-"Arduino.h"
-
-enum LogLevel {
-DEBUG,
-INFO,
-WARNING,
-ERROR
-};
-
-class LogSystem {
-public:
-static void begin(long baudRate);
-static void log(LogLevel level, const String &message);
-private:
-static LogLevel currentLogLevel;
-};
-
-#endif
-```
-
-```cpp
-// LogSystem.cpp
-#include
-"LogSystem.h"
-
-LogLevel LogSystem::currentLogLevel = DEBUG; // 默认日志级别
-
-void LogSystem::begin(long baudRate) {
-Serial.begin(baudRate);
-while (!Serial); // 等待串口连接
-}
-
-void LogSystem::log(LogLevel level, const String &message) {
-if (level < currentLogLevel) return; // 忽略低于当前设置级别的日志
-
-String logPrefix;
-switch (level) {
-case DEBUG: logPrefix = "DEBUG: "; break;
-case INFO: logPrefix = "INFO: "; break;
-case WARNING: logPrefix = "WARNING: "; break;
-case ERROR: logPrefix = "ERROR: "; break;
-}
-Serial.println(logPrefix + message);
-}
-```
-
-使用此系统，您可以轻松地在代码中添加日志语句来跟踪程序的执行流程和状态。例如：
-
-```cpp
-LogSystem::begin(9600);
-LogSystem::log(DEBUG, "程序启动");
-LogSystem::log(INFO, "正在执行操作...");
-LogSystem::log(WARNING, "内存使用率高");
-LogSystem::log(ERROR, "操作失败！");
-```
-
-根据需要调整日志级别和输出目标，以适配您的具体应用场景。
-
-
+[日志系统（未完成）](doc/logger.md)
 

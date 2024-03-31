@@ -13,6 +13,7 @@
 #include "utility/ProjectConfig.h"
 #include "hardware_abstraction/actuators/ActuatorManager.h"
 #include "data/pub-sub/Subscriber.h"
+#include "core/CommandManager.h"
 
 /** 串口管理器  SerialManager类
  * 负责管理，格式化串口有关的打印输出。

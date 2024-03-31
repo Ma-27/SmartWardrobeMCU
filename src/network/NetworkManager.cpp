@@ -75,6 +75,33 @@ void NetworkManager::update(const Message &message, int messageType) {
 }
 
 
+// 解析命令
+bool NetworkManager::parseCommand(const String &command) {
+    // 移除字符串首尾的空白字符
+    String trimmedCommand = command;
+    trimmedCommand.trim();
+
+    // 解析命令并执行相应的操作
+    if (trimmedCommand.startsWith("upload")) {
+        // 调用这个类中的parseCommand方法，对命令进行进一步解析，如果还有子层级的命令，则向下分发
+        // FIXME
+        // return dispatchCommand(trimmedCommand, "upload",NetworkDataHandler::getInstance());
+    } else {
+        // 未知命令
+        dataManager->logData("Unknown command in Network Manager: " + trimmedCommand, true);
+    }
+    return false;
+}
+
+// 具体解析是哪个负责执行命令，派发给相应的监听器
+bool NetworkManager::dispatchCommand(String &command, const String &tag, CommandListener *listener) {
+    return false;
+}
+
+
+//-----------------------------------------------------------------------------------------------------------------------------------
+
+
 /**
  * 连接到指定的Wi-Fi接入点AP，接入互联网。同时配置各种网络设置。
  */
@@ -137,6 +164,11 @@ bool NetworkManager::resetConnection() {
 // 添加用于获取和设置当前网络状态的方法
 ConnectionStatus NetworkManager::getCurrentStatus() {
     return dataManager->connectionStatus;
+}
+
+// 测试MQTT连接
+bool NetworkManager::testMQTT() {
+    return serverConnector->testMQTT();
 }
 
 /**设置当前的连接状态。并且发布网络状态更新事件

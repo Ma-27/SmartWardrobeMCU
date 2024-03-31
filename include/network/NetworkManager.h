@@ -13,6 +13,7 @@
 #include "data/pub-sub/Subscriber.h"
 #include "data/pub-sub/EventManager.h"
 #include "NetworkDataHandler.h"
+#include "core/CommandListener.h"
 
 class DataManager; // 前向声明
 class EventManager; // EventManager也在这里使用，前向声明
@@ -23,7 +24,7 @@ class DisplayManager; // DisplayManager也在这里使用，前向声明
 /**
  * 网络抽象层，负责提供网络和设备的接口，网络的连接和释放，网络状态的监测，网络的数据收发处理等等。
  */
-class NetworkManager : public Subscriber {
+class NetworkManager : public Subscriber, public CommandListener {
 private:
     // 静态公共私有实例指针
     static NetworkManager *instance;
@@ -64,6 +65,12 @@ public:
     // 提供一个公共的访问方法
     static NetworkManager *getInstance();
 
+    // 解析命令
+    bool parseCommand(const String &command) override;
+
+    // 具体解析是哪个负责执行命令，派发给相应的监听器
+    bool dispatchCommand(String &command, const String &tag, CommandListener *listener) override;
+
     // 添加用于获取和设置当前网络状态的方法
     ConnectionStatus getCurrentStatus();
 
@@ -78,6 +85,10 @@ public:
 
     // 连接到指定的Wi-Fi接入点AP，接入互联网
     bool connectToWifi();
+
+    // 测试MQTT指令是否可用
+    bool testMQTT();
+
 
 
 };

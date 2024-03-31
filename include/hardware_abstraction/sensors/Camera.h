@@ -39,6 +39,7 @@
 #include "utility/ProjectConfig.h"
 #include <Wire.h> // I2C 协议必不可少的库
 #include "core/TaskScheduler.h"
+#include "core/CommandListener.h"
 
 #define OV7670_ADDRESS    0x21  //摄像头设备地址
 #define VSYNC      3
@@ -60,7 +61,7 @@
 #define FIFO_RCLK   46
 #define FIFO_OE    50
 
-class Camera {
+class Camera : public CommandListener {
 public:
     // 删除拷贝构造函数和赋值操作符，确保单例的唯一性
     Camera(const Camera &) = delete;
@@ -77,6 +78,14 @@ public:
     初始化摄像头
     */
     void captureImage();
+
+    // 解析命令
+    bool parseCommand(const String &command) override;
+
+    // 具体解析是哪个负责执行命令，派发给相应的监听器
+    bool dispatchCommand(String &command, const String &tag, CommandListener *listener) override;
+
+
 
 private:
     static Camera *instance; // 静态私有实例指针

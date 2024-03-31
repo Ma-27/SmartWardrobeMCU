@@ -94,26 +94,9 @@ void SerialManager::listenCommand(bool enable) {
 
 // 根据接收到的命令执行相应操作
 void SerialManager::executeCommand(String command) {
-    // 移除字符串首尾的空白字符
-    command.trim();
     // 打印收到的命令
-    Serial.println("Received command: " + command);
+    DataManager::getInstance()->logData("Received command: " + command, true);
 
-    // 检查是否包含"light on"子字符串
-    if (command.indexOf("light on") != -1) {
-        // 执行打开操作
-        ActuatorManager::getInstance()->setLightIntensity(100);
-    }
-        // 检查是否包含"light off"子字符串
-    else if (command.indexOf("light off") != -1) {
-        // 执行关闭操作
-        ActuatorManager::getInstance()->setLightIntensity(0);
-    } else if (command.indexOf("camera shot") != -1) {
-        // FIXME
-        // 摄影并打印到端口
-        Camera::getInstance()->captureImage();
-    } else {
-        // 未知命令
-        Serial.println("Unknown command: " + command);
-    }
+    // 使用CommandManager去调度执行命令
+    CommandManager::getInstance()->parseCommand(command);
 }

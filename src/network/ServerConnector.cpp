@@ -184,6 +184,12 @@ bool ServerConnector::resetConnection() {
     return executeAT_Setting("AT+RST", "OK", 5000);
 }
 
+// 测试AT+RST 复位连接
+bool ServerConnector::testMQTT() {
+    // 增加超时时间
+    return executeAT_Setting("AT+MQTTUSERCFG?", "", 5000);
+}
+
 
 
 

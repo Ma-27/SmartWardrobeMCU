@@ -13,6 +13,8 @@
 #include "network/NetworkManager.h"
 #include "data/pub-sub/EventManager.h"
 
+class SerialManager;
+
 /**
  * **数据管理器** (`DataManager`)
    - 中心化管理和调度数据流。负责数据的存储和校验，协调数据的在各个组件之间的流通等等。

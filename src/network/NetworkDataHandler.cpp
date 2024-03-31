@@ -33,6 +33,7 @@ bool NetworkDataHandler::sendData(const String &data) {
     Serial1.println(data);
     // 保存打印数据到本地
     dataManager->logData("Uploading:" + String(data), true);
+
     // FIXME there always return true
     return true;
 }

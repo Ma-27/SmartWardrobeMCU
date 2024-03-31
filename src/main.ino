@@ -28,8 +28,9 @@ void setup() {
     if (!controller) {
         controller = CoreController::getInstance();
         // 再尝试初始化一遍，如果还不行就报错
-        if (!controller)
+        if (!controller) {
             DataManager::getInstance()->logData("Empty controller!", true);
+        }
     }
 }
 

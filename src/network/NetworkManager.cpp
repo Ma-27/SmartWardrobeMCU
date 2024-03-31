@@ -59,12 +59,12 @@ void NetworkManager::initNetworkManager() {
  * @param messageType 收到的消息类型，int类型号
  */
 void NetworkManager::update(const Message &message, int messageType) {
+    dataManager->logData("init task scheduler ready from network manager", false);
+
     switch (messageType) {
         case TASK_SCHEDULER_READY:
-            dataManager->logData("init task scheduler ready from network manager", false);
-
             // 负责上传数据到云平台，此过程由NetworkManager层进行。
-            TaskScheduler::getInstance().addTask([this]() { this->uploadDataToPlatform(); },
+            TaskScheduler::getInstance().addTask([this]() { this->uploadDataToPlatform(true); },
                                                  ProjectConfig::UPLOAD_DATA_TIME);
             break;
         default:
@@ -73,6 +73,33 @@ void NetworkManager::update(const Message &message, int messageType) {
     }
 
 }
+
+
+// 解析命令
+bool NetworkManager::parseCommand(const String &command) {
+    // 移除字符串首尾的空白字符
+    String trimmedCommand = command;
+    trimmedCommand.trim();
+
+    // 解析命令并执行相应的操作
+    if (trimmedCommand.startsWith("upload")) {
+        // 调用这个类中的parseCommand方法，对命令进行进一步解析，如果还有子层级的命令，则向下分发
+        // FIXME
+        // return dispatchCommand(trimmedCommand, "upload",NetworkDataHandler::getInstance());
+    } else {
+        // 未知命令
+        dataManager->logData("Unknown command in Network Manager: " + trimmedCommand, true);
+    }
+    return false;
+}
+
+// 具体解析是哪个负责执行命令，派发给相应的监听器
+bool NetworkManager::dispatchCommand(String &command, const String &tag, CommandListener *listener) {
+    return false;
+}
+
+
+//-----------------------------------------------------------------------------------------------------------------------------------
 
 
 /**
@@ -139,6 +166,11 @@ ConnectionStatus NetworkManager::getCurrentStatus() {
     return dataManager->connectionStatus;
 }
 
+// 测试MQTT连接
+bool NetworkManager::testMQTT() {
+    return serverConnector->testMQTT();
+}
+
 /**设置当前的连接状态。并且发布网络状态更新事件
  * @param status 待设置的网络状态
  */
@@ -155,7 +187,9 @@ void NetworkManager::setConnectionStatus(ConnectionStatus status) {
 }
 
 // 上传数据到云平台
-bool NetworkManager::uploadDataToPlatform() {
+bool NetworkManager::uploadDataToPlatform(bool enable) {
+    if (!enable) return false;
+
     char c[100];
     // sprintf 在 Arduino 中无法转换浮点数
     dtostrf(dataManager->temperature, 2, 2, c);

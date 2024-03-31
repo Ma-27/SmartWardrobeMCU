@@ -56,6 +56,8 @@ public:
     // 测试AT+RST 复位连接
     bool resetConnection();
 
+    bool testMQTT();
+
 };
 
 #endif // SERVER_CONNECTOR_H

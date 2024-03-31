@@ -14,8 +14,8 @@ TaskScheduler *TaskScheduler::instance = nullptr;
 // 如果实例不存在，将创建一个新的实例并返回其引用。
 TaskScheduler &TaskScheduler::getInstance() {
     if (instance == nullptr) {
-        // 如果单例未被创建，创建之，并初始化最大任务数量为5。
-        static TaskScheduler singleton(5);
+        // 如果单例未被创建，创建之，并初始化最大任务数量为20。
+        static TaskScheduler singleton(20);
         instance = &singleton;
     }
     return *instance;
@@ -38,8 +38,9 @@ TaskScheduler::~TaskScheduler() {
 /** 添加一个新任务到调度器。
  @param callback: 要执行的任务的回调函数。
  @param interval: 任务执行的时间间隔（毫秒）。
+ @return taskId: 这个任务的ID。
  */
-void TaskScheduler::addTask(TaskCallback callback, unsigned long interval) {
+int TaskScheduler::addTask(TaskCallback callback, unsigned long interval) {
     // 确保当前任务数量没有超出容量。
     if (taskCount < capacity) {
         // 为新任务设置回调函数、间隔和最后运行时间。
@@ -49,13 +50,16 @@ void TaskScheduler::addTask(TaskCallback callback, unsigned long interval) {
         tasks[taskCount].lastRun = millis(); // 使用Arduino的millis()函数获取当前时间。
         taskCount++; // 增加已注册任务的数量。
     }
+
+    // 注意返回值。因为taskCount已经+1.
+    return tasks[taskCount - 1].id;
 }
 
 /** 删除一个已注册的任务。
-@param callback: 要删除的任务的回调函数。
-  注意：如果有多个任务使用相同的回调，此方法将删除第一个匹配的任务。
+ @param callback: 要删除的任务的回调函数。
+ 注意：如果有多个任务使用相同的回调，此方法将删除第一个匹配的任务。
 */
-void TaskScheduler::deleteTask(int id) {
+int TaskScheduler::deleteTask(int id) {
     for (unsigned int i = 0; i < taskCount; i++) {
         if (tasks[i].id == id) {
             // 找到要删除的任务，从数组中移除它。
@@ -68,14 +72,17 @@ void TaskScheduler::deleteTask(int id) {
             // 可选：将最后一个任务位置清零，确保不留下悬挂指针或数据。
             // 注意：这一步不是必须的，因为taskCount已经减少，
             // 并且未来可能会有新任务覆盖此位置。
-            // tasks[taskCount].callback = nullptr;
+            tasks[taskCount].callback = nullptr;
             tasks[taskCount].interval = 0;
             tasks[taskCount].lastRun = 0;
 
             // 由于已经找到并删除了任务，退出循环。
-            break;
+            return 0;
         }
     }
+
+    // 代表未找到任务，删除失败。
+    return -1;
 }
 
 // 执行所有已注册的任务，如果它们的间隔时间已经到了。
@@ -93,8 +100,6 @@ void TaskScheduler::run() {
 
 // 生成唯一标识符的函数
 int TaskScheduler::generateUniqueId() {
-    // 静态变量，用于存储上一个分配的ID
-    static int lastId = 0;
     // 增加ID值并返回
     return ++lastId;
 }

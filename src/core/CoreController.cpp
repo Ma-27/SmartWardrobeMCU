@@ -38,7 +38,6 @@ void CoreController::init() {
     DataChangeListener *dataChangeListener = DataChangeListener::getInstance();
     dataChangeListener->subscribeDataChange();
 
-
     // 连接网络。
     bool result = connectToWifi();
 
@@ -51,7 +50,6 @@ void CoreController::init() {
     // 返回连接结果,1表示成功，0表示失败。
     data->logData(String(result), false);
 
-
     // TODO 接下来的是任务调度，模拟线程为每个任务定时执行。当到了规定时间间隔后执行任务。
     // 比如说，使用Lambda表达式安排updateTemperatureAndHumidity作为任务， 更新温湿度
     // 但是各个任务被设计为分布式的初始化，它们注册的话，需要pub-sub模式。Controller通知各个订阅者TASK_SCHEDULER_READY，订阅者就应该将各个任务注册到任务调度器中。
@@ -59,7 +57,7 @@ void CoreController::init() {
     ScheduleTaskMessage message(EventManagerStatus::AVAILABLE);
     EventManager::getInstance()->notify(TASK_SCHEDULER_READY, message);
 
-    // 分布的任务有：
+    // 分布式添加的任务有：（这些不需要在此处添加，分布式由其他类添加和删除）
     // 更新温湿度
     // 上传数据到云平台
 }

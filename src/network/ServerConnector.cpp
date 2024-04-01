@@ -31,7 +31,7 @@ ServerConnector::ServerConnector() {
 // 执行AT测试和AT命令连接
 bool ServerConnector::executeAT_Setting(const char *data, const char *keyword, unsigned long time_out) {
     // 打印接收到的每行数据
-    dataManager->logData("Starting Command: " + String(data), false);
+    dataManager->logData("Starting Command: " + String(data), true);
 
     // 使用Serial1连接Arduino和esp01
     Serial1.println(data);
@@ -46,7 +46,7 @@ bool ServerConnector::executeAT_Setting(const char *data, const char *keyword, u
         if (Serial1.available()) {
             readData = Serial1.readStringUntil('\n');
             // 打印接收到的每行数据
-            dataManager->logData("Received: " + readData, false);
+            dataManager->logData("Received: " + readData, true);
             if (readData.indexOf(keyword) >= 0) {
                 dataManager->logData("-----------------Received expected response:" + readData + "-----------------",
                                      false);   // 收到预期响应
@@ -135,7 +135,7 @@ bool ServerConnector::readServerShakehands() {
     // 用于存储从服务器接收到的数据
     String response = "";
     // 提示信息
-    dataManager->logData("Waiting for server response...", false);
+    dataManager->logData("Waiting for server response...", true);
 
     // 检查是否有数据可读，或者是否超时
     while ((millis() - startTime) < timeout) {
@@ -145,29 +145,28 @@ bool ServerConnector::readServerShakehands() {
             // 将字符添加到响应字符串中
             response += c;
         }
-
-        // 检查是否接收到结束标志，例如，某些特定的字符或字符串
-        // 这里需要根据服务器的响应格式来决定何时结束读取
-        // 例如，如果服务器在消息结束时发送特定字符串，如"END"，则可以这样检查：
-        if (response.endsWith("received")) {
-            success = true;
-            // 已经获得预期响应了，跳出循环
-            break;
-        }
     }
 
     // 如果接收到了响应
     if (response.length() > 0) {
-        dataManager->logData("Received response from server:", false);
+        dataManager->logData("Received response from server:", true);
         // 打印响应
-        dataManager->logData(response, false);
+        dataManager->logData(response, true);
+
+        // 检查是否接收到结束标志，例如，某些特定的字符或字符串
+        // 这里需要根据服务器的响应格式来决定何时结束读取
+        // 例如，如果服务器在消息结束时发送特定字符串，如"END"，则可以这样检查：
+        if (response.endsWith("server received data")) {
+            success = true;
+        }
+
     } else {
         // 超时，没有接收到响应
         dataManager->logData("No response from server (timeout)", true);
     }
 
     if (success) {
-        dataManager->logData("-----------------Device successfully online.-----------------", false);
+        dataManager->logData("-----------------Device successfully online.-----------------", true);
     }
     return success;
 }

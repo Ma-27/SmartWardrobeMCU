@@ -8,6 +8,8 @@
 #include <HardwareSerial.h>
 #include <Arduino.h>
 #include <avr/dtostrf.h>
+#include <ArduinoJson.h>
+
 #include "network/NetworkManager.h"
 #include "data/DataManager.h"
 #include "utility/ProjectConfig.h"
@@ -190,14 +192,20 @@ void NetworkManager::setConnectionStatus(ConnectionStatus status) {
 bool NetworkManager::uploadDataToPlatform(bool enable) {
     if (!enable) return false;
 
-    char c[100];
-    // sprintf 在 Arduino 中无法转换浮点数
-    dtostrf(dataManager->temperature, 2, 2, c);
-    dtostrf(dataManager->humidity, 2, 2, c + 5);
-    // 保存打印数据到本地
-    dataManager->logData("Uploading:" + String(c), true);
+    // 使用DynamicJsonDocument，动态分配内存，但这里同样指定了推荐的初始大小
+    DynamicJsonDocument doc(256);
 
-    // 调用数据收发类收发数据
-    return networkDataHandler->sendData(c);
+    /// 具体的设备ID,zhe
+    doc["device_id"] = ProjectConfig::DEVICE_ID;
+    doc["runtime"] = millis();
+    doc["data"]["temperature"] = dataManager->temperature;
+    doc["data"]["humidity"] = dataManager->humidity;
+
+    String jsonStr;
+    serializeJson(doc, jsonStr);
+
+    dataManager->logData("Uploading: " + jsonStr, true);
+
+    return networkDataHandler->sendData(jsonStr.c_str());
 }
 

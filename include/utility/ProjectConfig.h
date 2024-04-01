@@ -17,6 +17,9 @@
 class ProjectConfig {
 public:
     // 更新温湿度数据的频率,单位为ms
+    static const int DEVICE_ID = 001;
+
+    // 更新温湿度数据的频率,单位为ms
     static const int UPDATE_DHT_TIME = 100;
 
     // 串口和单片机的波特率设为115200.

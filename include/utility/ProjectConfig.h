@@ -16,11 +16,23 @@
 
 class ProjectConfig {
 public:
-    // 更新温湿度数据的频率,单位为ms
-    static const int DEVICE_ID = 001;
+    // 设备ID编号，用于云平台识别设备和其他操作
+    static const int DEVICE_ID = 1;
 
     // 更新温湿度数据的频率,单位为ms
     static const int UPDATE_DHT_TIME = 100;
+
+    /// 更新各种指标的频率为立即更新，没有延迟,单位为ms
+    static const int NO_INTERVAL = 0;
+
+    /// 更新各种指标的频率为小的延迟,单位为ms
+    static const int SMALL_INTERVAL = 20;
+
+    /// 更新各种指标的频率为中等的延迟,单位为ms
+    static const int MEDIUM_INTERVAL = 50;
+
+    /// 更新各种指标的频率为大的延迟,单位为ms
+    static const int BIG_INTERVAL = 200;
 
     // 串口和单片机的波特率设为115200.
     static const long BAUD = 115200;
@@ -68,6 +80,9 @@ public:
 
     // 检查摄像头中断标志位的延迟时间.
     static const long CHECK_CAMERA_INTERRUPT_DELAY = 0;
+
+    // 用于存储从服务器接收到的数据，(设置为1.5KB。因为服务器返回的数据最多为1KB)
+    static const int BUFFER_SIZE = 1536; // 1.5KB
 };
 
 #endif // PROJECT_CONFIG_H

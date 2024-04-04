@@ -66,15 +66,15 @@
 -- @example local hex = to_hex("\2\2\0\150\0\37\206") --
 --------------------------------------------------------
 function to_hex(s)
-	local i
-	local t
+    local i
+    local t
 
-	t={s:byte(1,s:len())}
-	for i=1,#t do
-		t[i]=string.format('%02X',t[i])
-	end
+    t = { s:byte(1, s:len()) }
+    for i = 1, #t do
+        t[i] = string.format('%02X', t[i])
+    end
 
-	return table.concat(t)
+    return table.concat(t)
 end
 
 -----------------------------------------------
@@ -84,58 +84,58 @@ end
 -- @example local str = to_str({x=100})      --
 -----------------------------------------------
 function to_str(o)
-	local i=1
-	local t={}
-	local f
+    local i = 1
+    local t = {}
+    local f
 
-	f=function(x)
-		local y=type(x)
-		if y=="number" then
-			t[i]=x
-			i=i+1
-		elseif y=="boolean" then
-			t[i]=tostring(x)
-			i=i+1
-		elseif y=="string" then
-			t[i]="\""
-			t[i+1]=x
-			t[i+2]="\""
-			i=i+3
-		elseif y=="table" then
-			t[i]="{"
-			i=i+1
+    f = function(x)
+        local y = type(x)
+        if y == "number" then
+            t[i] = x
+            i = i + 1
+        elseif y == "boolean" then
+            t[i] = tostring(x)
+            i = i + 1
+        elseif y == "string" then
+            t[i] = "\""
+            t[i + 1] = x
+            t[i + 2] = "\""
+            i = i + 3
+        elseif y == "table" then
+            t[i] = "{"
+            i = i + 1
 
-			local z=true
-			for k,v in pairs(x) do
-				if z then
-					z=false
-					t[i]="\""
-					t[i+1]=k
-					t[i+2]="\""
-					t[i+3]=":"
-					i=i+4
-					f(v)
-				else
-					t[i]=","
-					t[i+1]="\""
-					t[i+2]=k
-					t[i+3]="\""
-					t[i+4]=":"
-					i=i+5
-					f(v)
-				end
-			end
+            local z = true
+            for k, v in pairs(x) do
+                if z then
+                    z = false
+                    t[i] = "\""
+                    t[i + 1] = k
+                    t[i + 2] = "\""
+                    t[i + 3] = ":"
+                    i = i + 4
+                    f(v)
+                else
+                    t[i] = ","
+                    t[i + 1] = "\""
+                    t[i + 2] = k
+                    t[i + 3] = "\""
+                    t[i + 4] = ":"
+                    i = i + 5
+                    f(v)
+                end
+            end
 
-			t[i]="}"
-			i=i+1
-		else
-			t[i]="nil"
-			i=i+1
-		end
-	end
-	f(o)
+            t[i] = "}"
+            i = i + 1
+        else
+            t[i] = "nil"
+            i = i + 1
+        end
+    end
+    f(o)
 
-	return table.concat(t)
+    return table.concat(t)
 end
 
 ----------------------------------------------------------------------------------------------------------
@@ -151,37 +151,37 @@ end
 -- @example local ok = add_val(t,"dsname",0,100)                                                        --
 ----------------------------------------------------------------------------------------------------------
 function add_val(t, i, a, v, c)
-	if type(t)~="table" then
-		return false
-	elseif type(i)~="string" then
-		return false
-	elseif type(a)~="number" then
-		return false
-	else
-		local o = type(v)
-		if o~="boolean" and o~="number" and o~="string" and o~="table" then
-			return false
-		end
+    if type(t) ~= "table" then
+        return false
+    elseif type(i) ~= "string" then
+        return false
+    elseif type(a) ~= "number" then
+        return false
+    else
+        local o = type(v)
+        if o ~= "boolean" and o ~= "number" and o ~= "string" and o ~= "table" then
+            return false
+        end
 
-		local n = {i=i,v=v}
-		if a~=0 and a~=nil then
-			n["a"]=a
-		end
-		if c~=nil then
-			n["c"]=c
-		end
+        local n = { i = i, v = v }
+        if a ~= 0 and a ~= nil then
+            n["a"] = a
+        end
+        if c ~= nil then
+            n["c"] = c
+        end
 
-		-- list push_back --
-		if t.h==nil then
-			t.h={nil,n}
-			t.t=t.h
-		else
-			t.t[1]={nil,n}
-			t.t=t.t[1]
-		end
-	end
+        -- list push_back --
+        if t.h == nil then
+            t.h = { nil, n }
+            t.t = t.h
+        else
+            t.t[1] = { nil, n }
+            t.t = t.t[1]
+        end
+    end
 
-	return true
+    return true
 end
 
 ----------------------------------------------------------------------------------------------------------
@@ -198,42 +198,42 @@ end
 -- @example local ok = add_val(t,"dsname",0,"0A0B0C0D...",{...})                                        --
 ----------------------------------------------------------------------------------------------------------
 function add_bin(t, i, a, b, d)
-	if type(t)~="table" then
-		return false
-	elseif type(i)~="string" then
-		return false
-	elseif type(a)~="number" then
-		return false
-	elseif type(b)~="string" then
-		return false
-	else
-		local o=type(d)
-		if o~="nil" and o~="string" and o~="table" then
-			return false
-		end
+    if type(t) ~= "table" then
+        return false
+    elseif type(i) ~= "string" then
+        return false
+    elseif type(a) ~= "number" then
+        return false
+    elseif type(b) ~= "string" then
+        return false
+    else
+        local o = type(d)
+        if o ~= "nil" and o ~= "string" and o ~= "table" then
+            return false
+        end
 
-		local n={i=i,b=to_hex(b)}
-		if a~=0 and a~=nil then
-			n["a"]=a
-		end
-		if d~=nil then
-			n["d"]=d
-		end
-		if c~=nil then
-			n["c"]=c
-		end
+        local n = { i = i, b = to_hex(b) }
+        if a ~= 0 and a ~= nil then
+            n["a"] = a
+        end
+        if d ~= nil then
+            n["d"] = d
+        end
+        if c ~= nil then
+            n["c"] = c
+        end
 
-		-- list push_back --
-		if t.h==nil then
-			t.h={nil,n}
-			t.t=t.h
-		else
-			t.t[1]={nil,n}
-			t.t=t.t[1]
-		end
-	end
+        -- list push_back --
+        if t.h == nil then
+            t.h = { nil, n }
+            t.t = t.h
+        else
+            t.t[1] = { nil, n }
+            t.t = t.t[1]
+        end
+    end
 
-	return true
+    return true
 end
 
 --------------------------------------------------------------
@@ -243,28 +243,28 @@ end
 -- @example local json = to_json(t)                         --
 --------------------------------------------------------------
 function to_json(t)
-	local i=1
-	local o={}
-	local n
+    local i = 1
+    local o = {}
+    local n
 
-	o[i]="["
-	i=i+1
-	n=t.h
-	while n~=nil do
-		if n[2]~=nil then
-			o[i]=to_str(n[2])
-			i=i+1
-		end
+    o[i] = "["
+    i = i + 1
+    n = t.h
+    while n ~= nil do
+        if n[2] ~= nil then
+            o[i] = to_str(n[2])
+            i = i + 1
+        end
 
-		n=n[1]
-		if n~=nil then
-			o[i]=","
-			i=i+1
-		end
-	end
-	o[i]="]"
+        n = n[1]
+        if n ~= nil then
+            o[i] = ","
+            i = i + 1
+        end
+    end
+    o[i] = "]"
 
-	return table.concat(o)
+    return table.concat(o)
 end
 
 ------------------------------------
@@ -301,11 +301,11 @@ end
 --           @example dev:send("\2\2\0\150\0\37\206\89")                                --
 ------------------------------------------------------------------------------------------
 function device_timer_init(dev)
-	-- 添加用户自定义代码 --
-	-- 例如： --
-	dev:timeout(0)
-	dev:add(10,"open","open")
- 	dev:add(12,"close","close")
+    -- 添加用户自定义代码 --
+    -- 例如： --
+    dev:timeout(1)
+    dev:add(10, "open", "open")
+    dev:add(12, "close", "close")
 end
 
 -----------------------------------------------------------------------------------------------------------
@@ -372,13 +372,13 @@ end
 --           @example local datas = dev:bytes(1,dev:size())                                              --
 -----------------------------------------------------------------------------------------------------------
 function device_data_analyze(dev)
-	local t={}
-	local a=0
-	local s = dev:size()
-	   -- 我们定义 一次发送 十个 字节，分别为 温度 湿度 --
-	add_val(t,"Temperature",a,dev:bytes(1,5))
-	add_val(t,"Humidity",a,dev:bytes(6,5))
-	dev:response()
-	dev:send("received")
-	return s,to_json(t)
-   end
+    local t = {}
+    local a = 0
+    local s = dev:size()
+    -- 我们定义 一次发送 十个 字节，分别为 温度 湿度 --
+    add_val(t, "Temperature", a, dev:bytes(1, 5))
+    add_val(t, "Humidity", a, dev:bytes(6, 5))
+    dev:response()
+    dev:send("received")
+    return s, to_json(t)
+end

@@ -1,0 +1,21 @@
+// FIXME archive
+    /*
+     * if (packetType == NetworkPacketType::CONFIRM) {
+        // 验证确认报文
+        PacketParser parser = PacketParser(PacketParser::PACKET_RETURN_DOC);
+        // 解析模拟的报文
+        JsonDocument doc = parser.parsePacket(packet);
+        // 读取报文状态
+        return parser.handleDefault(doc.as<JsonObject>());
+    }
+     */
+
+
+      // 验证确认报文
+             PacketParser parser;
+             parser.initialize();
+
+             // 解析模拟的报文
+             parser.parsePacket(response);
+             // 读取报文状态
+             // parser.handleDefault(doc.as<JsonObject>());

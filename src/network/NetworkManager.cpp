@@ -14,6 +14,7 @@
 #include "data/DataManager.h"
 #include "utility/ProjectConfig.h"
 #include "core/TaskScheduler.h"
+#include "network/net_message/PacketGenerator.h"
 
 // 初始化静态实例指针
 NetworkManager *NetworkManager::instance = nullptr;
@@ -55,8 +56,8 @@ void NetworkManager::initNetworkManager() {
 
 
 /**
- * 实现Subscriber接口要求的update方法。
  * 将温湿度等数据实时传送到服务器。
+ * 有新消息时执行特定任务
  * @param message 收到的消息
  * @param messageType 收到的消息类型，int类型号
  */
@@ -83,22 +84,79 @@ bool NetworkManager::parseCommand(const String &command) {
     String trimmedCommand = command;
     trimmedCommand.trim();
 
-    // 解析命令并执行相应的操作
-    if (trimmedCommand.startsWith("upload")) {
-        // 调用这个类中的parseCommand方法，对命令进行进一步解析，如果还有子层级的命令，则向下分发
-        // FIXME
-        // return dispatchCommand(trimmedCommand, "upload",NetworkDataHandler::getInstance());
+    if (trimmedCommand.length() > 0) {
+        // 如果命令不为空（即含有子层级的命令），递交给其子类处理
+        return dispatchCommand(trimmedCommand, "", this);
     } else {
-        // 未知命令
-        dataManager->logData("Unknown command in Network Manager: " + trimmedCommand, true);
+        // 如果命令为空，返回false
+        return false;
     }
-    return false;
 }
+
 
 // 具体解析是哪个负责执行命令，派发给相应的监听器
 bool NetworkManager::dispatchCommand(String &command, const String &tag, CommandListener *listener) {
-    return false;
+    // 删除命令前的所有空格
+    command.trim();
+
+    // 执行有-的子命令并且处理参数
+    if (command.startsWith("-")) {
+        // 去掉命令开头的"-"，以保留"net "的格式
+        String processedCommand = command.substring(1);
+
+        if (processedCommand.startsWith("ping")) {
+            // 构建信息
+            String message = PacketGenerator::ping();
+            // 发送ping消息
+            networkDataHandler->sendData(message);
+
+            dataManager->logData("Ping Command Sent", true);
+            // 接收pong消息
+
+
+            // 解析pong消息
+
+            // 判断传输状态
+
+            /// 上传云平台裸数据命令
+        } else if (processedCommand.startsWith("upload")) {
+            // 假设正确的字符串processedCommand目前是"upload "data""
+
+            // 找到第一个双引号，然后加1跳过它
+            int start = processedCommand.indexOf('"') + 1;
+
+            // 如果没有找到双引号，indexOf 返回-1，加1后变为0
+            if (start == 0) {
+                // 没有找到双引号，返回空字符串
+                return "";
+            }
+
+            // 从start开始找下一个双引号
+            int end = processedCommand.indexOf('"', start);
+            if (end == -1) {
+                // 如果没有找到第二个双引号，返回空字符串
+                return "";
+            }
+
+            // 找到要上传的内容，提取并返回两个双引号之间的内容
+            String data = processedCommand.substring(start, end);
+
+            networkDataHandler->sendData(data);
+
+        } else {
+            // 未知命令
+            dataManager->logData("Invalid command parameter in Network Manager: " + processedCommand, true);
+            return false;
+        }
+    }
+
+    // 不继续向下处理
+    return true;
 }
+
+
+
+
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------
@@ -192,20 +250,7 @@ void NetworkManager::setConnectionStatus(ConnectionStatus status) {
 bool NetworkManager::uploadDataToPlatform(bool enable) {
     if (!enable) return false;
 
-    // 使用DynamicJsonDocument，动态分配内存，但这里同样指定了推荐的初始大小
-    DynamicJsonDocument doc(256);
-
-    /// 具体的设备ID,zhe
-    doc["device_id"] = ProjectConfig::DEVICE_ID;
-    doc["runtime"] = millis();
-    doc["data"]["temperature"] = dataManager->temperature;
-    doc["data"]["humidity"] = dataManager->humidity;
-
-    String jsonStr;
-    serializeJson(doc, jsonStr);
-
-    dataManager->logData("Uploading: " + jsonStr, true);
-
-    return networkDataHandler->sendData(jsonStr.c_str());
+    // FIXME implement later
+    return networkDataHandler->sendData("");
 }
 

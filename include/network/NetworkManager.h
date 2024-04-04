@@ -8,7 +8,7 @@
 #ifndef NETWORK_MANAGER_H
 #define NETWORK_MANAGER_H
 
-#include "NetworkStatusMessage.h"
+#include "network/net_message/NetworkStatusMessage.h"
 #include "network/ServerConnector.h"
 #include "data/pub-sub/Subscriber.h"
 #include "data/pub-sub/EventManager.h"

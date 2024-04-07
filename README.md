@@ -81,6 +81,8 @@
 |   |   |-- DataManager.cpp
 |   |   |-- SerialManager.h
 |   |   |-- SerialManager.cpp
+|   |   |   |-- CommandManager.h
+|   |   |   |-- CommandManager.cpp
 |   |-- /utility
 |   |   |-- Utility.h
 |   |   |-- Utility.cpp

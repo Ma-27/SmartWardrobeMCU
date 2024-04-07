@@ -17,6 +17,21 @@
 #include "functional"
 
 class TaskScheduler {
+private:
+    // 任务类型,默认是不可抢占式的
+    enum TaskType {
+        PREEMPTIVE,    // 可抢占式任务
+        NON_PREEMPTIVE  // 不可抢占式任务
+    };
+
+    // 线程的状态模型
+    enum TaskState {
+        READY,   // 就绪
+        RUNNING, // 运行中
+        WAITING  // 等待
+    };
+
+
 public:
     // 定义任务回调函数的类型
     // 使用std::function而不是原始的函数指针
@@ -26,13 +41,14 @@ public:
     static TaskScheduler &getInstance();
 
     // 添加任务函数（传入函数名），返回taskID。
-    int addTask(TaskCallback callback, unsigned long interval);
+    int addTask(TaskCallback callback, unsigned long interval, TaskType type = NON_PREEMPTIVE, int priority = 0);
 
     // 删除任务函数（传入任务id）
     int deleteTask(int id);
 
     // 每次的任务调度
     void run();
+
 
 private:
     // 禁止复制和赋值
@@ -46,6 +62,7 @@ private:
     // 静态变量，用于存储上一个分配的ID
     int lastId = 0;
 
+    // 任务结构体
     struct Task {
         // 任务的标识符
         int id;
@@ -55,6 +72,9 @@ private:
         unsigned long interval;
         // 上次运行的时刻
         unsigned long lastRun;
+        TaskType type;
+        TaskState state;
+        int priority; // 如果需要优先级调度
     };
 
     Task *tasks;

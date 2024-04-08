@@ -5,7 +5,8 @@
 -- 1、定时下发数据任务初始化函数：device_timer_init(dev)【可选】     --
 -- 2、对设备上传数据进行解析（包括心跳等）：device_data_analyze(dev) --
 -----------------------------------------------------------------------
-
+dataPoint = {}
+serverReturnDebug = ""
 
 -------------------------------------------------------------------------------
 -- 注册C函数                                                                 --
@@ -304,8 +305,6 @@ function device_timer_init(dev)
     -- 添加用户自定义代码 --
     -- 例如： --
     dev:timeout(1)
-    dev:add(10, "open", "open")
-    dev:add(12, "close", "close")
 end
 
 -----------------------------------------------------------------------------------------------------------
@@ -372,13 +371,18 @@ end
 --           @example local datas = dev:bytes(1,dev:size())                                              --
 -----------------------------------------------------------------------------------------------------------
 function device_data_analyze(dev)
-    local t = {}
-    local a = 0
-    local s = dev:size()
-    -- 我们定义 一次发送 十个 字节，分别为 温度 湿度 --
-    add_val(t, "Temperature", a, dev:bytes(1, 5))
-    add_val(t, "Humidity", a, dev:bytes(6, 5))
-    dev:response()
-    dev:send("received")
-    return s, to_json(t)
+    i = 1
+    if i == 1 then
+        -- 我们定义 一次发送 十个 字节，分别为 温度 湿度 --
+        add_val(dataPoint, "Temperature", 0, 22.13)
+        dev:response()
+        dev:send("received")
+        serverReturnDebug = to_json(dataPoint)
+        dev:send(serverReturnDebug)
+        return dev:size(), to_json(dataPoint)
+    else
+        add_val(dataPoint, "Temperature", 0, 0.0)
+        dev:send("error")
+        return dev:size(), to_json(dataPoint)
+    end
 end

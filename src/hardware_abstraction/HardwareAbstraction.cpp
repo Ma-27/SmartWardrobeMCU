@@ -82,6 +82,10 @@ void HardwareAbstraction::processTemperatureAndHumidity(boolean enabled) {
     // 保存温湿度
     dataManager->humidity = sensorManager->readHumidity();
     dataManager->temperature = sensorManager->readTemperature();
+
+    // 保存温湿度数据的最新更新时间
+    dataManager->TemperatureHumidityUpdateTime = millis();
+
     // 显示温湿度
     displayManager->displayHumidity(dataManager->humidity);
     displayManager->displayTemperature(dataManager->temperature);

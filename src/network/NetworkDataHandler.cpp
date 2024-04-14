@@ -47,7 +47,6 @@ bool NetworkDataHandler::sendData(const String &data) {
     Serial1.println(data);
 
     // 保存打印数据到本地
-    dataManager->logData("Uploading:" + String(data), true);
     dataManager->logData("=======Uploading To server =======", true);
     dataManager->logData(data, true);
     dataManager->logData("==================================", true);
@@ -101,9 +100,9 @@ String NetworkDataHandler::receiveData(bool enabled) {
 
     // 如果接收到了响应
     if (response.length() > 0) {
-        dataManager->logData("------------------Receiving data from server ----------------", true);
+        dataManager->logData("----Receiving data from server ----", true);
         dataManager->logData(response, true);
-        dataManager->logData("-------------------------------------------------------------", true);
+        dataManager->logData("-----------------------------------", true);
 
         // 将响应数据添加到数据包队列中
         packetQueue->enqueuePacket(response);

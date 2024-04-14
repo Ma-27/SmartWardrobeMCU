@@ -69,6 +69,9 @@ public:
 
     // 网络连接进度
     int connectingProgress = 0;
+
+    // 温湿度数据的最新更新时间
+    long TemperatureHumidityUpdateTime = 0;
 };
 
 #endif

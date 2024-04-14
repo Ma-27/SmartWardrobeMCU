@@ -51,9 +51,16 @@ private:
     void initializeHandlerMap();
 
     // 用于处理不同类型报文的私有方法
-    void handlePing(const JsonObject &doc);
+    bool handlePing(const JsonObject &doc);
 
-    void handleTemperatureHumidityUpdate(const JsonObject &doc);
+    // 处理网络通信的报文异常与错误
+    void handleError(const JsonObject &doc);
+
+    // 处理请求数据的报文
+    bool handleRequestData(const JsonObject &doc);
+
+    // 处理注册确认报文
+    bool handleRegisterAck(const JsonObject &doc);
 };
 
 #endif // PacketParser_h

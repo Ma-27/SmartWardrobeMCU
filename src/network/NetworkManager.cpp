@@ -110,16 +110,21 @@ bool NetworkManager::dispatchCommand(String &command, const String &tag, Command
             // 发送ping消息
             networkDataHandler->sendData(message);
 
-            dataManager->logData("Ping Command Sent", true);
-            // 接收pong消息
+            dataManager->logData("Ping Datagram Sent", true);
+            // 接收pong消息,由PacketParser处理
+            ///FINISH
+        }else if (processedCommand.startsWith("dht")) {
+                // 构建信息
+                String message = PacketGenerator::generateTemperatureHumidityMessage();
+                // 发送ping消息
+                networkDataHandler->sendData(message);
 
-
-            // 解析pong消息
-
-            // 判断传输状态
+                dataManager->logData("Uploading temperature humidity Command executed", true);
+                // 接收pong消息,由PacketParser处理
+                ///FINISH
 
             /// 上传云平台裸数据命令
-        } else if (processedCommand.startsWith("upload")) {
+        } else if (processedCommand.startsWith("uploadRaw")) {
             // 假设正确的字符串processedCommand目前是"upload "data""
 
             // 找到第一个双引号，然后加1跳过它
@@ -250,7 +255,9 @@ void NetworkManager::setConnectionStatus(ConnectionStatus status) {
 bool NetworkManager::uploadDataToPlatform(bool enable) {
     if (!enable) return false;
 
-    // FIXME implement later
-    return networkDataHandler->sendData("");
+    // 获取数据并且编码成JSON格式
+    String data = PacketGenerator::generateTemperatureHumidityMessage();
+    // 发送数据
+    return networkDataHandler->sendData(data);
 }
 

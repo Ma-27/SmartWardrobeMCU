@@ -1,69 +1,26 @@
-﻿-----------------------------------------------------------------------
--- 使用说明：                                                        --
--- V1.3                                                              --
+﻿----------------------------------------------------------------------- --
 -- 用户需要自行完成一下2个函数的实现                                 --
 -- 1、定时下发数据任务初始化函数：device_timer_init(dev)【可选】     --
 -- 2、对设备上传数据进行解析（包括心跳等）：device_data_analyze(dev) --
 -----------------------------------------------------------------------
-
+dataPoint = {}
+serverReturnDebug = ""
+sendCount = 0
+info = ""
+flag = false
+debug = ""
+serverReturnDebug = ""
+deviceID = ""
+from = 0
+packetType = ""
 
 -------------------------------------------------------------------------------
--- 注册C函数                                                                 --
--- u2f 将32位整型内存数据转换为浮点数（不同于值转换）                        --
--- 类似C代码 *(float*)(&u)                                                   --
--- function u2f(u)                                                           --
--- @param   u   number   整数值                                              --
--- @return  成功返回浮点数值，否则返回nil                                    --
--- @example local u = 123                                                    --
---          local f = u2f( 123 )                                             --
---                                                                           --
--- time 获取时间戳，距离（00:00:00 UTC, January 1, 1970）的毫秒数            --
--- function time()                                                           --
--- @return  返回当前时间戳                                                   --
--- @example local t = time()                                                 --
---                                                                           --
--- year 获取年（year-1900）                                                  --
--- function year(t)                                                          --
--- @param   t   number   时间戳，距离（00:00:00 UTC, January 1, 1970）的秒数 --
--- @return  返回年                                                           --
--- @example local y = year( t )                                              --
---                                                                           --
--- month 获取月（0-11）                                                      --
--- function month(t)                                                         --
--- @param   t   number   时间戳，距离（00:00:00 UTC, January 1, 1970）的秒数 --
--- @return  返回月                                                           --
--- @example local m = month( t )                                             --
---                                                                           --
--- day 获取日（1-31）                                                        --
--- function day(t)                                                           --
--- @param   t   number   时间戳，距离（00:00:00 UTC, January 1, 1970）的秒数 --
--- @return  返回月                                                           --
--- @example local d = day( t )                                               --
---                                                                           --
--- hour 获取时（0-23）                                                       --
--- function hour(t)                                                          --
--- @param   t   number   时间戳，距离（00:00:00 UTC, January 1, 1970）的秒数 --
--- @return  返回时                                                           --
--- @example local h = hour( t )                                              --
---                                                                           --
--- minute 获取分（0-59）                                                     --
--- function minute(t)                                                        --
--- @param   t   number   时间戳，距离（00:00:00 UTC, January 1, 1970）的秒数 --
--- @return  返回分                                                           --
--- @example local m = minute( t )                                            --
---                                                                           --
--- second 获取秒（0-59）                                                     --
--- function second(t)                                                        --
--- @param   t   number   时间戳，距离（00:00:00 UTC, January 1, 1970）的秒数 --
--- @return  返回秒                                                           --
--- @example local m = second( t )                                            --
+-- 注册C函数
+-- 参考old文档
 -------------------------------------------------------------------------------
 
 --------------------------------------------------------
 -- 将bytes string转换hex string                       --
--- @param   s   string   bytes string                 --
--- @return  返回hex string，类似"0A0B0C0D..."         --
--- @example local hex = to_hex("\2\2\0\150\0\37\206") --
 --------------------------------------------------------
 function to_hex(s)
     local i
@@ -79,9 +36,6 @@ end
 
 -----------------------------------------------
 -- 将object序列化成字符串                    --
--- @param   o   boolean|number|string|table  --
--- @return  返回序列化string                 --
--- @example local str = to_str({x=100})      --
 -----------------------------------------------
 function to_str(o)
     local i = 1
@@ -139,16 +93,7 @@ function to_str(o)
 end
 
 ----------------------------------------------------------------------------------------------------------
--- 添加值数据点到table中                                                                                --
--- @param   t   table                                                                                   --
---          i   string                      数据流或数据流模板名称                                      --
---          a   number                      毫秒级时间戳，距离（00:00:00 UTC, January 1, 1970）的毫秒； --
---                                          如果值为0，表示使用当前时间                                 --
---          v   boolean|number|string|table 布尔值、数值、字符串、json                                  --
---          c   string                      用于标识数据点归属(设备AuthCode,可选)                       --
---                                          如果值为“”或nil，表示数据点归属建立TCP连接的设备            --
--- @return  成功返回true，否则返回false                                                                 --
--- @example local ok = add_val(t,"dsname",0,100)                                                        --
+-- 添加值数据点到table中                                                                                -- --
 ----------------------------------------------------------------------------------------------------------
 function add_val(t, i, a, v, c)
     if type(t) ~= "table" then
@@ -185,17 +130,7 @@ function add_val(t, i, a, v, c)
 end
 
 ----------------------------------------------------------------------------------------------------------
--- 添加二进制数据点到table中                                                                            --
--- @param   t   table                                                                                   --
---          i   string                      数据流或数据流模板名称                                      --
---          a   number                      毫秒级时间戳，距离（00:00:00 UTC, January 1, 1970）的毫秒； --
---                                          如果值为0，表示使用当前时间                                 --
---          b   string                      二进制数据（hex string），类似"0A0B0C0D..."                 --
---          d   boolean|number|string|table 用于描述b（可选）；数值、字符串、json                       --
---          c   string                      用于标识数据点归属(设备AuthCode,可选)                       --
---                                          如果值为“”或nil，表示数据点归属建立TCP连接的设备            --
--- @return  成功返回true，否则返回false                                                                 --
--- @example local ok = add_val(t,"dsname",0,"0A0B0C0D...",{...})                                        --
+-- 添加二进制数据点到table中                                                                            -- --
 ----------------------------------------------------------------------------------------------------------
 function add_bin(t, i, a, b, d)
     if type(t) ~= "table" then
@@ -269,116 +204,272 @@ end
 
 ------------------------------------
 -- begin-添加用户自定义值或函数等 --
+---------------------------
+-- 解析可能嵌套的JSON字符串为Lua表
+-- 支持最多三重嵌套，不支持数组
+function parseJson(jsonStr)
+    -- 去除字符串首尾的空格
+    local function strip(str)
+        return str:gsub("^%s*(.-)%s*$", "%1")
+    end
+
+    -- 解析单个值，可能是数字、布尔值、字符串或嵌套对象
+    local function parseValue(val)
+        val = strip(val)
+        if val:sub(1, 1) == "{" then
+            debug = debug .. "Entering nested object. the object have been parsed \n"  -- 进入嵌套对象的调试信息
+            -- 注释掉的这行代码是错误的，之前通过括号匹配已经解析过了
+            -- return parseObject(val)  -- 递归解析嵌套对象
+            return val
+        elseif tonumber(val) then
+            debug = debug .. "Parsing number: " .. val .. "\n"  -- 解析数字的调试信息
+            return tonumber(val)  -- 将字符串转换为数字
+        elseif val == "true" then
+            debug = debug .. "Parsing boolean true.\n"  -- 解析布尔值true的调试信息
+            return true
+        elseif val == "false" then
+            debug = debug .. "Parsing boolean false.\n"  -- 解析布尔值false的调试信息
+            return false
+        elseif val:sub(1, 1) == '"' and val:sub(-1) == '"' then
+            debug = debug .. "Parsing string: " .. val .. "\n"  -- 解析字符串的调试信息
+            return val:sub(2, -2)  -- 去除字符串首尾的引号
+        else
+            debug = debug .. "Returning raw value: " .. val .. "\n"  -- 返回原始值的调试信息
+            return val
+        end
+    end
+
+    -- 解析对象，可能包含多个键值对
+    local function parseObject(objStr)
+        debug = debug .. "\nStarting to parse object.\n"  -- 开始解析对象的调试信息
+        local obj = {}
+        objStr = objStr:gsub("%s*([,:{}%[%]])%s*", "%1")  -- 去除结构性括号前后的空格
+        objStr = objStr:gsub("^%s*{", ""):gsub("}%s*$", "")  -- 移除对象字符串首尾的大括号
+        local key = nil
+        local previousKey = nil
+        local notInString = true  --如果 notInString 是 true,表示当前不在字符串内,这是json固有结构
+        local start = 1
+        local depth = 0
+
+        for i = 1, #objStr do
+            local char = objStr:sub(i, i)
+            if char == '"' and (i == 1 or objStr:sub(i - 1, i - 1) ~= '\\') then
+                --只有当一个双引号既是字符串的第一个字符，或者其前一个字符不是反斜线时，这个双引号才被视为标记字符串值开始或结束的符号。
+                notInString = not notInString  -- 切换字符串内外状态
+            elseif notInString then
+                if char == '{' then
+                    depth = depth + 1  -- 增加嵌套深度
+                    if depth == 1 then
+                        start = i
+                    end
+                elseif char == '}' then
+                    if depth == 1 then
+                        local subObjStr = strip(objStr:sub(start, i))  -- 提取嵌套对象的字符串
+                        local nestedObj = parseObject(subObjStr)
+                        obj[previousKey] = nestedObj  -- 将解析的嵌套对象赋值给对应的键
+                        debug = debug .. "Exiting nested object with key: " .. previousKey .. "\n"
+                        debug = debug .. "The nested object is: " .. to_str(nestedObj) .. "\n"
+                    end
+                    key = nil
+                    depth = depth - 1  -- 减少嵌套深度
+                elseif depth == 0 then
+                    if char == ':' then
+                        key = strip(objStr:sub(start + 1, i - 2))  -- 提取键名
+                        ---检查嵌套的键值对，如果下一个真是嵌套键值对，那将前一个键名保存为前馈键名
+                        if objStr:sub(i + 1, i + 1) == '{' then
+                            previousKey = key
+                        end
+                        start = i + 1
+                    elseif char == ',' then
+                        if key then
+                            local value = strip(objStr:sub(start, i - 1))  -- 提取键值
+                            obj[key] = parseValue(value)  -- 将解析的值赋值给对应的键
+                            key = nil --使用后置为空，避免检查key时错误更新
+                        end
+                        start = i + 1
+                    end
+                end
+            end
+        end
+
+        if key then
+            local value = strip(objStr:sub(start))
+            obj[key] = parseValue(value)  -- 对最后一个键值对进行处理
+        end
+
+        debug = debug .. "Finished parsing object.\n"  -- 完成对象解析的调试信息
+        debug = debug .. "The final object is: " .. to_str(obj) .. "\n"  -- 输出解析结果
+        return obj
+    end
+
+    return parseObject(jsonStr), debug  -- 返回解析结果和调试信息
+end
+
+-- 构建全局通用响应报文的函数
+function createConfirmResponse(deviceId, remark)
+    return to_str({
+        device_id = deviceId,
+        from = "0", -- 通常这个字段表示消息从哪里发出，这里固定为"0"表示服务器
+        packet_type = "Confirm",
+        send_count = sendCount,
+        data = "server received data",
+        remark = remark
+    })
+end
+
+
+-- 处理Ping报文
+function handlePing(jsonData)
+    local response = {
+        device_id = jsonData["device_id"],
+        from = "0",
+        packet_type = "Pong",
+        send_count = sendCount,
+        data = jsonData["data"]
+    }
+    debug = debug .. "Pong response, is there an empty? : " .. to_str(response) .. "\n"  -- 输出Pong响应的调试信息
+    return to_str(response) -- 转换为JSON字符串
+end
+
+
+-- 处理温湿度数据，包括存储数据等操作
+function handleTemperatureHumidity(jsonData)
+    local device_id = jsonData["device_id"]
+    local temperature = jsonData["data"]["temperature"]
+    local humidity = jsonData["data"]["humidity"]
+    local measure_time = jsonData["data"]["measure_time"]
+
+    local succeed = true  -- 默认假设所有操作都会成功
+
+    -- 更新数据到云平台，只有当所有调用都返回true时，succeed才保持true
+    succeed = succeed and add_val(dataPoint, "Humidity", 0, humidity)
+    succeed = succeed and add_val(dataPoint, "Temperature", 0, temperature)
+    succeed = succeed and add_val(dataPoint, "MeasureTime", 0, measure_time)
+
+    -- 判断测试结果
+    local remark = succeed and "temperature humidity data received" or "failed to parse data"
+
+    -- 转换为JSON字符串并且回复
+    return createConfirmResponse(device_id, remark)
+end
+
+function handleDeviceRegister(jsonData)
+    -- 在这里处理设备注册逻辑，例如验证设备信息，注册设备到数据库等。
+    -- 假设注册成功，并构建响应报文。
+
+    local response = {
+        device_id = jsonData["device_id"],
+        from = "0",
+        packet_type = "Register-Ack",
+        config = {
+            valid_interval = "300000", -- 示例配置信息，实际应根据需求设定
+            status = "success"
+        }
+    }
+    return to_str(response) -- 将Lua表转换为JSON字符串
+end
+
+
+-- 如果收到用户 App 等客户端更新数据的请求，则服务器需要向 Arduino 系统请求报文。
+function handleRequestData(jsonData, dataType)
+    -- 构建请求报文的内容
+    local request = {
+        device_id = jsonData["device_id"], -- 使用提供的设备ID
+        from = 0, -- 报文来源标识（0代表服务器）
+        packet_type = "Request-Data", -- 报文类型
+        data_type = dataType or "", -- 请求的数据类型
+        send_count = sendCount, -- 发送计数
+        remark = jsonData["remark"] or ""  -- 备注信息，默认为空
+    }
+
+    -- 使用to_str函数将请求报文转换为JSON格式的字符串
+    return to_str(request)
+end
+
+
+-- 构建表示错误的响应报文
+function handleErrorPacket(deviceID, errorCode, errorMsg)
+    local response = {
+        device_id = deviceID,
+        from = "0",
+        packet_type = "Error",
+        send_count = sendCount,
+        error_code = errorCode,
+        error_message = errorMsg
+    }
+    return to_str(response) -- 将Lua表转换为JSON字符串
+end
+
+-- 筛选和处理报文的方法：这个是逐一匹配报文的，只能通过if-else硬添加
+function handleRequest(jsonData)
+    -- 获取报文类型
+    local packetType = jsonData["packet_type"]
+    local deviceID = jsonData["device_id"]
+
+    -- 根据报文类型进行处理
+    if packetType == "Ping" then
+        -- 处理Ping报文
+        return handlePing(jsonData)
+    elseif packetType == "Temperature-Humidity" then
+        -- 处理温湿度数据报文
+        return handleTemperatureHumidity(jsonData)
+    elseif packetType == "Log-In" then
+        -- 处理设备登录
+        return handleDeviceRegister(jsonData)
+    else
+        -- 未找到应当处理的报文类型，返回错误报文
+        return handleErrorPacket(deviceID, 1001, "Invalid parameter in parsing packet_type.")
+    end
+end
+
 
 -- end-添加用户自定义值或函数等   --
 ------------------------------------
 
 ------------------------------------------------------------------------------------------
--- 设置定时下发设备的数据（可选）                                                       --
--- @param  dev    user_data   设备管理器                                                --
--- @return 无                                                                           --
--- @notice 此函数为回调函数，不可在脚本内调用                                           --
--- @readme dev提供一下几个函数：                                                        --
---         dev:add(interval,name,data)添加定时下发数据                                  --
---           @param   interval   number   数据下发的时间间隔（秒）                      --
---                    name       string   名称（须保证唯一性）                          --
---                    data       string   数据（二进制数据），使用lua转义字符串         --
---           @return  成功返回true，否则返回false                                       --
---           @notice  定时数据下发的平均频率不超过1，及1/interval_1+...+1/interval_n<=1 --
---           @example local ok = dev:add(10,"test","\1\1\0\150\0\37\253\29")            --
---         dev:timeout(sec)设置下发数据的设备响应超时时间（秒）                         --
---           @param   sec        int      响应超时时间（秒）                            --
---                                        如果值为0，表示不检测设备响应超时             --
---           @return  无                                                                --
---           @example dev:timeout(3)                                                    --
---         dev:response()设备响应成功                                                   --
---           @param   无                                                                --
---           @return  无                                                                --
---           @example dev:response()                                                    --
---         dev:send(data)下发数据到设备                                                 --
---           @param   data   string   数据（二进制数据），使用lua转义字符串             --
---           @return  无                                                                --
---           @example dev:send("\2\2\0\150\0\37\206\89")                                --
+-- 设置定时下发设备的数据（可选）                                                       -- --
 ------------------------------------------------------------------------------------------
 function device_timer_init(dev)
     -- 添加用户自定义代码 --
     -- 例如： --
     dev:timeout(1)
-    dev:add(10, "open", "open")
-    dev:add(12, "close", "close")
 end
 
 -----------------------------------------------------------------------------------------------------------
--- 解析设备上传数据                                                                                      --
--- @param  dev    user_data   设备管理器                                                                 --
--- @return size表示已解析设备上传数据的字节数，json表示解析后的数据点集合，格式如下：                    --
---         [                                                                                             --
---           {                                                                                           --
---             "i" : "dsname1",          // 数据流或数据流模板名称1                                      --
---             "a" : 1234567890,         // 毫秒级时间戳，距离（00:00:00 UTC, January 1, 1970）的毫秒    --
---                                       // 如果值为0，表示使用当前时间                                  --
---             "v" : 123 | "123" | {...} // 布尔值、数值、字符串、json                                   --
---             "b" : "0A0B0C0D..."       // 二进制数据（16进制字符串），与v互斥，不同时存在              --
---             "d" : xxx | "xxx" | {...} // 用于描述b（可选）；布尔值、数值、字符串、json                --
---             "c" : "authcode1"         // 用于标识数据点归属(设备AuthCode,可选)                        --
---                                       // 如果为“”或不存在，表示数据点归属建立TCP连接的设备            --
---           }                                                                                           --
---           ...                                                                                         --
---           {                                                                                           --
---             "i" : "dsnamen",          // 数据流或数据流模板名称1                                      --
---             "a" : 1234567890,         // 毫秒级时间戳，距离（00:00:00 UTC, January 1, 1970）的毫秒    --
---                                       // 如果值为0，表示使用当前时间                                  --
---             "v" : 123 | "123" | {...} // 布尔值、数值、字符串、json                                   --
---             "b" : "0A0B0C0D..."       // 二进制数据（16进制字符串），与v互斥，不同时存在              --
---             "d" : xxx | "xxx" | {...} // 用于描述b（可选）；布尔值、数值、字符串、json                --
---             "c" : "authcoden"         // 用于标识数据点归属(设备AuthCode,可选)                        --
---                                       // 如果为“”或不存在，表示数据点归属建立TCP连接的设备            --
---           }                                                                                           --
---         ]                                                                                             --
--- @notice 此函数为回调函数，不可在脚本内调用                                                            --
--- @readme dev提供一下几个函数：                                                                         --
---         dev:add(interval,name,data)添加定时下发数据                                                   --
---           @param   interval number   数据下发的时间间隔（秒）                                         --
---                    name     string   名称（须保证唯一性）                                             --
---                    data     string   数据（二进制数据），使用lua转义字符串                            --
---           @return  成功返回true，否则返回false                                                        --
---           @notice  定时数据下发的平均频率不超过1，及1/interval_1+...+1/interval_n<=1                  --
---           @example local ok = dev:add(10,"test","\1\1\0\150\0\37\253\29")                             --
---         dev:timeout(sec)设置下发数据的设备响应超时时间（秒）                                          --
---           @param   sec      int      响应超时时间（秒）                                               --
---                                      如果值为0，表示不检测设备响应超时                                --
---           @return  无                                                                                 --
---           @example dev:timeout(3)                                                                     --
---         dev:response()设备响应成功                                                                    --
---           @param   无                                                                                 --
---           @return  无                                                                                 --
---           @example dev:response()                                                                     --
---         dev:send(data)下发数据到设备                                                                  --
---           @param   data   string   数据（二进制数据），使用lua转义字符串                              --
---           @return  无                                                                                 --
---           @example dev:send("\2\2\0\150\0\37\206\89")                                                 --
---         dev:size()获取设备数据大小（字节数）                                                          --
---           @param   无                                                                                 --
---           @return  返回设备数据大小（字节数）                                                         --
---           @example local sz = dev:size()                                                              --
---         dev:byte(pos)获取pos对应位置的设备数据（字节）                                                --
---           @param   pos   number   指定的获取位置，取值范围[1,dev:size()+1)                            --
---           @return  成功返回设备数据（int），否则返回nil                                               --
---           @example local data = dev:byte(1)                                                           --
---         dev:bytes(pos,count)获取从pos开始，count个设备数据                                            --
---           @param   pos   number   指定的获取起始位置，取值范围[1,dev:size()+1)                        --
---                    count number   指定的获取数据总数，取值范围[0,dev:size()+1-pos]                    --
---           @return  成功返回设备数据（string），否则返回nil                                            --
---           @example local datas = dev:bytes(1,dev:size())                                              --
+-- 解析设备上传数据                                                                                      -- --
 -----------------------------------------------------------------------------------------------------------
 function device_data_analyze(dev)
-    local t = {}
-    local a = 0
-    local s = dev:size()
-    -- 我们定义 一次发送 十个 字节，分别为 温度 湿度 --
-    add_val(t, "Temperature", a, dev:bytes(1, 5))
-    add_val(t, "Humidity", a, dev:bytes(6, 5))
+    -- TODO handleRequestData 方法应该由其他设备调用，这里虽然给出了默认的回复实现方法，但是没有真正用到它
+
+    -- 获取设备发送的所有数据
+    local data = dev:bytes(1, dev:size())
+
+    -- 数据下发次数递增
+    sendCount = sendCount or 0 -- 如果sendCount未初始化，则初始化为0
+    sendCount = sendCount + 1
+
+    -- 去掉数据首尾的空格
+    data = data:gsub("^%s*(.-)%s*$", "%1")
+
+    -- 检查数据是否看似有效的JSON格式（简单检查）
+    if string.sub(data, 1, 1) == "{" and string.sub(data, -1) == "}" then
+        -- 如果数据格式看起来像JSON，则尝试解析JSON
+        local jsonData = parseJson(data)
+        -- 筛选和处理报文
+        local response = handleRequest(jsonData)
+
+        -- 将调试信息发送给设备
+        --dev:send(debug)
+
+        -- 将正式的响应报文发送给设备
+        dev:send(response)
+    else
+        -- 如果数据不符合基本的JSON格式，发送错误信息报文
+        local errorJson = handleErrorPacket(0, 1000, "Invalid JSON format.")
+        dev:send(errorJson)
+    end
+
+    debug = ""
     dev:response()
-    dev:send("received")
-    return s, to_json(t)
+    return dev:size(), to_json(dataPoint)
 end

@@ -19,6 +19,9 @@ public:
     // 设备ID编号，用于云平台识别设备和其他操作
     static const int DEVICE_ID = 1;
 
+    // 服务器ID编号，用于云平台识别服务器和其他操作
+    static const int SERVER_ID = 0;
+
     // 更新温湿度数据的频率,单位为ms
     static const int UPDATE_DHT_TIME = 100;
 

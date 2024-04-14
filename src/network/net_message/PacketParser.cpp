@@ -34,15 +34,19 @@ void PacketParser::initialize(int mode) {
 // 初始化报文处理函数映射, 为每种报文类型添加处理函数，降低时间复杂度
 void PacketParser::initializeHandlerMap() {
     // 处理Pong返回报文
-    handlerMap["Ping"] = [this](const JsonObject &doc) { this->handlePing(doc); };
+    handlerMap["Pong"] = [this](const JsonObject &doc) { this->handlePing(doc); };
 
-    // 处理温湿度数据更新报文
-    handlerMap["Temperature-Humidity-Update"] = [this](const JsonObject &doc) {
-        this->handleTemperatureHumidityUpdate(doc);
-    };
+    // 处理错误和异常报文
+    handlerMap["Error"] = [this](const JsonObject &doc) { this->handleError(doc); };
 
     // 对于未定义的报文类型，使用handleDefault方法
-    handlerMap["confirm"] = [this](const JsonObject &doc) { this->handleDefault(doc); };
+    handlerMap["Confirm"] = [this](const JsonObject &doc) { this->handleDefault(doc); };
+
+    // 对于请求Arduino数据的报文，使用handleRequestData方法
+    handlerMap["Request-Data"] = [this](const JsonObject &doc) { this->handleRequestData(doc); };
+
+    // 处理设备登录确认报文，并且做一些配置工作
+    handlerMap["Register-Ack"] = [this](const JsonObject &doc) { this->handleRegisterAck(doc); };
 }
 
 
@@ -68,7 +72,11 @@ JsonDocument PacketParser::parsePacket(const String &jsonPacket) {
     }
 
     // 提取device_id
-    const char *deviceId = doc["device_id"];
+    const int deviceId = doc["device_id"];
+    if (deviceId != ProjectConfig::DEVICE_ID) {
+        dataManager->logData("Device ID does not match", true);
+    }
+
     // 提取packet_type
     const char *packetType = doc["packet_type"];
 
@@ -84,35 +92,104 @@ JsonDocument PacketParser::parsePacket(const String &jsonPacket) {
     return emptyDoc;
 }
 
-void PacketParser::handlePing(const JsonObject &doc) {
-    // FIXME
+// 处理Pong返回报文
+bool PacketParser::handlePing(const JsonObject &doc) {
+    DataManager *dataManager = DataManager::getInstance();
+    String dataRef = "This is data from Arduino - testing server";
+
+    // 提取runtime
+    String data = doc["data"];
+
+    // 提取data对象
+    if (data == dataRef) {
+        dataManager->logData("Ping successful", true);
+        return true;
+    } else {
+        dataManager->logData("Ping is not successful", true);
+        return false;
+    }
 }
 
-void PacketParser::handleTemperatureHumidityUpdate(const JsonObject &doc) {
+// 处理异常和错误报文
+void PacketParser::handleError(const JsonObject &doc) {
+    DataManager *dataManager = DataManager::getInstance();
+
     // 提取runtime
-    const char *runtime = doc["runtime"];
-    // 提取data对象
-    JsonObject data = doc["data"].as<JsonObject>();
-    // 对data对象中的键值对进行遍历和处理
-    for (JsonPair kv: data) {
-        Serial.print(kv.key().c_str());
-        Serial.print(": ");
-        Serial.println(kv.value().as<String>());
+    String errorCode = doc["error_code"];
+    String errorMsg = doc["error_message"];
+
+    // 记录错误信息
+    dataManager->logData("Error code: " + errorCode, true);
+    dataManager->logData("Error message: " + errorMsg, true);
+}
+
+
+// 处理默认报文的方法
+bool PacketParser::handleDefault(const JsonObject &doc) {
+    DataManager *dataManager = DataManager::getInstance();
+
+    String data = doc["data"];
+    String remark = doc["remark"];
+
+    if (data == "server received data") {
+        dataManager->logData("Confirmed: server received data", true);
+        dataManager->logData("Additional information: ", true);
+        dataManager->logData(remark, true);
+        return true;
+    } else {
+        dataManager->logData("receiving data from server but data cannot be confirmed", true);
+        return false;
     }
 }
 
 
-bool PacketParser::handleDefault(const JsonObject &doc) {
+// 处理来自服务器的请求数据报文
+bool PacketParser::handleRequestData(const JsonObject &doc) {
     DataManager *dataManager = DataManager::getInstance();
+    String packetType = doc["packet_type"];  // 报文类型
+    String dataType = doc["data_type"];  // 请求的数据类型
+    String remark = doc["remark"];  // 备注信息
 
-    const char *data = doc["data"];
-    if (strcmp(data, "server received data") == 0) {
-        dataManager->logData("Confirmed: server received data", true);
-        dataManager->logData("", true);
+    // 日志记录收到的请求
+    dataManager->logData("Received request for " + dataType, true);
+    dataManager->logData("Remark: " + remark, true);
+
+    // 根据请求的数据类型，采集对应的数据
+    if (dataType == "Temperature-Humidity") {
+        // 使用CommandManager去调度执行命令
+        CommandManager::getInstance()->parseCommand("net -dht");
+        return true;
+    } else if (dataType == "Light") {
+        // TODO
         return true;
     } else {
-        dataManager->logData("Data not confirmed", true);
-        dataManager->logData("", true);
+        dataManager->logData("Data type not supported: " + dataType, true);
+        return false;
+    }
+}
+
+
+// 处理设备登录确认报文
+bool PacketParser::handleRegisterAck(const JsonObject &doc) {
+    DataManager *dataManager = DataManager::getInstance();
+
+    JsonObject config = doc["config"].as<JsonObject>();  // 配置信息对象
+    long validInterval = config["valid_interval"];  // 配置的有效间隔
+    String status = config["status"];  // 登录状态
+
+    // 记录收到的报文和状态
+    dataManager->logData("Received Register-Ack for device", true);
+    dataManager->logData("Status: " + status + ", Valid Interval: " + String(validInterval), true);
+
+    // 根据状态进行处理
+    if (status == "success") {
+        // 如果登录成功，进行相应的配置设置
+        // 这里可以根据valid_interval设置一些定时任务或者计时器
+        dataManager->logData("Login successful. Configured device...", true);
+        return true;
+    } else {
+        // 如果登录不成功，处理失败逻辑
+        dataManager->logData("Login failed.", true);
         return false;
     }
 }

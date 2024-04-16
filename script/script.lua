@@ -400,6 +400,30 @@ function handleErrorPacket(deviceID, errorCode, errorMsg)
     return to_str(response) -- 将Lua表转换为JSON字符串
 end
 
+-- 处理灯光状态数据，包括存储数据等操作
+function handleLight(jsonData)
+    local device_id = jsonData["device_id"]
+    local brightness = jsonData["data"]["brightness"]
+    local knob_value = jsonData["data"]["knob_value"]
+    local light_openness = jsonData["data"]["light_openness"]
+    local measure_time = jsonData["data"]["measure_time"]
+
+    local succeed = true  -- 默认假设所有操作都会成功
+
+    -- 更新数据到云平台，只有当所有调用都返回true时，succeed才保持true
+    succeed = succeed and add_val(dataPoint, "Brightness", 0, brightness)
+    succeed = succeed and add_val(dataPoint, "KnobValue", 0, knob_value)
+    succeed = succeed and add_val(dataPoint, "LightOpenness", 0, light_openness)
+    succeed = succeed and add_val(dataPoint, "MeasureTime", 0, measure_time)
+
+    -- 判断测试结果
+    local remark = succeed and "light data received" or "failed to parse light data"
+
+    -- 转换为JSON字符串并且回复
+    return createConfirmResponse(device_id, remark)
+end
+
+
 -- 筛选和处理报文的方法：这个是逐一匹配报文的，只能通过if-else硬添加
 function handleRequest(jsonData)
     -- 获取报文类型
@@ -416,6 +440,9 @@ function handleRequest(jsonData)
     elseif packetType == "Log-In" then
         -- 处理设备登录
         return handleDeviceRegister(jsonData)
+    elseif packetType == "Light" then
+        -- 处理设备发送的灯光数据
+        return handleLight(jsonData)
     else
         -- 未找到应当处理的报文类型，返回错误报文
         return handleErrorPacket(deviceID, 1001, "Invalid parameter in parsing packet_type.")

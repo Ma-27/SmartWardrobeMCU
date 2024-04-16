@@ -66,8 +66,13 @@ void NetworkManager::update(const Message &message, int messageType) {
 
     switch (messageType) {
         case TASK_SCHEDULER_READY:
-            // 负责上传数据到云平台，此过程由NetworkManager层进行。
-            TaskScheduler::getInstance().addTask([this]() { this->uploadDataToPlatform(true); },
+            // 负责上传温湿度数据到云平台，此过程由NetworkManager层进行。
+            TaskScheduler::getInstance().addTask([this]() { this->uploadDhtDataToPlatform(true); },
+                                                 ProjectConfig::UPLOAD_DATA_TIME);
+            // 延时2s来避免碰撞
+            delay(2000);
+            // 负责上传光照数据到云平台，此过程由NetworkManager层进行。
+            TaskScheduler::getInstance().addTask([this]() { this->uploadLightToPlatform(true); },
                                                  ProjectConfig::UPLOAD_DATA_TIME);
             break;
         default:
@@ -116,12 +121,19 @@ bool NetworkManager::dispatchCommand(String &command, const String &tag, Command
         }else if (processedCommand.startsWith("dht")) {
                 // 构建信息
                 String message = PacketGenerator::generateTemperatureHumidityMessage();
-                // 发送ping消息
+                // 发送温湿度数据消息
                 networkDataHandler->sendData(message);
 
                 dataManager->logData("Uploading temperature humidity Command executed", true);
-                // 接收pong消息,由PacketParser处理
                 ///FINISH
+        }else if (processedCommand.startsWith("light")) {
+            // 构建信息
+            String message = PacketGenerator::generateLightMessage();
+            // 发送光照、电机等等消息
+            networkDataHandler->sendData(message);
+
+            dataManager->logData("Uploading light data Command executed", true);
+            ///FINISH
 
             /// 上传云平台裸数据命令
         } else if (processedCommand.startsWith("uploadRaw")) {
@@ -251,8 +263,8 @@ void NetworkManager::setConnectionStatus(ConnectionStatus status) {
     Serial.flush();
 }
 
-// 上传数据到云平台
-bool NetworkManager::uploadDataToPlatform(bool enable) {
+// 上传温湿度数据到云平台
+bool NetworkManager::uploadDhtDataToPlatform(bool enable) {
     if (!enable) return false;
 
     // 获取数据并且编码成JSON格式
@@ -260,4 +272,15 @@ bool NetworkManager::uploadDataToPlatform(bool enable) {
     // 发送数据
     return networkDataHandler->sendData(data);
 }
+
+// 上传光照数据到云平台
+bool NetworkManager::uploadLightToPlatform(bool enable) {
+    if (!enable) return false;
+
+    // 获取数据并且编码成JSON格式
+    String data = PacketGenerator::generateLightMessage();
+    // 发送数据
+    return networkDataHandler->sendData(data);
+}
+
 

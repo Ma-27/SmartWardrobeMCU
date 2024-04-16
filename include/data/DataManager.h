@@ -72,6 +72,9 @@ public:
 
     // 温湿度数据的最新更新时间
     long TemperatureHumidityUpdateTime = 0;
+
+    // 灯光数据的最新更新时间
+    long lightUpdateTime = 0;
 };
 
 #endif

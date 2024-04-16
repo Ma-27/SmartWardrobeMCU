@@ -160,10 +160,11 @@ bool PacketParser::handleRequestData(const JsonObject &doc) {
         CommandManager::getInstance()->parseCommand("net -dht");
         return true;
     } else if (dataType == "Light") {
-        // TODO
+        // 使用CommandManager去调度执行命令
+        CommandManager::getInstance()->parseCommand("net -light");
         return true;
     } else {
-        dataManager->logData("Data type not supported: " + dataType, true);
+        dataManager->logData("requested data type not supported: " + dataType, true);
         return false;
     }
 }

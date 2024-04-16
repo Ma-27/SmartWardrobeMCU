@@ -115,6 +115,9 @@ void HardwareAbstraction::processLight(bool enabled) {
 
     // 控制执行器开灯或者关灯
     actuatorManager->setLightIntensity(dataManager->light);
+
+    // 保存灯光数据的最新更新时间
+    dataManager->lightUpdateTime = millis();
 }
 
 

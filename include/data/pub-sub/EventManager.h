@@ -30,14 +30,15 @@ private:
     static EventManager *instance; // 静态实例指针
 
     EventManager() {} // 私有构造函数
-    EventManager(const EventManager &) = delete; // 禁止复制
-    EventManager &operator=(const EventManager &) = delete; // 禁止赋值
 
     // @deprecated
     // DataManager *dataManager;
 
 
 public:
+    EventManager(const EventManager &) = delete; // 禁止复制
+    EventManager &operator=(const EventManager &) = delete; // 禁止赋值
+
     // 获取实例的方法
     static EventManager *getInstance();
 

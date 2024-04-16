@@ -8,7 +8,7 @@
 #ifndef NETWORK_MANAGER_H
 #define NETWORK_MANAGER_H
 
-#include "NetworkStatusMessage.h"
+#include "network/net_message/NetworkStatusMessage.h"
 #include "network/ServerConnector.h"
 #include "data/pub-sub/Subscriber.h"
 #include "data/pub-sub/EventManager.h"
@@ -42,7 +42,10 @@ private:
     void initNetworkManager();
 
     // 上传数据到云平台
-    bool uploadDataToPlatform(bool enable);
+    bool uploadDhtDataToPlatform(bool enable);
+
+    // 上传光照数据到云平台
+    bool uploadLightToPlatform(bool enable);
 
     // 获得服务器的握手信息，如果显示连接上了，那就ok了
     bool readServerShakehands();
@@ -88,9 +91,6 @@ public:
 
     // 测试MQTT指令是否可用
     bool testMQTT();
-
-
-
 };
 
 #endif

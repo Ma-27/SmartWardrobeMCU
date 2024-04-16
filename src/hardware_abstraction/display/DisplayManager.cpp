@@ -74,10 +74,10 @@ void DisplayManager::showConnectionStage(const Message &message) {// 需要将Me
             data = "Not Connected";
             break;
         case ConnectionStatus::ConnectingToWiFi:
-            data = "Connecting WiFi";
+            data = "Connecting Wi-Fi";
             break;
         case ConnectionStatus::WiFiConnected:
-            data = "WiFi Connected";
+            data = "Wi-Fi Connected";
             break;
         case ConnectionStatus::ServerConnected:
             data = "Server Connected";

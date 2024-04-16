@@ -81,6 +81,8 @@
 |   |   |-- DataManager.cpp
 |   |   |-- SerialManager.h
 |   |   |-- SerialManager.cpp
+|   |   |   |-- CommandManager.h
+|   |   |   |-- CommandManager.cpp
 |   |-- /utility
 |   |   |-- Utility.h
 |   |   |-- Utility.cpp
@@ -137,7 +139,11 @@
 
 [查看命令如何调用的](doc/command.md)
 
-关键API
+## 通信报文格式设计
+
+[报文格式与设计](doc/protocol.md)
+
+## 关键API
 
 ### 1. 保存串口信息到日志系统，选择是否打印
 

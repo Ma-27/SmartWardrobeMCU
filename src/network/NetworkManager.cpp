@@ -8,10 +8,13 @@
 #include <HardwareSerial.h>
 #include <Arduino.h>
 #include <avr/dtostrf.h>
+#include <ArduinoJson.h>
+
 #include "network/NetworkManager.h"
 #include "data/DataManager.h"
 #include "utility/ProjectConfig.h"
 #include "core/TaskScheduler.h"
+#include "network/net_message/PacketGenerator.h"
 
 // 初始化静态实例指针
 NetworkManager *NetworkManager::instance = nullptr;
@@ -53,8 +56,8 @@ void NetworkManager::initNetworkManager() {
 
 
 /**
- * 实现Subscriber接口要求的update方法。
  * 将温湿度等数据实时传送到服务器。
+ * 有新消息时执行特定任务
  * @param message 收到的消息
  * @param messageType 收到的消息类型，int类型号
  */
@@ -63,8 +66,13 @@ void NetworkManager::update(const Message &message, int messageType) {
 
     switch (messageType) {
         case TASK_SCHEDULER_READY:
-            // 负责上传数据到云平台，此过程由NetworkManager层进行。
-            TaskScheduler::getInstance().addTask([this]() { this->uploadDataToPlatform(true); },
+            // 负责上传温湿度数据到云平台，此过程由NetworkManager层进行。
+            TaskScheduler::getInstance().addTask([this]() { this->uploadDhtDataToPlatform(true); },
+                                                 ProjectConfig::UPLOAD_DATA_TIME);
+            // 延时2s来避免碰撞
+            delay(2000);
+            // 负责上传光照数据到云平台，此过程由NetworkManager层进行。
+            TaskScheduler::getInstance().addTask([this]() { this->uploadLightToPlatform(true); },
                                                  ProjectConfig::UPLOAD_DATA_TIME);
             break;
         default:
@@ -81,22 +89,91 @@ bool NetworkManager::parseCommand(const String &command) {
     String trimmedCommand = command;
     trimmedCommand.trim();
 
-    // 解析命令并执行相应的操作
-    if (trimmedCommand.startsWith("upload")) {
-        // 调用这个类中的parseCommand方法，对命令进行进一步解析，如果还有子层级的命令，则向下分发
-        // FIXME
-        // return dispatchCommand(trimmedCommand, "upload",NetworkDataHandler::getInstance());
+    if (trimmedCommand.length() > 0) {
+        // 如果命令不为空（即含有子层级的命令），递交给其子类处理
+        return dispatchCommand(trimmedCommand, "", this);
     } else {
-        // 未知命令
-        dataManager->logData("Unknown command in Network Manager: " + trimmedCommand, true);
+        // 如果命令为空，返回false
+        return false;
     }
-    return false;
 }
+
 
 // 具体解析是哪个负责执行命令，派发给相应的监听器
 bool NetworkManager::dispatchCommand(String &command, const String &tag, CommandListener *listener) {
-    return false;
+    // 删除命令前的所有空格
+    command.trim();
+
+    // 执行有-的子命令并且处理参数
+    if (command.startsWith("-")) {
+        // 去掉命令开头的"-"，以保留"net "的格式
+        String processedCommand = command.substring(1);
+
+        if (processedCommand.startsWith("ping")) {
+            // 构建信息
+            String message = PacketGenerator::ping();
+            // 发送ping消息
+            networkDataHandler->sendData(message);
+
+            dataManager->logData("Ping Datagram Sent", true);
+            // 接收pong消息,由PacketParser处理
+            ///FINISH
+        }else if (processedCommand.startsWith("dht")) {
+                // 构建信息
+                String message = PacketGenerator::generateTemperatureHumidityMessage();
+                // 发送温湿度数据消息
+                networkDataHandler->sendData(message);
+
+                dataManager->logData("Uploading temperature humidity Command executed", true);
+                ///FINISH
+        }else if (processedCommand.startsWith("light")) {
+            // 构建信息
+            String message = PacketGenerator::generateLightMessage();
+            // 发送光照、电机等等消息
+            networkDataHandler->sendData(message);
+
+            dataManager->logData("Uploading light data Command executed", true);
+            ///FINISH
+
+            /// 上传云平台裸数据命令
+        } else if (processedCommand.startsWith("uploadRaw")) {
+            // 假设正确的字符串processedCommand目前是"upload "data""
+
+            // 找到第一个双引号，然后加1跳过它
+            int start = processedCommand.indexOf('"') + 1;
+
+            // 如果没有找到双引号，indexOf 返回-1，加1后变为0
+            if (start == 0) {
+                // 没有找到双引号，返回空字符串
+                return "";
+            }
+
+            // 从start开始找下一个双引号
+            int end = processedCommand.indexOf('"', start);
+            if (end == -1) {
+                // 如果没有找到第二个双引号，返回空字符串
+                return "";
+            }
+
+            // 找到要上传的内容，提取并返回两个双引号之间的内容
+            String data = processedCommand.substring(start, end);
+
+            networkDataHandler->sendData(data);
+
+        } else {
+            // 未知命令
+            dataManager->logData("Invalid command parameter in Network Manager: " + processedCommand, true);
+            return false;
+        }
+    }
+
+    // 不继续向下处理
+    return true;
 }
+
+
+
+
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------
@@ -186,18 +263,24 @@ void NetworkManager::setConnectionStatus(ConnectionStatus status) {
     Serial.flush();
 }
 
-// 上传数据到云平台
-bool NetworkManager::uploadDataToPlatform(bool enable) {
+// 上传温湿度数据到云平台
+bool NetworkManager::uploadDhtDataToPlatform(bool enable) {
     if (!enable) return false;
 
-    char c[100];
-    // sprintf 在 Arduino 中无法转换浮点数
-    dtostrf(dataManager->temperature, 2, 2, c);
-    dtostrf(dataManager->humidity, 2, 2, c + 5);
-    // 保存打印数据到本地
-    dataManager->logData("Uploading:" + String(c), true);
-
-    // 调用数据收发类收发数据
-    return networkDataHandler->sendData(c);
+    // 获取数据并且编码成JSON格式
+    String data = PacketGenerator::generateTemperatureHumidityMessage();
+    // 发送数据
+    return networkDataHandler->sendData(data);
 }
+
+// 上传光照数据到云平台
+bool NetworkManager::uploadLightToPlatform(bool enable) {
+    if (!enable) return false;
+
+    // 获取数据并且编码成JSON格式
+    String data = PacketGenerator::generateLightMessage();
+    // 发送数据
+    return networkDataHandler->sendData(data);
+}
+
 

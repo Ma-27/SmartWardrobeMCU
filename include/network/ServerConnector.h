@@ -14,9 +14,13 @@
 #include "Arduino.h"
 #include "data/DataManager.h"
 #include "hardware_abstraction/display/DisplayManager.h"
+#include "network/NetworkDataHandler.h"
+#include "network/net_message/NetworkPacketType.h"
 
 class DataManager; // 前向声明
 class DisplayManager;
+
+class NetworkDataHandler;
 
 
 class ServerConnector {
@@ -28,6 +32,8 @@ private:
     DataManager *dataManager;
 
     DisplayManager *displayManager;
+
+    NetworkDataHandler *networkDataHandler;
 
     // 私有构造函数，遵循单例模式
     ServerConnector();

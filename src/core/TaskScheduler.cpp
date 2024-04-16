@@ -40,7 +40,7 @@ TaskScheduler::~TaskScheduler() {
  @param interval: 任务执行的时间间隔（毫秒）。
  @return taskId: 这个任务的ID。
  */
-int TaskScheduler::addTask(TaskCallback callback, unsigned long interval) {
+int TaskScheduler::addTask(TaskCallback callback, unsigned long interval, TaskType type, int priority) {
     // 确保当前任务数量没有超出容量。
     if (taskCount < capacity) {
         // 为新任务设置回调函数、间隔和最后运行时间。
@@ -48,6 +48,9 @@ int TaskScheduler::addTask(TaskCallback callback, unsigned long interval) {
         tasks[taskCount].callback = callback;
         tasks[taskCount].interval = interval;
         tasks[taskCount].lastRun = millis(); // 使用Arduino的millis()函数获取当前时间。
+        tasks[taskCount].type = type;
+        tasks[taskCount].state = READY;  // 新任务默认为就绪状态
+        tasks[taskCount].priority = priority;
         taskCount++; // 增加已注册任务的数量。
     }
 
@@ -90,10 +93,20 @@ void TaskScheduler::run() {
     // 获取当前机器已经运行的时间。
     unsigned long currentMillis = millis();
     for (unsigned int i = 0; i < taskCount; i++) {
-        // 检查是否到达任务执行的时间。
-        if (currentMillis - tasks[i].lastRun >= tasks[i].interval) {
-            tasks[i].callback(); // 执行任务的回调函数。
+        // 仅当任务处于就绪状态，且达到执行时间时，才执行任务
+        if (tasks[i].state == READY && currentMillis - tasks[i].lastRun >= tasks[i].interval) {
+            // 如果是不可抢占式任务，设置其状态为运行中
+            if (tasks[i].type == NON_PREEMPTIVE) {
+                tasks[i].state = RUNNING;
+            }
+
+            tasks[i].callback();  // 执行任务
             tasks[i].lastRun = currentMillis; // 更新任务的最后运行时间。
+
+            // 不可抢占式任务执行完毕后，将状态设回就绪
+            if (tasks[i].type == NON_PREEMPTIVE) {
+                tasks[i].state = READY;
+            }
         }
     }
 }

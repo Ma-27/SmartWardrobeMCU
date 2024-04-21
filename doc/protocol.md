@@ -133,7 +133,7 @@ Arduino会向服务器发送以下报文格式：
 
 
 
-#### 6.  上传灯光数据
+#### 4.  上传灯光数据
 
 此报文旨在每30秒向服务器上报一次灯光状态数据，报文格式如下：
 
@@ -315,6 +315,51 @@ Arduino 应该尽快向服务器返回符合要求的数据。返回数据的格
   }
 }
 ```
+
+
+
+#### 6. 命令报文
+
+##### 1. 开启/关闭灯光控制命令
+
+当服务器需要控制智能衣柜的灯光开关时，它会发送一个具体指定操作的命令报文。这个报文通过`action`字段明确指示灯光的预期状态，如`"turn_on"`或`"turn_off"`。
+
+```json
+{
+  "device_id": 1,
+  "from": 0,
+  "packet_type": "Command",
+  "command": "Light-Manuel",
+  "action": "turn_on",  // 可替换为 "turn_off" 以关闭灯光
+  "remark": "Command to turn on the light"  // 描述信息也应相应更改为 "turn off"
+}
+```
+
+##### 2. 自动灯光控制命令
+
+服务器也可以下发命令，要求Arduino设备根据环境光照或其他传感器输入自动控制灯光。这类命令通过`action`字段指示设备启用或禁用自动控制功能。
+
+```json
+{
+  "device_id": 1,
+  "from": 0,
+  "packet_type": "Command",
+  "command": "Auto-Light-Control",
+  "action": "enable",  // 可替换为 "disable" 以禁用自动灯光控制
+  "remark": "Command to enable automatic light control"// 描述信息也应相应更改为 "disable"
+}
+```
+
+##### 报文说明
+
+- **device_id**: 设备的唯一标识符，确保命令发送到正确的设备。
+- **from**: 发送者的标识符，这里固定为 `0` 表示来自服务器。
+- **packet_type**: 报文类型，这里固定为 `"Command"`，表示这是一个控制命令报文。
+- **command**: 指定命令的种类，如 `"Light-Manuel"` 或 `"Auto-Light-Control"`。
+- **action**: 具体的操作指令，如 `"turn_on"`、`"turn_off"`、`"enable"` 或 `"disable"`。
+- **remark**: 对命令的额外描述，便于日志记录和问题追踪。
+
+
 
 
 

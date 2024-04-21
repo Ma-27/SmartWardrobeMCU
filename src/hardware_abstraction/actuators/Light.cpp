@@ -75,6 +75,9 @@ bool Light::dispatchCommand(String &command, const String &tag, CommandListener 
     } else if (processedCommand.startsWith("auto")) {
         // 自动调节亮度
         isAutoControl = true;
+    } else if (processedCommand.startsWith("manuel")) {
+        // 自动调节亮度
+        isAutoControl = false;
     } else if (processedCommand.startsWith("v")) {
         // 根据命令调节亮度
         isAutoControl = false;

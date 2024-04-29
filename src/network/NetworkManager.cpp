@@ -67,12 +67,12 @@ void NetworkManager::update(const Message &message, int messageType) {
     switch (messageType) {
         case TASK_SCHEDULER_READY:
             // 负责上传温湿度数据到云平台，此过程由NetworkManager层进行。
-            TaskScheduler::getInstance().addTask([this]() { this->uploadDhtDataToPlatform(true); },
+            TaskScheduler::getInstance().addTask([this]() { this->uploadDhtDataToPlatform(false); },
                                                  ProjectConfig::UPLOAD_DATA_TIME);
             // 延时2s来避免碰撞
             delay(2000);
             // 负责上传光照数据到云平台，此过程由NetworkManager层进行。
-            TaskScheduler::getInstance().addTask([this]() { this->uploadLightToPlatform(true); },
+            TaskScheduler::getInstance().addTask([this]() { this->uploadLightToPlatform(false); },
                                                  ProjectConfig::UPLOAD_DATA_TIME);
             break;
         default:

@@ -346,7 +346,7 @@ Arduino 应该尽快向服务器返回符合要求的数据。返回数据的格
   "packet_type": "Command",
   "command": "Auto-Light-Control",
   "action": "enable",  // 可替换为 "disable" 以禁用自动灯光控制
-  "remark": "Command to enable automatic light control"// 描述信息也应相应更改为 "disable"
+  "remark": "Command to enable automatic light control"
 }
 ```
 
@@ -358,6 +358,46 @@ Arduino 应该尽快向服务器返回符合要求的数据。返回数据的格
 - **command**: 指定命令的种类，如 `"Light-Manuel"` 或 `"Auto-Light-Control"`。
 - **action**: 具体的操作指令，如 `"turn_on"`、`"turn_off"`、`"enable"` 或 `"disable"`。
 - **remark**: 对命令的额外描述，便于日志记录和问题追踪。
+
+
+
+##### 3.温度控制命令
+
+服务器下发命令，设定智能衣柜的目标温度，并且输入用户是否启用。这类命令通过`action`字段指示设备启用或禁用自动控制功能。
+
+```json
+{
+  "device_id": 1,
+  "from": 0,
+  "packet_type": "Command",
+  "command": "Temperature-Control",
+  "action": "enable",  // 可替换为 "disable" 以禁用自动温湿度控制
+  "target" : 18,  // 控制的目标温度
+  "remark": "Command to set the target temperaute"
+}
+```
+
+报文说明同上。
+
+##### 4.湿度控制命令
+
+服务器下发命令，设定智能衣柜的目标湿度，并且输入用户是否启用。这类命令通过`action`字段指示设备启用或禁用自动控制功能。
+
+```json
+{
+  "device_id": 1,
+  "from": 0,
+  "packet_type": "Command",
+  "command": "Humidity-Control",
+  "action": "enable",  // 可替换为 "disable" 以禁用自动温湿度控制
+  "target" : 52,  // 控制的目标温度
+  "remark": "Command to set the target humidity"
+}
+```
+
+报文说明同上。
+
+
 
 
 

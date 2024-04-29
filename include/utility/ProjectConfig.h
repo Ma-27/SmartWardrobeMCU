@@ -25,6 +25,9 @@ public:
     // 更新温湿度数据的频率,单位为ms
     static const int UPDATE_DHT_TIME = 100;
 
+    /// 控制温湿度数据的频率,单位为ms。注意，这个时间是可以动态修改的。采用PID算法，在算法中会改动
+    static const int CONTROL_DHT_TIME = 250;
+
     /// 更新各种指标的频率为立即更新，没有延迟,单位为ms
     static const int NO_INTERVAL = 0;
 
@@ -86,6 +89,12 @@ public:
 
     // 用于存储从服务器接收到的数据，(设置为1.5KB。因为服务器返回的数据最多为1KB)
     static const int BUFFER_SIZE = 1536; // 1.5KB
+
+    // 湿度控制器(增加湿度）的线使用Arduino的4号引脚
+    static const int HUMID_INCREASE_CONTROL_PIN = 4;
+
+    // 湿度控制器(降低湿度）的线使用Arduino的5号引脚
+    static const int HUMID_DECREASE_CONTROL_PIN = 5;
 };
 
 #endif // PROJECT_CONFIG_H

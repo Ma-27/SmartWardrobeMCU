@@ -12,6 +12,8 @@
 
 21 SCL-SCL LED
 
+4 湿度控制器的线。
+
 // 光敏电阻连接的模拟输入引脚
 static const int lightSensorPin = A0;
 

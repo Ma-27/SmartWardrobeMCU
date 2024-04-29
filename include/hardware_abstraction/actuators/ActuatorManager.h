@@ -1,5 +1,5 @@
 /**
- * @description: 执行器管理器** (`ActuatorManager`)
+ * @description: 执行器管理器** (`ActuatorManager`)。这里负责管理各个能够执行具体任务的器件。这里也充当控制算法的所在地，这里负责控制执行器的自动逻辑，比如自动温湿度等等。
  * @author: Mamh
  * @email: mamhsl@163.com
  * @date: 2024/2/2 上午 11:26
@@ -14,6 +14,8 @@
 #include "hardware_abstraction/actuators/Light.h"
 #include "data/pub-sub/Subscriber.h"
 #include "core/CommandListener.h"
+#include "Humidifier.h"
+#include "Dehumidifier.h"
 
 class SerialManager;
 
@@ -47,7 +49,19 @@ private:
     // 灯光控制类
     Light *light;
 
+    // 加湿器控制类
+    Humidifier *humidifier;
+
+    // 干燥器控制类
+    Dehumidifier *dehumidifier;
+
     DataManager *dataManager;
+
+    // 自动控制温度,这个方法由调度器调度
+    void autoControlTemperature(boolean enabled);
+
+    // 自动控制湿度,这个方法由调度器调度
+    void autoControlHumidity(boolean enabled);
 
 public:
     // 删除拷贝构造函数和赋值操作符，确保单例的唯一性

@@ -8,6 +8,8 @@
 #include "hardware_abstraction/actuators/ActuatorManager.h"
 #include "hardware_abstraction/actuators/Humidifier.h"
 #include "hardware_abstraction/actuators/Dehumidifier.h"
+#include "hardware_abstraction/actuators/Cooler.h"
+#include "hardware_abstraction/actuators/Heater.h"
 
 // 初始化静态实例指针
 ActuatorManager *ActuatorManager::instance = nullptr;
@@ -53,6 +55,9 @@ void ActuatorManager::initActuatorManager() {
     // 订阅调度器准备好了的消息。准备好了之后就添加各种自动控制的任务到调度器一直调度。
     eventManager->subscribe(TASK_SCHEDULER_READY, this);
 
+    // 初始化数据管理器
+    dataManager = DataManager::getInstance();
+
     // 初始化灯光控制类
     light = Light::getInstance();
 
@@ -62,8 +67,11 @@ void ActuatorManager::initActuatorManager() {
     // 初始化干燥器
     dehumidifier = Dehumidifier::getInstance();
 
-    // 初始化数据管理器
-    dataManager = DataManager::getInstance();
+    // 初始化冷却器
+    cooler = Cooler::getInstance();
+
+    // 初始化加热器
+    heater = Heater::getInstance();
 }
 
 /**
@@ -112,6 +120,12 @@ bool ActuatorManager::parseCommand(const String &command) {
     } else if (trimmedCommand.startsWith("dehumidify")) {
         // 如果这是一个降湿器的命令
         return dispatchCommand(trimmedCommand, "dehumidify", Dehumidifier::getInstance());
+    } else if (trimmedCommand.startsWith("cool")) {
+        // 如果这是一个降温器的命令
+        return dispatchCommand(trimmedCommand, "cool", Cooler::getInstance());
+    } else if (trimmedCommand.startsWith("heat")) {
+        // 如果这是一个加热器的命令
+        return dispatchCommand(trimmedCommand, "heat", Heater::getInstance());
     } else {
         // 未知命令
         dataManager->logData("Unknown command in Actuator Manager: " + trimmedCommand, true);
@@ -188,19 +202,19 @@ void ActuatorManager::autoControlTemperature(boolean enabled) {
         lastErrorTemp = error;
         lastTimeTemp = now;
 
-        // 控制加热器和冷却器的PWM
-        if (output > 0) {
+        // 控制加热器和冷却器的PWM。输出正值需要加热，输出负值需要冷却，输出为0则关闭加热器和冷却器。如果到达阈值，则不控制了。
+        if (output > 1) {
             // 打开加热器
-            // TODO LATER IMPLEMENT
-
+            heater->turnOn();
             // 设置冷却器的PWM值,关闭冷却器
-            // cooler->speedControl(0);
-        } else {
+            cooler->speedControl(0);
+        } else if (output < 1) {
             // 关闭加热器
-            // TODO
-
+            heater->turnOff();
             // 设置冷却器的PWM值，输出取反
-            // cooler->speedControl((int) -output);
+            cooler->speedControl((int) -output);
+        } else {
+            // DO NOTHING
         }
     }
 }

@@ -38,8 +38,6 @@ void CoreController::init() {
     DataChangeListener *dataChangeListener = DataChangeListener::getInstance();
     dataChangeListener->subscribeDataChange();
 
-
-    /*
     /// 连接网络。
     bool result = connectToWifi();
 
@@ -51,8 +49,6 @@ void CoreController::init() {
 
     // 返回连接结果,1表示成功，0表示失败。
     data->logData(String(result), false);
-
-*/
 
 
     /** 接下来的是任务调度，到了规定时间间隔后执行任务。这是不可抢占的

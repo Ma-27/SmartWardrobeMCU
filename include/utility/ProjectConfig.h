@@ -95,6 +95,12 @@ public:
 
     // 湿度控制器(降低湿度）的线使用Arduino的5号引脚
     static const int HUMID_DECREASE_CONTROL_PIN = 5;
+
+    // 温度控制器(降温风扇）的线使用Arduino的6号引脚
+    static const int COOL_CONTROL_PIN = 6;
+
+    // 温度控制器(增温热发生器）的线使用Arduino的7号引脚
+    static const int HEAT_CONTROL_PIN = 7;
 };
 
 #endif // PROJECT_CONFIG_H

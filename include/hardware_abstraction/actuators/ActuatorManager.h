@@ -16,6 +16,8 @@
 #include "core/CommandListener.h"
 #include "Humidifier.h"
 #include "Dehumidifier.h"
+#include "Heater.h"
+#include "Cooler.h"
 
 class SerialManager;
 
@@ -55,6 +57,13 @@ private:
     // 干燥器控制类
     Dehumidifier *dehumidifier;
 
+    // 冷却器控制类
+    Cooler *cooler;
+
+    // 加热器控制类
+    Heater *heater;
+
+    // 数据管理器
     DataManager *dataManager;
 
     // 自动控制温度,这个方法由调度器调度

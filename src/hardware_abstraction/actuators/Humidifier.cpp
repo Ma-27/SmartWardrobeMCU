@@ -31,12 +31,12 @@ void Humidifier::initHumidifier() {
 
 // 控制加湿喷雾器开启
 void Humidifier::turnOn() {
-    // 设置加湿器的数字引脚为高电平
+    // 设置加湿器的数字引脚为高电平（电路设计问题，使用了一个三极管）
     digitalWrite(ProjectConfig::HUMID_INCREASE_CONTROL_PIN, HIGH);
 }
 
 void Humidifier::turnOff() {
-    // 设置加湿器的数字引脚为低电平
+    // 设置加湿器的数字引脚为低电平（电路设计问题，使用了一个三极管）
     digitalWrite(ProjectConfig::HUMID_INCREASE_CONTROL_PIN, LOW);
 }
 

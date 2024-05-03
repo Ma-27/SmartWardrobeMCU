@@ -101,6 +101,27 @@ public:
 
     // 温度控制器(增温热发生器）的线使用Arduino的7号引脚
     static const int HEAT_CONTROL_PIN = 7;
+
+    // 舵机控制引脚
+    static const int SERVO_PIN = 10;
+
+    // 舵机开启时应该转到的角度
+    static const int SERVO_ON_DEGREE = 90;
+
+    // 舵机关闭时应该转到的角度
+    static const int SERVO_OFF_DEGREE = 0;
+
+    // 步进电机控制引脚1
+    static const int MOTOR_IN1 = 24;
+
+    // 步进电机控制引脚2
+    static const int MOTOR_IN2 = 25;
+
+    // 步进电机控制引脚3
+    static const int MOTOR_IN3 = 26;
+
+    // 步进电机控制引脚4
+    static const int MOTOR_IN4 = 27;
 };
 
 #endif // PROJECT_CONFIG_H

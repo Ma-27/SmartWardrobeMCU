@@ -72,6 +72,9 @@ void ActuatorManager::initActuatorManager() {
 
     // 初始化加热器
     heater = Heater::getInstance();
+
+    // 初始化晾衣架
+    hanger = ShelfManager::getInstance();
 }
 
 /**
@@ -87,9 +90,9 @@ void ActuatorManager::update(const Message &message, int messageType) {
 
             // 负责自动控制温湿度。由于温湿度控制器都在这里，所以不需要HardwareAbstraction控制。
             TaskScheduler::getInstance().addTask([this]() { this->autoControlTemperature(true); },
-                                                 ProjectConfig::CONTROL_DHT_TIME);
+                                                 ProjectConfig::SMALL_INTERVAL);
             TaskScheduler::getInstance().addTask([this]() { this->autoControlHumidity(true); },
-                                                 ProjectConfig::CONTROL_DHT_TIME);
+                                                 ProjectConfig::SMALL_INTERVAL);
             break;
         default:
             // DO NOTHING
@@ -126,7 +129,10 @@ bool ActuatorManager::parseCommand(const String &command) {
     } else if (trimmedCommand.startsWith("heat")) {
         // 如果这是一个加热器的命令
         return dispatchCommand(trimmedCommand, "heat", Heater::getInstance());
-    } else {
+    } else if (trimmedCommand.startsWith("shelf")) {
+        // 如果这是一个衣架的命令
+        return dispatchCommand(trimmedCommand, "shelf", ShelfManager::getInstance());
+    }else {
         // 未知命令
         dataManager->logData("Unknown command in Actuator Manager: " + trimmedCommand, true);
         return false;

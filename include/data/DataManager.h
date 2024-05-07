@@ -75,6 +75,12 @@ public:
 
     // 灯光数据的最新更新时间
     long lightUpdateTime = 0;
+
+    // 目标温度
+    float targetTemperature = 18.0f;
+
+    // 目标湿度
+    float targetHumidity = 30.0f;
 };
 
 #endif

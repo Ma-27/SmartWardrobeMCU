@@ -11,7 +11,7 @@
 // 初始化静态实例指针
 CommandManager *CommandManager::instance = nullptr;
 
-// 提供一个公共的访问方法
+// 提供一个公共的访问方法c
 CommandManager *CommandManager::getInstance() {
     if (instance == nullptr) {
         instance = new CommandManager();

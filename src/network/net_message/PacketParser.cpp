@@ -47,6 +47,9 @@ void PacketParser::initializeHandlerMap() {
 
     // 处理设备登录确认报文，并且做一些配置工作
     handlerMap["Register-Ack"] = [this](const JsonObject &doc) { this->handleRegisterAck(doc); };
+
+    // 处理接收到的命令报文
+    handlerMap["Command"] = [this](const JsonObject &doc) { this->handleCommand(doc); };
 }
 
 
@@ -194,5 +197,53 @@ bool PacketParser::handleRegisterAck(const JsonObject &doc) {
         return false;
     }
 }
+
+
+// 处理接收到的命令报文
+bool PacketParser::handleCommand(const JsonObject &doc) {
+    DataManager *dataManager = DataManager::getInstance();
+    // 命令类型
+    String commandType = doc["command"];
+    // 操作指令
+    String action = doc["action"];
+    // 备注信息
+    String remark = doc["remark"];
+
+    // 记录收到的命令和操作
+    dataManager->logData("Received command: " + commandType + ", Action: " + action, true);
+    dataManager->logData("Remark: " + remark, true);
+
+    // 根据命令类型和操作指令执行相应操作
+    if (commandType == "Light-Manuel") {
+        if (action == "turn_on") {
+            // 调用相应函数开启灯光
+            dataManager->logData("Turning on the light as per command.", true);
+            // 使用CommandManager去调度执行命令
+            CommandManager::getInstance()->parseCommand("act light -on");
+        } else if (action == "turn_off") {
+            // 调用相应函数关闭灯光
+            dataManager->logData("Turning off the light as per command.", true);
+            CommandManager::getInstance()->parseCommand("act light -off");
+        }
+        return true;
+
+    } else if (commandType == "Auto-Light-Control") {
+        if (action == "enable") {
+            // 启用自动灯光控制
+            dataManager->logData("Enabling automatic light control.", true);
+            CommandManager::getInstance()->parseCommand("act light -auto");
+        } else if (action == "disable") {
+            // 禁用自动灯光控制
+            dataManager->logData("Disabling automatic light control.", true);
+            CommandManager::getInstance()->parseCommand("act light -manuel");
+        }
+        return true;
+    }
+
+    // 如果没有匹配的命令类型，记录错误并返回false
+    dataManager->logData("Unrecognized command type.", true);
+    return false;
+}
+
 
 

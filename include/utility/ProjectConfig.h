@@ -25,6 +25,9 @@ public:
     // 更新温湿度数据的频率,单位为ms
     static const int UPDATE_DHT_TIME = 100;
 
+    /// 控制温湿度数据的频率,单位为ms。注意，这个时间是可以动态修改的。采用PID算法，在算法中会改动
+    static const int CONTROL_DHT_TIME = 250;
+
     /// 更新各种指标的频率为立即更新，没有延迟,单位为ms
     static const int NO_INTERVAL = 0;
 
@@ -56,8 +59,8 @@ public:
 
     // FIXME
     // 定义WiFi名称和密码为静态成员变量
-#define WIFI_SSID "mamh"
-#define WIFI_PASSWORD "mamh2015"
+#define WIFI_SSID "306-18G"
+#define WIFI_PASSWORD "cqupt306?"
 
     // FIXME
     // 连接到OneNetIot平台的私人秘钥
@@ -86,6 +89,39 @@ public:
 
     // 用于存储从服务器接收到的数据，(设置为1.5KB。因为服务器返回的数据最多为1KB)
     static const int BUFFER_SIZE = 1536; // 1.5KB
+
+    // 湿度控制器(增加湿度）的线使用Arduino的4号引脚
+    static const int HUMID_INCREASE_CONTROL_PIN = 4;
+
+    // 湿度控制器(降低湿度）的线使用Arduino的5号引脚
+    static const int HUMID_DECREASE_CONTROL_PIN = 5;
+
+    // 温度控制器(降温风扇）的线使用Arduino的6号引脚
+    static const int COOL_CONTROL_PIN = 6;
+
+    // 温度控制器(增温热发生器）的线使用Arduino的7号引脚
+    static const int HEAT_CONTROL_PIN = 7;
+
+    // 舵机控制引脚
+    static const int SERVO_PIN = 10;
+
+    // 舵机开启时应该转到的角度
+    static const int SERVO_ON_DEGREE = 90;
+
+    // 舵机关闭时应该转到的角度
+    static const int SERVO_OFF_DEGREE = 0;
+
+    // 步进电机控制引脚1
+    static const int MOTOR_IN1 = 24;
+
+    // 步进电机控制引脚2
+    static const int MOTOR_IN2 = 25;
+
+    // 步进电机控制引脚3
+    static const int MOTOR_IN3 = 26;
+
+    // 步进电机控制引脚4
+    static const int MOTOR_IN4 = 27;
 };
 
 #endif // PROJECT_CONFIG_H

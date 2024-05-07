@@ -51,8 +51,6 @@ void CoreController::init() {
     data->logData(String(result), false);
 
 
-
-
     /** 接下来的是任务调度，到了规定时间间隔后执行任务。这是不可抢占的
     比如说，使用Lambda表达式安排updateTemperatureAndHumidity作为任务， 更新温湿度
     但是各个任务被设计为分布式的初始化，它们注册的话，需要pub-sub模式。Controller通知各个订阅者TASK_SCHEDULER_READY，订阅者就应该将各个任务注册到任务调度器中。

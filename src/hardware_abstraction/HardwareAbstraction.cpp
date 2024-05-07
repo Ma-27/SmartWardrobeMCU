@@ -68,7 +68,7 @@ void HardwareAbstraction::update(const Message &message, int messageType) {
             break;
         default:
             // DO NOTHING
-            dataManager->logData("init message error(task scheduler)", true);
+            dataManager->logData("init message error(hardware abstraction)", true);
     }
 }
 

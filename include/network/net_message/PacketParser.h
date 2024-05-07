@@ -61,6 +61,9 @@ private:
 
     // 处理注册确认报文
     bool handleRegisterAck(const JsonObject &doc);
+
+    // 处理命令报文
+    bool handleCommand(const JsonObject &doc);
 };
 
 #endif // PacketParser_h

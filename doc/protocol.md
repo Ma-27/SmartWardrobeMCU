@@ -133,7 +133,7 @@ Arduino会向服务器发送以下报文格式：
 
 
 
-#### 6.  上传灯光数据
+#### 4.  上传灯光数据
 
 此报文旨在每30秒向服务器上报一次灯光状态数据，报文格式如下：
 
@@ -162,6 +162,32 @@ Arduino会向服务器发送以下报文格式：
   - **measure_time**: 数据测量时的时间戳。
 - **runtime**: 自设备启动以来的运行时间（毫秒），用于追踪报文发送的相对时间。
 
+
+
+#### 4.  上传执行器数据
+
+此报文旨在每30秒向服务器上报一次执行器数据，比如，加热片工作状态、衣架机械臂的位置和机械臂的开闭状态。以机械臂为例，报文格式如下：
+
+```json
+{
+  "device_id": 1,
+  "from": 1,
+  "packet_type": "Actuator",
+  "data": {
+    "mechine_arm_open": false,
+    "mechine_arm_position": 1
+  },
+  "runtime": 405730
+}
+```
+
+- **device_id**: 设备标识符，用于标识发送报文的设备。
+- **from**: 发送源的标识符，通常与 `device_id` 相同。
+- **packet_type**: 报文类型，此处为 `"Actuator"` 代表这个和执行器的部件有关。
+- **data**: 包含具体数据的对象。
+  - **mechine_arm_open**: 机械臂是否开启。机械臂开启指的是机械臂的位置是否处于拾取状态，还是非拾取状态（默认状态）。
+  - **mechine_arm_position**: 机械臂的位置，用于追踪当前机械臂跟踪的哪个衣服。机械臂需要对相应的衣服进行操作
+- **runtime**: 自设备启动以来的运行时间（毫秒），用于追踪报文发送的相对时间。
 
 
 ------
@@ -315,6 +341,91 @@ Arduino 应该尽快向服务器返回符合要求的数据。返回数据的格
   }
 }
 ```
+
+
+
+#### 6. 命令报文
+
+##### 1. 开启/关闭灯光控制命令
+
+当服务器需要控制智能衣柜的灯光开关时，它会发送一个具体指定操作的命令报文。这个报文通过`action`字段明确指示灯光的预期状态，如`"turn_on"`或`"turn_off"`。
+
+```json
+{
+  "device_id": 1,
+  "from": 0,
+  "packet_type": "Command",
+  "command": "Light-Manuel",
+  "action": "turn_on",  // 可替换为 "turn_off" 以关闭灯光
+  "remark": "Command to turn on the light"  // 描述信息也应相应更改为 "turn off"
+}
+```
+
+##### 2. 自动灯光控制命令
+
+服务器也可以下发命令，要求Arduino设备根据环境光照或其他传感器输入自动控制灯光。这类命令通过`action`字段指示设备启用或禁用自动控制功能。
+
+```json
+{
+  "device_id": 1,
+  "from": 0,
+  "packet_type": "Command",
+  "command": "Auto-Light-Control",
+  "action": "enable",  // 可替换为 "disable" 以禁用自动灯光控制
+  "remark": "Command to enable automatic light control"
+}
+```
+
+##### 报文说明
+
+- **device_id**: 设备的唯一标识符，确保命令发送到正确的设备。
+- **from**: 发送者的标识符，这里固定为 `0` 表示来自服务器。
+- **packet_type**: 报文类型，这里固定为 `"Command"`，表示这是一个控制命令报文。
+- **command**: 指定命令的种类，如 `"Light-Manuel"` 或 `"Auto-Light-Control"`。
+- **action**: 具体的操作指令，如 `"turn_on"`、`"turn_off"`、`"enable"` 或 `"disable"`。
+- **remark**: 对命令的额外描述，便于日志记录和问题追踪。
+
+
+
+##### 3.温度控制命令
+
+服务器下发命令，设定智能衣柜的目标温度，并且输入用户是否启用。这类命令通过`action`字段指示设备启用或禁用自动控制功能。
+
+```json
+{
+  "device_id": 1,
+  "from": 0,
+  "packet_type": "Command",
+  "command": "Temperature-Control",
+  "action": "enable",  // 可替换为 "disable" 以禁用自动温湿度控制
+  "target" : 18,  // 控制的目标温度
+  "remark": "Command to set the target temperaute"
+}
+```
+
+报文说明同上。
+
+##### 4.湿度控制命令
+
+服务器下发命令，设定智能衣柜的目标湿度，并且输入用户是否启用。这类命令通过`action`字段指示设备启用或禁用自动控制功能。
+
+```json
+{
+  "device_id": 1,
+  "from": 0,
+  "packet_type": "Command",
+  "command": "Humidity-Control",
+  "action": "enable",  // 可替换为 "disable" 以禁用自动温湿度控制
+  "target" : 52,  // 控制的目标温度
+  "remark": "Command to set the target humidity"
+}
+```
+
+报文说明同上。
+
+
+
+
 
 
 

@@ -80,7 +80,7 @@
 |   |   |   |-- Humidifier
 |   |   |   |-- DeHumidifier
 |   |   |   |-- Light
-|   |   |   |-- GarmentHangerManager    // 衣架控制类
+|   |   |   |-- ShelfManager            // 衣架控制类
 |   |-- /network
 |   |   |-- NetworkManager
 |   |   |-- NetworkDataHandler          // 处理接收到的数据
@@ -92,7 +92,13 @@
 |   |-- /data
 |   |   |-- DataManager
 |   |   |-- SerialManager
-|   |   |-- EventManager
+|   |   |-- /pub-sub
+|   |   |   |-- EventManager
+|   |   |   |-- Message
+|   |   |   |-- Subscriber
+|   |   |-- /cloth
+|   |   |   |-- Cloth
+|   |   |   |-- ClothManager
 |   |-- /utility
 |   |   |-- Utility
 |-- README.md

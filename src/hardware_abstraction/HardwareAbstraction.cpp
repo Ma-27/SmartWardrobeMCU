@@ -60,11 +60,11 @@ void HardwareAbstraction::update(const Message &message, int messageType) {
 
             // 负责更新温湿度，此过程由HardwareAbstraction层进行。
             TaskScheduler::getInstance().addTask([this]() { this->processTemperatureAndHumidity(true); },
-                                                 ProjectConfig::UPDATE_DHT_TIME);
+                                                 ProjectConfig::UPDATE_DHT_TIME, "update temperature and humidity data by sensor");
 
             // 负责根据光照强度控制灯，此过程由HardwareAbstraction层进行。
             TaskScheduler::getInstance().addTask([this]() { this->processLight(Light::getInstance()->isAutoControl); },
-                                                 ProjectConfig::UPDATE_LIGHT_TIME);
+                                                 ProjectConfig::UPDATE_LIGHT_TIME,"control light");
             break;
         default:
             // DO NOTHING

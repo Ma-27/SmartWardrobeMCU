@@ -22,3 +22,10 @@ Out）内存缓冲区，用于存储摄像头捕获的图像数据，使得处�
 | RRST     | 读重置（Read Reset）：用于重置FIFO的读指针。                      |
 | WRST     | 写重置（Write Reset）：用于重置FIFO的写指针。                     |
 | D0-D7    | 数据引脚（Data Pins）：8位并行数据输出引脚，传输图像数据。                 |
+
+### 衣柜机械臂控制
+
+- **SERVO_DEFAULT_ANGLE (-90)**: 舵机在不操作时的默认位置，表示垂直向下的位置。
+- **SERVO_HANG_ON_DEGREE (90)**: 舵机将衣物挂上的最高角度。
+- **SERVO_HANG_OFF_DEGREE (45)**: 舵机取衣物时的预备角度，用于准备接近或离开衣架。
+- **SERVO_MOVE_DEGREE (0)**: 舵机移动时保持此角度来存取取衣物。

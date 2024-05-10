@@ -53,7 +53,7 @@ void Camera::captureImage() {
     // process image。
     TaskScheduler &scheduler = TaskScheduler::getInstance();
     taskID = scheduler.addTask([this]() { this->checkInterruption(true); },
-                               ProjectConfig::CHECK_CAMERA_INTERRUPT_DELAY);
+                               ProjectConfig::CHECK_CAMERA_INTERRUPT_DELAY,"check camera interrupt");
 }
 
 

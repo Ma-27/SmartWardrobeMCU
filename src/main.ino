@@ -19,6 +19,14 @@ void setup() {
     // 将数字引脚13(ledPin)设置为低电平，熄灭LED
     digitalWrite(ProjectConfig::ledPin, LOW);
 
+    // 防止舵机异动
+    pinMode(ProjectConfig::SERVO_PIN, OUTPUT);
+    digitalWrite(ProjectConfig::SERVO_PIN, LOW);
+
+    // 防止加湿器异常工作
+    pinMode(ProjectConfig::HUMID_INCREASE_CONTROL_PIN, OUTPUT);
+    digitalWrite(ProjectConfig::HUMID_INCREASE_CONTROL_PIN, LOW);
+
     // 初始化整个控制器。控制器会将必要的组件全都初始化。
     controller = CoreController::getInstance();
     // 控制器中，各大组件有序进行初始化工作（转控制器）

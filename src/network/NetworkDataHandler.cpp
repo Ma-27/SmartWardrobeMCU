@@ -150,8 +150,8 @@ void NetworkDataHandler::update(const Message &message, int messageType) {
     switch (messageType) {
         case TASK_SCHEDULER_READY:
             // 一直挂起这个接收数据的进程。
-            TaskScheduler::getInstance().addTask([this]() { this->receiveData(true); },
-                                                 ProjectConfig::NO_INTERVAL);
+            TaskScheduler::getInstance().addTask([this]() { this->receiveData(false); },
+                                                 ProjectConfig::NO_INTERVAL,"network receiver");
             break;
         default:
             // DO NOTHING

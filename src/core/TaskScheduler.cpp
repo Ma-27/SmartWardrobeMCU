@@ -6,6 +6,7 @@
  */
 
 #include "core/TaskScheduler.h"
+#include "data/DataManager.h"
 
 // 静态成员变量定义，用于存储TaskScheduler类的唯一实例的指针。
 TaskScheduler *TaskScheduler::instance = nullptr;
@@ -40,7 +41,7 @@ TaskScheduler::~TaskScheduler() {
  @param interval: 任务执行的时间间隔（毫秒）。
  @return taskId: 这个任务的ID。
  */
-int TaskScheduler::addTask(TaskCallback callback, unsigned long interval, TaskType type, int priority) {
+int TaskScheduler::addTask(TaskCallback callback, unsigned long interval, String info, TaskType type, int priority) {
     // 确保当前任务数量没有超出容量。
     if (taskCount < capacity) {
         // 为新任务设置回调函数、间隔和最后运行时间。
@@ -51,6 +52,7 @@ int TaskScheduler::addTask(TaskCallback callback, unsigned long interval, TaskTy
         tasks[taskCount].type = type;
         tasks[taskCount].state = READY;  // 新任务默认为就绪状态
         tasks[taskCount].priority = priority;
+        tasks[taskCount].info = info; // 存储额外的信息
         taskCount++; // 增加已注册任务的数量。
     }
 
@@ -65,47 +67,70 @@ int TaskScheduler::addTask(TaskCallback callback, unsigned long interval, TaskTy
 int TaskScheduler::deleteTask(int id) {
     for (unsigned int i = 0; i < taskCount; i++) {
         if (tasks[i].id == id) {
-            // 找到要删除的任务，从数组中移除它。
-            // 这是通过将后面的任务前移来实现的，覆盖掉要删除的任务。
+            // 在删除任务前，清理可能的额外资源
+            tasks[i].callback = nullptr;  // 清空回调函数指针
+            tasks[i].func = nullptr;      // 清空续接函数指针
+
+            // 找到要删除的任务，从数组中移除它
             for (unsigned int j = i; j < taskCount - 1; j++) {
                 tasks[j] = tasks[j + 1];
             }
-            taskCount--; // 减少任务的总数。
+            taskCount--; // 减少任务的总数
 
-            // 可选：将最后一个任务位置清零，确保不留下悬挂指针或数据。
-            // 注意：这一步不是必须的，因为taskCount已经减少，
-            // 并且未来可能会有新任务覆盖此位置。
+            // 可选：清零最后一个任务位置，避免悬挂指针
             tasks[taskCount].callback = nullptr;
+            tasks[taskCount].func = nullptr;
+            tasks[taskCount].info = "";
             tasks[taskCount].interval = 0;
             tasks[taskCount].lastRun = 0;
+            tasks[taskCount].shouldYield = false;
+            tasks[taskCount].type = NON_PREEMPTIVE;
+            tasks[taskCount].state = READY;
+            tasks[taskCount].priority = 0;
 
             // 由于已经找到并删除了任务，退出循环。
-            return 0;
+            return 0;  // 返回0表示成功删除任务
         }
     }
 
     // 代表未找到任务，删除失败。
-    return -1;
+    return -1;  // 返回-1表示任务未找到
 }
 
 // 执行所有已注册的任务，如果它们的间隔时间已经到了。
 void TaskScheduler::run() {
     // 获取当前机器已经运行的时间。
     unsigned long currentMillis = millis();
+
+    // 检查当前任务是否需要yield
+    if (tasks[currentTaskIndex].shouldYield) {
+        currentTaskIndex = (currentTaskIndex + 1) % taskCount;
+    }
+
     for (unsigned int i = 0; i < taskCount; i++) {
+        unsigned int taskIndex = (i + currentTaskIndex) % taskCount;
+
         // 仅当任务处于就绪状态，且达到执行时间时，才执行任务
-        if (tasks[i].state == READY && currentMillis - tasks[i].lastRun >= tasks[i].interval) {
+        if (tasks[taskIndex].state == READY && currentMillis - tasks[taskIndex].lastRun >= tasks[taskIndex].interval) {
             // 如果是不可抢占式任务，设置其状态为运行中
-            if (tasks[i].type == NON_PREEMPTIVE) {
-                tasks[i].state = RUNNING;
+            if (tasks[taskIndex].type == NON_PREEMPTIVE) {
+                tasks[taskIndex].state = RUNNING;
             }
 
-            tasks[i].callback();  // 执行任务
-            tasks[i].lastRun = currentMillis; // 更新任务的最后运行时间。
+            // 执行任务
+            tasks[taskIndex].callback();
+            // 更新任务的最后运行时间。
+            tasks[taskIndex].lastRun = currentMillis;
 
             // 不可抢占式任务执行完毕后，将状态设回就绪
-            if (tasks[i].type == NON_PREEMPTIVE) {
-                tasks[i].state = READY;
+            if (tasks[taskIndex].type == NON_PREEMPTIVE) {
+                tasks[taskIndex].state = READY;
+            }
+
+            // 如果该任务执行后应该yield，则记录下一个任务的索引
+            if (tasks[taskIndex].shouldYield) {
+                currentTaskIndex = (taskIndex + 1) % taskCount;
+                return;
             }
         }
     }
@@ -115,6 +140,47 @@ void TaskScheduler::run() {
 int TaskScheduler::generateUniqueId() {
     // 增加ID值并返回
     return ++lastId;
+}
+
+// 让出处理机，让其他任务执行
+void TaskScheduler::yield(int taskId, ResumeFunction func) {
+    for (unsigned int i = 0; i < taskCount; i++) {
+        if (tasks[i].id == taskId) {
+            tasks[i].shouldYield = true;
+            tasks[i].func = func;
+            return;
+        }
+    }
+}
+
+// 夺回处理机，并从断点后继续执行
+void TaskScheduler::resume(int taskId) {
+    for (unsigned int i = 0; i < taskCount; i++) {
+        if (tasks[i].id == taskId && tasks[i].shouldYield) {
+            tasks[i].shouldYield = false; // 取消让出处理机的标志
+            tasks[i].func(); // 调用断点后的回调函数，继续执行
+            return;
+        }
+    }
+}
+
+// TaskScheduler类中新增函数，用于打印所有任务信息
+void TaskScheduler::printTaskInfo() {
+    // 初始化数据管理器
+    DataManager *dataManager = DataManager::getInstance();
+    dataManager->logData("----------TASKS----------------", true);
+    // 遍历任务列表并打印每个任务的信息
+    for (unsigned int i = 0; i < taskCount; i++) {
+        dataManager->logData("Task ID: " + String(tasks[i].id), true);
+        dataManager->logData("Task Info: " + String(tasks[i].info), true);
+        dataManager->logData("Task Yield? : " + String(tasks[i].shouldYield), true);
+        dataManager->logData("Task Interval: " + String(tasks[i].interval) + " ms", true);
+        dataManager->logData("Task Last Run: " + String(tasks[i].lastRun) + " ms", true);
+        dataManager->logData("Task State: " + String(tasks[i].state), true);
+        dataManager->logData("Task Priority: " + String(tasks[i].priority), true);
+        // 打印完一个任务的信息后添加一个分隔行
+        dataManager->logData("-------------------------", true);
+    }
 }
 
 

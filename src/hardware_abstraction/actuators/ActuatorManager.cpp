@@ -90,9 +90,9 @@ void ActuatorManager::update(const Message &message, int messageType) {
 
             // 负责自动控制温湿度。由于温湿度控制器都在这里，所以不需要HardwareAbstraction控制。
             TaskScheduler::getInstance().addTask([this]() { this->autoControlTemperature(true); },
-                                                 ProjectConfig::SMALL_INTERVAL);
+                                                 ProjectConfig::SMALL_INTERVAL, "auto control temperature");
             TaskScheduler::getInstance().addTask([this]() { this->autoControlHumidity(true); },
-                                                 ProjectConfig::SMALL_INTERVAL);
+                                                 ProjectConfig::SMALL_INTERVAL, "auto control humidity");
             break;
         default:
             // DO NOTHING

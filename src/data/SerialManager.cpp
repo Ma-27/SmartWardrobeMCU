@@ -63,11 +63,13 @@ String SerialManager::readString() {
     * @param messageType 收到的消息类型，int类型号
     */
 void SerialManager::update(const Message &message, int messageType) {
+    // 保存命令行taskID.
+    DataManager *dataManager = DataManager::getInstance();
     switch (messageType) {
         case TASK_SCHEDULER_READY:
             // 负责查询串口有无指令。
-            TaskScheduler::getInstance().addTask([this]() { this->listenCommand(true); },
-                                                 ProjectConfig::QUERY_SERIAL_TIME);
+            dataManager->commandLineTaskID = TaskScheduler::getInstance().addTask([this]() { this->listenCommand(true); },
+                                                 ProjectConfig::QUERY_SERIAL_TIME,"listenCommand");
             break;
         default:
             // DO NOTHING

@@ -18,7 +18,7 @@
 #include "Dehumidifier.h"
 #include "Heater.h"
 #include "Cooler.h"
-#include "GarmentHangerManager.h"
+#include "ShelfManager.h"
 
 class SerialManager;
 
@@ -64,7 +64,7 @@ private:
     // 加热器控制类
     Heater *heater;
 
-    // 加热器控制类
+    // 衣架系统
     ShelfManager *hanger;
 
 

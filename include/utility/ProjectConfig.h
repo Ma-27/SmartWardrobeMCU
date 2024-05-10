@@ -105,12 +105,6 @@ public:
     // 舵机控制引脚
     static const int SERVO_PIN = 10;
 
-    // 舵机开启时应该转到的角度
-    static const int SERVO_ON_DEGREE = 90;
-
-    // 舵机关闭时应该转到的角度
-    static const int SERVO_OFF_DEGREE = 0;
-
     // 步进电机控制引脚1
     static const int MOTOR_IN1 = 24;
 
@@ -122,6 +116,9 @@ public:
 
     // 步进电机控制引脚4
     static const int MOTOR_IN4 = 27;
+
+    // 衣架的数量，根据实物，1cm的位置对应1个衣架。5个衣架位置和1个默认位置
+    static const int SHELF_NUMS = 6;
 };
 
 #endif // PROJECT_CONFIG_H

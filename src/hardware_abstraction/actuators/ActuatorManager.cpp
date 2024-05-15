@@ -89,9 +89,9 @@ void ActuatorManager::update(const Message &message, int messageType) {
             dataManager->logData("init task scheduler ready from actuator manager", false);
 
             // 负责自动控制温湿度。由于温湿度控制器都在这里，所以不需要HardwareAbstraction控制。
-            TaskScheduler::getInstance().addTask([this]() { this->autoControlTemperature(true); },
+            TaskScheduler::getInstance().addTask([this]() { this->autoControlTemperature(false); },
                                                  ProjectConfig::SMALL_INTERVAL, "auto control temperature");
-            TaskScheduler::getInstance().addTask([this]() { this->autoControlHumidity(true); },
+            TaskScheduler::getInstance().addTask([this]() { this->autoControlHumidity(false); },
                                                  ProjectConfig::SMALL_INTERVAL, "auto control humidity");
             break;
         default:
@@ -181,12 +181,15 @@ bool ActuatorManager::dispatchCommand(String &command, const String &tag, Comman
 // 自动控制温度函数
 void ActuatorManager::autoControlTemperature(boolean enabled) {
     if (!enabled) {
+        dataManager->logData("Temperature control disabled", false);
         return; // 如果控制不启用，则直接返回
     }
 
     // 读取目标温度和当前温度
     float targetTemperature = dataManager->targetTemperature;
     float currentTemperature = dataManager->temperature;
+    dataManager->logData("Target Temperature: " + String(targetTemperature) + ", Current Temperature: " + String(currentTemperature), false);
+
     // 获取当前时间
     unsigned long now = millis();
     // 计算时间变化
@@ -194,6 +197,8 @@ void ActuatorManager::autoControlTemperature(boolean enabled) {
 
     // 检查是否达到控制更新间隔
     if (timeChange >= ProjectConfig::CONTROL_DHT_TIME) {
+        dataManager->logData("Time since last update: " + String(timeChange), false);
+
         // 计算温度偏差
         float error = targetTemperature - currentTemperature;
         // 计算积分项
@@ -204,6 +209,9 @@ void ActuatorManager::autoControlTemperature(boolean enabled) {
         float output = Kp_temp * error + Ki_temp * integralTemp + Kd_temp * derivative;
         // 输出限制到 PWM 范围 (0-255)
         output = constrain(output, 0, 255);
+
+        dataManager->logData("Error: " + String(error) + ", Integral: " + String(integralTemp) + ", Derivative: " + String(derivative) + ", Output: " + String(output), false);
+
         // 更新历史数据
         lastErrorTemp = error;
         lastTimeTemp = now;
@@ -212,15 +220,19 @@ void ActuatorManager::autoControlTemperature(boolean enabled) {
         if (output > 1) {
             // 打开加热器
             heater->turnOn();
+            dataManager->logData("Heater turned on", false);
             // 设置冷却器的PWM值,关闭冷却器
             cooler->speedControl(0);
+            dataManager->logData("Cooler turned off", false);
         } else if (output < 1) {
             // 关闭加热器
             heater->turnOff();
+            dataManager->logData("Heater turned off", false);
             // 设置冷却器的PWM值，输出取反
             cooler->speedControl((int) -output);
+            dataManager->logData("Cooler speed set to " + String((int)-output), false);
         } else {
-            // DO NOTHING
+            dataManager->logData("No action taken", false);
         }
     }
 }
@@ -228,12 +240,15 @@ void ActuatorManager::autoControlTemperature(boolean enabled) {
 // 自动控制湿度
 void ActuatorManager::autoControlHumidity(boolean enabled) {
     if (!enabled) {
+        dataManager->logData("Humidity control disabled", false);
         return; // 如果控制不启用，则直接返回
     }
 
     // 读取目标湿度和当前湿度
     float targetHumidity = dataManager->targetHumidity;
     float currentHumidity = dataManager->humidity;
+    dataManager->logData("Target Humidity: " + String(targetHumidity) + ", Current Humidity: " + String(currentHumidity), false);
+
     // 获取当前时间
     unsigned long now = millis();
     // 计算时间变化
@@ -241,6 +256,8 @@ void ActuatorManager::autoControlHumidity(boolean enabled) {
 
     // 检查是否达到控制更新间隔
     if (timeChange >= ProjectConfig::CONTROL_DHT_TIME) {
+        dataManager->logData("Time since last update: " + String(timeChange), false);
+
         // 计算湿度偏差
         float error = targetHumidity - currentHumidity;
         // 计算积分项
@@ -251,10 +268,16 @@ void ActuatorManager::autoControlHumidity(boolean enabled) {
         float output = Kp_hum * error + Ki_hum * integralHum + Kd_hum * derivative;
         // 输出限制到 PWM 范围
         output = constrain(output, 0, 255);
+
+        dataManager->logData("Error: " + String(error) + ", Integral: " + String(integralHum) + ", Derivative: " + String(derivative) + ", Output: " + String(output), false);
+
         // 控制除湿器的PWM速度
         dehumidifier->speedControl((int) output);
+        dataManager->logData("Dehumidifier speed set to " + String((int)output), false);
+
         // 更新历史数据
         lastErrorHum = error;
         lastTimeHum = now;
     }
 }
+

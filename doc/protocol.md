@@ -399,7 +399,7 @@ Arduino 应该尽快向服务器返回符合要求的数据。返回数据的格
   "command": "Temperature-Control",
   "action": "enable",  // 可替换为 "disable" 以禁用自动温湿度控制
   "target" : 18,  // 控制的目标温度
-  "remark": "Command to set the target temperaute"
+  "remark": "Command to enable the target temperature"
 }
 ```
 

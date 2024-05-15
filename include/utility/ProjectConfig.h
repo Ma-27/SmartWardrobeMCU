@@ -59,8 +59,10 @@ public:
 
     // FIXME
     // 定义WiFi名称和密码为静态成员变量
-#define WIFI_SSID "306-18G"
-#define WIFI_PASSWORD "cqupt306?"
+// #define WIFI_SSID "306-18G"
+// #define WIFI_PASSWORD "cqupt306?"
+#define WIFI_SSID "mamhPhone"
+#define WIFI_PASSWORD "12345678"
 
     // FIXME
     // 连接到OneNetIot平台的私人秘钥

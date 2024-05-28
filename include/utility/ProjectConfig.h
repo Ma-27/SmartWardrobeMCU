@@ -59,10 +59,10 @@ public:
 
     // FIXME
     // 定义WiFi名称和密码为静态成员变量
-// #define WIFI_SSID "306-18G"
-// #define WIFI_PASSWORD "cqupt306?"
-#define WIFI_SSID "mamhPhone"
-#define WIFI_PASSWORD "12345678"
+#define WIFI_SSID "306-18G"
+#define WIFI_PASSWORD "cqupt306?"
+// #define WIFI_SSID "mamhPhone"
+// #define WIFI_PASSWORD "12345678"
 
     // FIXME
     // 连接到OneNetIot平台的私人秘钥
@@ -105,7 +105,7 @@ public:
     static const int HEAT_CONTROL_PIN = 7;
 
     // 舵机控制引脚
-    static const int SERVO_PIN = 10;
+    static const int SERVO_PIN = 13;
 
     // 步进电机控制引脚1
     static const int MOTOR_IN1 = 24;

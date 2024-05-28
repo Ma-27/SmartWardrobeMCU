@@ -7,6 +7,7 @@
 
 // 实现文件
 #include "hardware_abstraction/actuators/Dehumidifier.h"
+#include "data/DataManager.h"
 
 // 初始化静态实例指针
 Dehumidifier *Dehumidifier::instance = nullptr;
@@ -64,16 +65,38 @@ bool Dehumidifier::parseCommand(const String &command) {
 
 // 具体解析是哪个负责执行命令，派发给相应的监听器
 bool Dehumidifier::dispatchCommand(String &command, const String &tag, CommandListener *listener) {
+    // 初始化数据管理器
+    DataManager *dataManager = DataManager::getInstance();
+
     command.trim();
     String processedCommand = command.substring(1);
     processedCommand.trim();
 
+    // 打开降湿器
     if (processedCommand.startsWith("on")) {
         turnOn();
-    } else if (processedCommand.startsWith("off")) {
+    }
+        // 关闭降湿器
+    else if (processedCommand.startsWith("off")) {
         turnOff();
+    }
+        // 设置降湿器的风扇速度
+    else if (processedCommand.startsWith("v")) {
+        // 去掉参数v
+        String intensityString = processedCommand.substring(1);
+        intensityString.trim();
+
+        // 将参数转换为整数
+        int intensity = intensityString.toInt();
+        // 检查参数合法性
+        if (intensity < 0 || intensity > 255) {
+            dataManager->logData("Invalid intensity value:" + intensityString, true);
+            return false;
+        }
+        // 设置风扇速度
+        speedControl(intensity);
     } else {
-        Serial.println("Unknown command in Dehumidifier: " + processedCommand);
+        dataManager->logData("Unknown command in Dehumidifier: " + processedCommand, true);
         return false;
     }
     return true;

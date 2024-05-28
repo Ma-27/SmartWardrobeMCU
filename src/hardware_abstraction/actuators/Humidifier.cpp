@@ -6,6 +6,7 @@
  */
 
 #include "hardware_abstraction/actuators/Humidifier.h"
+#include "data/DataManager.h"
 
 // 初始化静态实例指针
 Humidifier *Humidifier::instance = nullptr;
@@ -27,6 +28,9 @@ Humidifier::Humidifier() {
 void Humidifier::initHumidifier() {
     // 设置加湿器的数字引脚
     pinMode(ProjectConfig::HUMID_INCREASE_CONTROL_PIN, OUTPUT);
+
+    // 设置DAC输出的分辨率为8位
+    analogWriteResolution(8);
 }
 
 // 控制加湿喷雾器开启
@@ -58,6 +62,9 @@ bool Humidifier::parseCommand(const String &command) {
 
 // 具体解析是哪个负责执行命令，派发给相应的监听器
 bool Humidifier::dispatchCommand(String &command, const String &tag, CommandListener *listener) {
+    // 初始化数据管理器
+    DataManager *dataManager = DataManager::getInstance();
+
     // 删除命令前的所有空格
     command.trim();
 
@@ -65,19 +72,21 @@ bool Humidifier::dispatchCommand(String &command, const String &tag, CommandList
     String processedCommand = command.substring(1);
     processedCommand.trim();
 
-
     //  执行命令并且处理参数
+
+    // 设置打开加湿器
     if (processedCommand.startsWith("on")) {
-        // 设置打开加湿器
         turnOn();
         isOn = true;
-    } else if (processedCommand.startsWith("off")) {
+    }
         // 设置打开加湿器
+    else if (processedCommand.startsWith("off")) {
         turnOff();
         isOn = false;
-    } else {
+    }
         // 不继续向下处理
-        Serial.println("Unknown command in Humidifier: " + processedCommand);
+    else {
+        dataManager->logData("Unknown command in Humidifier: " + processedCommand, true);
         return false;
     }
     return false;

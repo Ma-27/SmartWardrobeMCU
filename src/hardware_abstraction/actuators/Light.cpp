@@ -7,6 +7,7 @@
 
 #include "hardware_abstraction/actuators/Light.h"
 #include "utility/ProjectConfig.h"
+#include "data/DataManager.h"
 
 // 初始化静态实例指针
 Light *Light::instance = nullptr;
@@ -55,6 +56,9 @@ bool Light::parseCommand(const String &command) {
 
 // 具体解析是哪个负责执行命令，派发给相应的监听器
 bool Light::dispatchCommand(String &command, const String &tag, CommandListener *listener) {
+    // 初始化数据管理器
+    DataManager *dataManager = DataManager::getInstance();
+
     // 删除命令前的所有空格
     command.trim();
 
@@ -64,22 +68,27 @@ bool Light::dispatchCommand(String &command, const String &tag, CommandListener 
 
 
     //  执行命令并且处理参数
+
+    // 设置灯光强度全开,并且由命令控制
     if (processedCommand.startsWith("on")) {
-        // 设置灯光强度全开,并且由命令控制
         isAutoControl = false;
         setLightIntensity(100);
-    } else if (processedCommand.startsWith("off")) {
+    }
         // 设置灯光强度全关,并且由命令控制
+    else if (processedCommand.startsWith("off")) {
         isAutoControl = false;
         setLightIntensity(0);
-    } else if (processedCommand.startsWith("auto")) {
+    }
         // 自动调节亮度
+    else if (processedCommand.startsWith("auto")) {
         isAutoControl = true;
-    } else if (processedCommand.startsWith("manuel")) {
-        // 自动调节亮度
+    }
+        // 手动调节亮度
+    else if (processedCommand.startsWith("manuel")) {
         isAutoControl = false;
-    } else if (processedCommand.startsWith("v")) {
+    }
         // 根据命令调节亮度
+    else if (processedCommand.startsWith("v")) {
         isAutoControl = false;
         // 去掉参数v
         String intensityString = processedCommand.substring(1);
@@ -89,7 +98,7 @@ bool Light::dispatchCommand(String &command, const String &tag, CommandListener 
         int intensity = intensityString.toInt();
         // 检查参数合法性
         if (intensity < 0 || intensity > 100) {
-            Serial.println("Invalid intensity value:" + intensityString);
+            dataManager->logData("Invalid intensity value:" + intensityString, true);
             return false;
         }
         // 设置灯光强度
@@ -97,7 +106,7 @@ bool Light::dispatchCommand(String &command, const String &tag, CommandListener 
 
     } else {
         // 不继续向下处理
-        Serial.println("Unknown command in Light: " + processedCommand);
+        dataManager->logData("Unknown command in Light: " + processedCommand, true);
         return false;
     }
     return false;

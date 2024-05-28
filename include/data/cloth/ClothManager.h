@@ -17,21 +17,37 @@ private:
     int capacity;     // 衣物数组的容量
     int count;        // 当前衣物数量
 
-public:
+    // 该类的唯一实例
+    static ClothManager* instance;
+
     // 构造函数
     ClothManager(int _capacity);
 
     // 析构函数
     ~ClothManager();
 
+public:
+    // 禁止拷贝构造和赋值
+    ClothManager(const ClothManager&) = delete;
+    ClothManager& operator=(const ClothManager&) = delete;
+
+    // 获取单例对象的方法
+    static ClothManager* getInstance();
+
     // 管理衣物的方法
-    void addCloth(Cloth newCloth);
+    void addCloth(Cloth newCloth, int position);
 
     Cloth getCloth(int index);
 
     bool removeCloth(int index);
 
     void clearAll();
+
+    // 平方取中散列位置
+    int hashPosition(int position);
+
+    // 获取衣物的摘要信息
+    String displayClosetSummary() const;
 };
 
 #endif

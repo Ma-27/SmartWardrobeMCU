@@ -16,6 +16,7 @@
 #include "core/CommandListener.h"
 #include "utility/ProjectConfig.h"
 #include "data/cloth/Cloth.h"
+#include "data/cloth/ClothManager.h"
 
 class ShelfManager : public CommandListener {
 private:
@@ -42,8 +43,8 @@ private:
     // 舵机移动时的角度（舵机此时不携带衣物）
     static const int SERVO_MOVE_ANGLE = 0;
 
-    // 舵机移动1cm时对应的步数
-    static const int STEP_LENGTH_1CM = 910;
+    // 舵机移动1.75cm(1600步）时对应的步数。  1cm(910步）
+    static const int HANGER_SPACE_STEP = 1600;
 
     // 使用标志物进行简单的互斥
     bool isArmMoved = false;
@@ -54,9 +55,12 @@ private:
     int taskID = 0;
     int commandLineTaskID;
 
+    // 指向ClothManager的指针
+    ClothManager* clothManager;
+
+    // 衣架位置的结构体
     struct ShelfPosition {
         bool isEmpty;        // 位置是否为空
-        Cloth *cloth;        // 挂在该位置的衣物,指针
         int positionSteps;   // 步进电机的步数，对应该位置
     };
 

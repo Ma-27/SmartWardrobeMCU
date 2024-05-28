@@ -88,8 +88,7 @@ public:
     String getLastWornDate() const;
 
     void setLastWornDate(const String &value);
-
-#endif // CLOTH_H
 };
 
+#endif // CLOTH_H
 

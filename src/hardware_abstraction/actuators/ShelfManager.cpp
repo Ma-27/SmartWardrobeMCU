@@ -31,6 +31,9 @@ void ShelfManager::initShelfManager() {
 
     // 初始化每个衣架的位置
     initShelfPositions();
+
+    // 初始化每个衣架管理器
+    clothManager = ClothManager::getInstance();
 }
 
 // 私有化构造函数
@@ -43,8 +46,7 @@ void ShelfManager::initShelfPositions() {
     // 初始化每个衣架位置
     for (int i = 0; i < 6; i++) {
         positions[i].isEmpty = true;
-        positions[i].cloth = nullptr;
-        positions[i].positionSteps = i * STEP_LENGTH_1CM;  // 假设每个位置间隔1cm，转换为步进电机的步数
+        positions[i].positionSteps = i * HANGER_SPACE_STEP;  // 假设每个位置间隔1cm，转换为步进电机的步数
     }
     // 默认位置为第0位
     currentArmPosition = 0;
@@ -60,7 +62,7 @@ void ShelfManager::moveToPosition(int index) {
     // 初始化数据管理器
     DataManager *dataManager = DataManager::getInstance();
 
-    if (index < 0 || index >= 6) {
+    if (index < 0 || index >= ProjectConfig::SHELF_NUMS) {
         dataManager->logData("Invalid position index in moving to position.", true);
         return;
     }
@@ -120,12 +122,19 @@ void ShelfManager::moveToPosition(int index, int flag) {
 // 更新特定衣架的信息
 void ShelfManager::updateClothingStatus(int index, Cloth *cloth, bool isEmpty) {
     DataManager *dataManager = DataManager::getInstance();
+
     if (index < 0 || index >= 6) {
         dataManager->logData("Invalid position index in updating clothing status.", true);
         return;
     }
+
     positions[index].isEmpty = isEmpty;
-    positions[index].cloth = cloth; // 更新衣物引用
+    // 如果是添加衣物，更新衣物信息，否则删除衣物
+    if (!isEmpty) {
+        clothManager->addCloth(*cloth, index);
+    } else {
+        clothManager->removeCloth(index);
+    }
 }
 
 
@@ -174,7 +183,7 @@ void ShelfManager::pickClothing(int position) {
 
     // 拿下衣物，如果有的话
     if (!positions[position].isEmpty) {
-        // 标记位置为空
+        // 更新衣物的信息，将其删除
         updateClothingStatus(position, nullptr, true);
 
         // 移动到取衣服的位置
@@ -203,11 +212,10 @@ void ShelfManager::addClothing(int position, Cloth &cloth) {
         // 移动到添加衣物的位置
         setServoAngle(ShelfManager::SERVO_CARRY_ANGLE);
 
-        // 将衣物引用指向传递的衣物对象
-        positions[position].cloth = &cloth;
-        // 标记位置非空
-        positions[position].isEmpty = false;
+        // 更新衣物的信息，将其删除
+        updateClothingStatus(position, &cloth, false);
 
+        // 回归默认位置
         moveToPosition(position, 1);
 
     } else {
@@ -302,9 +310,10 @@ bool ShelfManager::dispatchCommand(String &command, const String &tag, CommandLi
         // 设定角度
         setServoAngle(angle);
         dataManager->logData(String(angle), true);
+    }
 
         // 设定步进电机的前进或者后退步数
-    } else if (processedCommand.startsWith("stepper_step")) {
+    else if (processedCommand.startsWith("stepper_step")) {
         // 去掉参数stepper_step
         String stepString = processedCommand.substring(12);
         stepString.trim();
@@ -320,8 +329,10 @@ bool ShelfManager::dispatchCommand(String &command, const String &tag, CommandLi
         // 启动步进电机，添加调度任务
         taskID = TaskScheduler::getInstance().addTask([this]() { this->rollStepper(); }, ProjectConfig::NO_INTERVAL,
                                                       "rollStepper specific step");
+    }
 
-    } else if (processedCommand.startsWith("pick_cloth")) {
+        // 取衣物
+    else if (processedCommand.startsWith("pick_cloth")) {
         // 去掉参数pick_clothing
         String trimmedPosition = processedCommand.substring(10);
         trimmedPosition.trim();
@@ -334,8 +345,10 @@ bool ShelfManager::dispatchCommand(String &command, const String &tag, CommandLi
 
         // 取衣物
         pickClothing(position);
+    }
 
-    } else if (processedCommand.startsWith("moveto")) {
+        // 移动到指定位置
+    else if (processedCommand.startsWith("moveto")) {
         // 去掉参数moveto
         String trimmedPosition = processedCommand.substring(6);
         trimmedPosition.trim();
@@ -348,8 +361,10 @@ bool ShelfManager::dispatchCommand(String &command, const String &tag, CommandLi
 
         //移动到指定位置
         moveToPosition(position);
+    }
 
-    } else if (processedCommand.startsWith("add_cloth")) {
+        // 添加衣物到衣柜
+    else if (processedCommand.startsWith("add_cloth")) {
         // 去掉参数add_cloth
         String trimmedPosition = processedCommand.substring(9);
         trimmedPosition.trim();
@@ -361,19 +376,24 @@ bool ShelfManager::dispatchCommand(String &command, const String &tag, CommandLi
         dataManager->logData(String(position), true);
 
         // 创建一个新的衣物对象(举例子）
-        Cloth* newCloth = new Cloth("123", "Blue", "T-Shirt", "Cotton", "M", true, 5, "Nike", "2023-01-01", true, "2023-05-01");
-
+        Cloth *newCloth = new Cloth("123", "Blue", "T-Shirt", "Cotton", "M", true, 5, "Nike", "2023-01-01", true,
+                                    "2023-05-01");
         // 在指定位置添加衣物
         addClothing(position, *newCloth);
+    }
 
-    } else if (processedCommand.startsWith("position")) {
+        // 查看机械臂的位置
+    else if (processedCommand.startsWith("arm_position")) {
         dataManager->logData("stepper position", true);
         dataManager->logData(String(stepper.currentPosition()), true);
 
         dataManager->logData("machine arm position:", true);
         dataManager->logData(String(currentArmPosition), true);
 
-    } else if (processedCommand.startsWith("view_position")) {
+    }
+
+        // 查看指定位置的衣物
+    else if (processedCommand.startsWith("view_position")) {
         // 去掉参数view_position
         String trimmedPosition = processedCommand.substring(13);
         trimmedPosition.trim();
@@ -382,13 +402,13 @@ bool ShelfManager::dispatchCommand(String &command, const String &tag, CommandLi
         int position = trimmedPosition.toInt();
 
         // 打印指定位置的衣物情况
-        if (position > 0 && position < 6) {
+        if (position > 0 && position < ProjectConfig::SHELF_NUMS) {
             String message = "Position " + String(position) + ": ";
             if (positions[position].isEmpty) {
                 message += "Empty";
             } else {
                 message += "Clothing: ";
-                message += positions[position].cloth->output();
+                message += clothManager->getCloth(position).output();
             }
             dataManager->logData(message, true);
         } else if (position == 0) {
@@ -396,6 +416,12 @@ bool ShelfManager::dispatchCommand(String &command, const String &tag, CommandLi
         } else {
             dataManager->logData("Invalid position index", true);
         }
+
+    }
+
+        // 查看衣架上各个挂位的摘要信息
+    else if (processedCommand.startsWith("summary_shelves")) {
+        String summary = clothManager->displayClosetSummary();
     } else {
         // 不继续向下处理
         dataManager->logData("Unknown command in ShelfManager: " + processedCommand, true);

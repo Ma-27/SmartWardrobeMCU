@@ -81,6 +81,9 @@ public:
 
     // 目标湿度
     float targetHumidity = 30.0f;
+
+    // 命令行任务ID
+    int commandLineTaskID;
 };
 
 #endif

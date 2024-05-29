@@ -18,7 +18,7 @@
 #include "Dehumidifier.h"
 #include "Heater.h"
 #include "Cooler.h"
-#include "GarmentHangerManager.h"
+#include "ShelfManager.h"
 
 class SerialManager;
 
@@ -64,7 +64,7 @@ private:
     // 加热器控制类
     Heater *heater;
 
-    // 加热器控制类
+    // 衣架系统
     ShelfManager *hanger;
 
 
@@ -82,6 +82,12 @@ public:
     ActuatorManager(const ActuatorManager &) = delete;
 
     void operator=(const ActuatorManager &) = delete;
+
+    // 温度是否自动控制。温度根据用户指示控制开启或者关闭，也可以通过手动控制。手动控制的优先级高于自动控制。
+    bool isTemperatureAutoControl = false;
+
+    // 湿度是否自动控制。湿度根据用户指示控制开启或者关闭，也可以通过手动控制。手动控制的优先级高于自动控制。
+    bool isHumidityAutoControl = false;
 
     // 提供一个公共的访问方法
     static ActuatorManager *getInstance();

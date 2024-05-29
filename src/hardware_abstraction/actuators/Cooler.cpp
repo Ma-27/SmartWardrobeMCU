@@ -6,6 +6,7 @@
  */
 
 #include "hardware_abstraction/actuators/Cooler.h"
+#include "data/DataManager.h"
 
 // 初始化静态实例指针, 确保类的单例模式
 Cooler *Cooler::instance = nullptr;
@@ -29,6 +30,9 @@ Cooler::Cooler() {
 void Cooler::initCooler() {
     // 设置冷却器控制引脚为输出模式
     pinMode(ProjectConfig::COOL_CONTROL_PIN, OUTPUT);
+
+    // 设置DAC输出的分辨率为8位
+    analogWriteResolution(8);
 }
 
 void Cooler::turnOn() {
@@ -66,6 +70,9 @@ bool Cooler::parseCommand(const String &command) {
 }
 
 bool Cooler::dispatchCommand(String &command, const String &tag, CommandListener *listener) {
+    // 初始化数据管理器
+    DataManager *dataManager = DataManager::getInstance();
+
     // 再次确保命令无额外空格
     command.trim();
     // 去除命令的第一个字符（是控制符"-"）
@@ -73,15 +80,33 @@ bool Cooler::dispatchCommand(String &command, const String &tag, CommandListener
     // 去除处理后的命令字符串的前后空格
     processedCommand.trim();
 
+    // 如果命令是开启风扇
     if (processedCommand.startsWith("on")) {
-        // 如果命令是开启风扇
         turnOn();
-    } else if (processedCommand.startsWith("off")) {
+    }
         // 如果命令是关闭风扇
+    else if (processedCommand.startsWith("off")) {
         turnOff();
-    } else {
+    }
+        // 如果命令是调节风扇的开度
+    else if (processedCommand.startsWith("v")) {
+        // 去掉参数v
+        String intensityString = processedCommand.substring(1);
+        intensityString.trim();
+
+        // 将参数转换为整数
+        int intensity = intensityString.toInt();
+        // 检查参数合法性
+        if (intensity < 0 || intensity > 255) {
+            dataManager->logData("Invalid intensity value:" + intensityString, true);
+            return false;
+        }
+        // 设置风扇速度
+        speedControl(intensity);
+    }
         // 未知命令打印错误
-        Serial.println("Unknown command in Cooler: " + processedCommand);
+    else {
+        dataManager->logData("Unknown command in Cooler: " + processedCommand, true);
         return false;
     }
     return true;

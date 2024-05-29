@@ -6,6 +6,7 @@
  */
 
 #include "hardware_abstraction/actuators/Heater.h"
+#include "data/DataManager.h"
 
 // 初始化静态实例指针，确保全局仅有一个加热器实例
 Heater *Heater::instance = nullptr;
@@ -62,6 +63,9 @@ bool Heater::parseCommand(const String &command) {
 
 // 处理具体的命令，根据命令内容执行开或关操作
 bool Heater::dispatchCommand(String &command, const String &tag, CommandListener *listener) {
+    // 初始化数据管理器
+    DataManager *dataManager = DataManager::getInstance();
+
     // 再次确保命令无额外空格
     command.trim();
     // 去除命令的首字符
@@ -70,15 +74,18 @@ bool Heater::dispatchCommand(String &command, const String &tag, CommandListener
     processedCommand.trim();
 
     // 根据命令内容执行相应操作
+
+    // 执行开启加热器
     if (processedCommand.startsWith("on")) {
-        // 执行开启加热器
         turnOn();
-    } else if (processedCommand.startsWith("off")) {
+    }
         // 执行关闭加热器
+    else if (processedCommand.startsWith("off")) {
         turnOff();
-    } else {
+    }
         // 未知命令，打印错误信息
-        Serial.println("Unknown command in Heater: " + processedCommand);
+    else {
+        dataManager->logData("Unknown command in Heater: " + processedCommand, true);
         return false;
     }
     return true;

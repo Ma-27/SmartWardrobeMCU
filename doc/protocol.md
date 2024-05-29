@@ -3,13 +3,13 @@
 注意在调试之前，要先发送报文鉴权信息：
 
 ```json
-*627051#KimirrCloset#test*
+*123456#KimirrCloset#test*
 ```
 
 测试库和依赖函数的可用性的脚本：
 
 ```json
-*627051#KimirrCloset#testlib*
+*123456#KimirrCloset#testlib*
 ```
 
 ==禁止在报文key or value字段中使用 "，" 或者 "," 符号，因为它们被我用作了提取解析报文字段的符号。==
@@ -346,7 +346,7 @@ Arduino 应该尽快向服务器返回符合要求的数据。返回数据的格
 
 #### 6. 命令报文
 
-##### 1. 开启/关闭灯光控制命令
+##### 1. 开启/关闭灯光-命令
 
 当服务器需要控制智能衣柜的灯光开关时，它会发送一个具体指定操作的命令报文。这个报文通过`action`字段明确指示灯光的预期状态，如`"turn_on"`或`"turn_off"`。
 
@@ -361,7 +361,7 @@ Arduino 应该尽快向服务器返回符合要求的数据。返回数据的格
 }
 ```
 
-##### 2. 自动灯光控制命令
+##### 2. 灯光自动控制命令
 
 服务器也可以下发命令，要求Arduino设备根据环境光照或其他传感器输入自动控制灯光。这类命令通过`action`字段指示设备启用或禁用自动控制功能。
 
@@ -387,9 +387,9 @@ Arduino 应该尽快向服务器返回符合要求的数据。返回数据的格
 
 
 
-##### 3.温度控制命令
+##### 3.温度自动控制命令（含有目标温度）
 
-服务器下发命令，设定智能衣柜的目标温度，并且输入用户是否启用。这类命令通过`action`字段指示设备启用或禁用自动控制功能。
+APP下发命令，设定智能衣柜的目标温度，设定温度自动控制是启用还是禁用。这类命令通过`action`字段指示设备启用或禁用自动控制功能。
 
 ```json
 {
@@ -399,13 +399,13 @@ Arduino 应该尽快向服务器返回符合要求的数据。返回数据的格
   "command": "Temperature-Control",
   "action": "enable",  // 可替换为 "disable" 以禁用自动温湿度控制
   "target" : 18,  // 控制的目标温度
-  "remark": "Command to set the target temperaute"
+  "remark": "Command to enable the auto control target temperature"
 }
 ```
 
 报文说明同上。
 
-##### 4.湿度控制命令
+##### 4.湿度自动控制命令（含有目标湿度）
 
 服务器下发命令，设定智能衣柜的目标湿度，并且输入用户是否启用。这类命令通过`action`字段指示设备启用或禁用自动控制功能。
 
@@ -414,10 +414,114 @@ Arduino 应该尽快向服务器返回符合要求的数据。返回数据的格
   "device_id": 1,
   "from": 0,
   "packet_type": "Command",
-  "command": "Humidity-Control",
+  "command": "Humidity-Control", // 指明是湿度器控制命令
   "action": "enable",  // 可替换为 "disable" 以禁用自动温湿度控制
-  "target" : 52,  // 控制的目标温度
-  "remark": "Command to set the target humidity"
+  "target" : 52,  // 控制的目标湿度
+  "remark": "Command to enable the auto control target humidity"
+}
+```
+
+报文说明同上。
+
+
+
+
+
+##### 5. 开启/关闭加热器 - 控制命令  
+
+当服务器需要控制智能衣柜的加热器开关时，它会发送命令报文。这个报文通过`action`字段明确器件的开闭状态，如`"turn_on"`或`"turn_off"`分别表示打开和关闭。
+
+```json
+{
+  "device_id": 1,
+  "from": 0,
+  "packet_type": "Command",
+  "command": "Actuator-Control",  // 指明是执行器控制命令
+  "actuator" : "Heater",  // 指明控制元件，这里是加热器
+  "action": "turn_on",  // 可替换为 "turn_off" 以关闭它
+  "remark": "Command to turn on the heater."  // 备用信息栏目
+}
+```
+
+报文说明同上。
+
+
+
+##### 6. 开启/关闭降温空调 - 控制命令  
+
+当服务器需要控制智能衣柜的降温空调开关时，它会发送命令报文。这个报文通过`action`字段明确器件的开闭状态，如`"turn_on"`或`"turn_off"`分别表示打开和关闭。通过`actuator`字段指明执行器件为降温器（空调）。通过`target` 控制打开的开度（这点与命令文档中的器件开度共用，设置的其实是同一个值，取值范围0-255）
+
+```json
+{
+  "device_id": 1,
+  "from": 0,
+  "packet_type": "Command",
+  "command": "Actuator-Control",  // 指明是执行器控制命令
+  "actuator" : "Cooler",  // 指明控制元件，这里是降温器
+  "action": "turn_on",  // 可替换为 "turn_off" 以关闭它
+  "target" : 255,  // 控制的开度
+  "remark": "Command to turn on the cooler."  // 备用信息栏目
+}
+```
+
+报文说明同上。
+
+
+
+##### 7. 开启/关闭加湿器 - 控制命令  
+
+当服务器需要控制智能衣柜的加湿器开关时，它会发送命令报文。这个报文通过`action`字段明确器件的开闭状态，如`"turn_on"`或`"turn_off"`分别表示打开和关闭。通过`actuator`字段指明执行器件为加湿器。
+
+```json
+{
+  "device_id": 1,
+  "from": 0,
+  "packet_type": "Command",
+  "command": "Actuator-Control",  // 指明是执行器控制命令
+  "actuator" : "Humidifier",  // 指明控制元件，这里是加湿器
+  "action": "turn_on",  // 可替换为 "turn_off" 以关闭它
+  "remark": "Command to turn on the humidifier."  // 备用信息栏目
+}
+```
+
+报文说明同上。
+
+
+
+##### 8. 开启/关闭除湿风扇（除湿器） - 控制命令  
+
+当服务器需要控制智能衣柜的除湿器开关时，它会发送命令报文。这个报文通过`action`字段明确器件的开闭状态，如`"turn_on"`或`"turn_off"`分别表示打开和关闭。通过`actuator`字段指明执行器件为除湿风扇（除湿器）。通过`target` 控制打开的开度（这点与命令文档中的器件开度共用，设置的其实是同一个值，取值范围0-255）
+
+```json
+{
+  "device_id": 1,
+  "from": 0,
+  "packet_type": "Command",
+  "command": "Actuator-Control",  // 指明是执行器控制命令
+  "actuator" : "Dehumidifier",  // 指明控制元件，这里是除湿器
+  "action": "turn_on",  // 可替换为 "turn_off" 以关闭它
+  "target" : 255,  // 控制的开度
+  "remark": "Command to turn on the dehumidifier."  // 备用信息栏目
+}
+```
+
+报文说明同上。
+
+
+
+##### 9. 衣架 - 控制命令  
+
+
+
+```json
+{
+  "device_id": 1,
+  "from": 0,
+  "packet_type": "Command",
+  "command": "Actuator",  // 指明是执行器控制命令
+  "actuator" : "Shelf",  // 指明控制元件，这里是衣架
+
+  "remark": "Command to turn on the dehumidifier."  // 备用信息栏目
 }
 ```
 

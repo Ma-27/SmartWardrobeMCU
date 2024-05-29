@@ -61,6 +61,8 @@ public:
     // 定义WiFi名称和密码为静态成员变量
 #define WIFI_SSID "306-18G"
 #define WIFI_PASSWORD "cqupt306?"
+// #define WIFI_SSID "mamhPhone"
+// #define WIFI_PASSWORD "12345678"
 
     // FIXME
     // 连接到OneNetIot平台的私人秘钥
@@ -103,13 +105,7 @@ public:
     static const int HEAT_CONTROL_PIN = 7;
 
     // 舵机控制引脚
-    static const int SERVO_PIN = 10;
-
-    // 舵机开启时应该转到的角度
-    static const int SERVO_ON_DEGREE = 90;
-
-    // 舵机关闭时应该转到的角度
-    static const int SERVO_OFF_DEGREE = 0;
+    static const int SERVO_PIN = 13;
 
     // 步进电机控制引脚1
     static const int MOTOR_IN1 = 24;
@@ -122,6 +118,9 @@ public:
 
     // 步进电机控制引脚4
     static const int MOTOR_IN4 = 27;
+
+    // 衣架的数量，根据实物，1cm的位置对应1个衣架。5个衣架位置和1个默认位置
+    static const int SHELF_NUMS = 6;
 };
 
 #endif // PROJECT_CONFIG_H

@@ -226,8 +226,9 @@ bool PacketParser::handleCommand(const JsonObject &doc) {
             CommandManager::getInstance()->parseCommand("act light -off");
         }
         return true;
-
-    } else if (commandType == "Auto-Light-Control") {
+    }
+        /// 亮度控制
+    else if (commandType == "Auto-Light-Control") {
         if (action == "enable") {
             // 启用自动灯光控制
             dataManager->logData("Enabling automatic light control.", true);
@@ -239,10 +240,133 @@ bool PacketParser::handleCommand(const JsonObject &doc) {
         }
         return true;
     }
+        /// 温度控制
+    else if (commandType == "Temperature-Control") {
+        if (action == "enable") {
+            // 启用自动温度控制
+            // 目标温度
+            int target = doc["target"];
+            dataManager->logData("Enabling automatic temperature control,target temperature:" + String(target), true);
+            CommandManager::getInstance()->parseCommand("act auto-control-temperature -tv " + String(target));
+        } else if (action == "disable") {
+            // 禁用自动控制
+            dataManager->logData("Disabling automatic temperature control.", true);
+            CommandManager::getInstance()->parseCommand("act manual-control-temperature");
+        }
+        return true;
+    }
+        /// 湿度控制
+    else if (commandType == "Humidity-Control") {
+        if (action == "enable") {
+            // 启用自动湿度控制
+            // 目标湿度
+            int target = doc["target"];
+            dataManager->logData("Enabling automatic humidity control,target humidity:" + String(target), true);
+            CommandManager::getInstance()->parseCommand("act auto-control-humidity -hv " + String(target));
+        }
+        else if (action == "disable") {
+            // 禁用自动灯光控制
+            dataManager->logData("Disabling automatic humidity control.", true);
+            CommandManager::getInstance()->parseCommand("act manual-control-humidity");
+        }
+        return true;
+    }
+        /// 执行器控制
+    else if (commandType == "Actuator-Control") {
+        // 提取执行器的名字，派发给不同的执行器
+        String actuator = doc["actuator"];
 
-    // 如果没有匹配的命令类型，记录错误并返回false
-    dataManager->logData("Unrecognized command type.", true);
-    return false;
+        // 开闭Cooler
+        if (actuator == "Cooler") {
+            // 确定是开启还是关闭
+            if (action == "turn_on") {
+                // 提取开度值 todo 还可以增加幅度值命令解析
+                int target = doc["target"];
+
+                dataManager->logData("Enable cooler, target:" + String(target), true);
+                CommandManager::getInstance()->parseCommand("act cool -on");
+            }
+            else if (action == "turn_off") {
+                dataManager->logData("Disable cooler", true);
+                CommandManager::getInstance()->parseCommand("act cool -off");
+            }
+            else{
+                dataManager->logData("Unrecognized actuator command in packet parser-cooler.", true);
+                return false;
+
+            }
+        }
+            // 开闭加热器
+        else if (actuator == "Heater") {
+            // 确定是开启还是关闭
+            if (action == "turn_on") {
+                dataManager->logData("Enable heater", true);
+                CommandManager::getInstance()->parseCommand("act heat -on");
+            }
+            else if (action == "turn_off") {
+                dataManager->logData("Disable heater", true);
+                CommandManager::getInstance()->parseCommand("act heat -off");
+            }
+            else{
+                dataManager->logData("Unrecognized actuator command in packet parser-heater.", true);
+                return false;
+            }
+        }
+            // 开闭加湿器
+        else if (actuator == "Humidifier") {
+            // 确定是开启还是关闭
+            if (action == "turn_on") {
+                dataManager->logData("Enable humidifier", true);
+                CommandManager::getInstance()->parseCommand("act humidify -on");
+            }
+            else if (action == "turn_off") {
+                dataManager->logData("Disable humidifier", true);
+                CommandManager::getInstance()->parseCommand("act humidify -off");
+            }
+            else{
+                dataManager->logData("Unrecognized actuator command in packet parser-humidifier.", true);
+                return false;
+            }
+        }
+            // 开闭除湿器
+        else if (actuator == "Dehumidifier") {
+            // 确定是开启还是关闭
+            if (action == "turn_on") {
+                // 提取开度值 todo 还可以增加幅度值命令解析
+                int target = doc["target"];
+
+                dataManager->logData("Enable Dehumidifier, target:" + String(target), true);
+                CommandManager::getInstance()->parseCommand("act dehumidify -on");
+            }
+            else if (action == "turn_off") {
+                dataManager->logData("Disable dehumidifier", true);
+                CommandManager::getInstance()->parseCommand("act dehumidify -off");
+            }
+            else{
+                dataManager->logData("Unrecognized actuator command in packet parser-dehumidifier.", true);
+                return false;
+            }
+        }
+            // 衣架控制
+        else if (actuator == "Shelf") {
+
+        }
+
+        // 如果什么执行器都没有匹配到，记录错误
+        else{
+            dataManager->logData("Unrecognized actuator in packet parser.", true);
+            return false;
+        }
+
+        return true;
+    }
+
+        // 如果没有匹配的命令类型，记录错误并返回false
+    else {
+        dataManager->logData("Unrecognized command type in packet parser.", true);
+        return false;
+    }
+    return true;
 }
 
 

@@ -77,7 +77,7 @@ void PacketQueue::update(const Message &message, int messageType) {
 
             // 负责时刻解析报文。
             TaskScheduler::getInstance().addTask([this]() { this->processPackets(true); },
-                                                 ProjectConfig::NO_INTERVAL);
+                                                 ProjectConfig::NO_INTERVAL, "parse packets");
 
 
             break;

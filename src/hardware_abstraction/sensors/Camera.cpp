@@ -7,6 +7,7 @@
 
 #include "hardware_abstraction/sensors/Camera.h"
 #include "utility/ProjectConfig.h"
+#include "data/DataManager.h"
 #include <Wire.h> // I2C 协议必不可少的库
 
 
@@ -53,7 +54,7 @@ void Camera::captureImage() {
     // process image。
     TaskScheduler &scheduler = TaskScheduler::getInstance();
     taskID = scheduler.addTask([this]() { this->checkInterruption(true); },
-                               ProjectConfig::CHECK_CAMERA_INTERRUPT_DELAY);
+                               ProjectConfig::CHECK_CAMERA_INTERRUPT_DELAY, "check camera interrupt");
 }
 
 
@@ -74,6 +75,9 @@ bool Camera::parseCommand(const String &command) {
 
 // 具体解析是哪个负责执行命令，派发给相应的监听器
 bool Camera::dispatchCommand(String &command, const String &tag, CommandListener *listener) {
+    // 初始化数据管理器
+    DataManager *dataManager = DataManager::getInstance();
+
     // 删除命令前的所有空格
     command.trim();
 
@@ -90,7 +94,7 @@ bool Camera::dispatchCommand(String &command, const String &tag, CommandListener
 
     } else {
         // 不继续向下处理
-        Serial.println("Unknown command in Camera: " + processedCommand);
+        dataManager->logData("Unknown command in Camera: " + processedCommand, true);
         return false;
     }
 }

@@ -48,6 +48,12 @@ public:
 
     // 获取衣物的摘要信息
     String displayClosetSummary() const;
+
+    // 根据现在的情况，找一个空位
+    int findEmptyPositionUsingHash();
+
+    // 根据衣物ID查找衣物位置
+    int findClothPositionById(const String &clothId) const;
 };
 
 #endif

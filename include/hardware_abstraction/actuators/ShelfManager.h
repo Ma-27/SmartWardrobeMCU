@@ -92,9 +92,6 @@ private:
     // 到特定的位置取衣物
     void pickClothing(int position);
 
-    // 添加衣物到指定位置
-    void addClothing(int position, Cloth &cloth);
-
     // 更新特定衣架的信息
     void updateClothingStatus(int index, Cloth *cloth, bool isEmpty);
 
@@ -119,6 +116,9 @@ public:
 
     // 提供一个公共的访问方法
     static ShelfManager *getInstance();
+
+    // 添加衣物到指定位置 fixme 无可奈何之举，时间不够
+    void addClothing(int position, Cloth &cloth);
 
     // 解析命令
     bool parseCommand(const String &command) override;

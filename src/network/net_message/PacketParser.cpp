@@ -263,8 +263,7 @@ bool PacketParser::handleCommand(const JsonObject &doc) {
             int target = doc["target"];
             dataManager->logData("Enabling automatic humidity control,target humidity:" + String(target), true);
             CommandManager::getInstance()->parseCommand("act auto-control-humidity -hv " + String(target));
-        }
-        else if (action == "disable") {
+        } else if (action == "disable") {
             // 禁用自动灯光控制
             dataManager->logData("Disabling automatic humidity control.", true);
             CommandManager::getInstance()->parseCommand("act manual-control-humidity");
@@ -285,12 +284,10 @@ bool PacketParser::handleCommand(const JsonObject &doc) {
 
                 dataManager->logData("Enable cooler, target:" + String(target), true);
                 CommandManager::getInstance()->parseCommand("act cool -on");
-            }
-            else if (action == "turn_off") {
+            } else if (action == "turn_off") {
                 dataManager->logData("Disable cooler", true);
                 CommandManager::getInstance()->parseCommand("act cool -off");
-            }
-            else{
+            } else {
                 dataManager->logData("Unrecognized actuator command in packet parser-cooler.", true);
                 return false;
 
@@ -302,12 +299,10 @@ bool PacketParser::handleCommand(const JsonObject &doc) {
             if (action == "turn_on") {
                 dataManager->logData("Enable heater", true);
                 CommandManager::getInstance()->parseCommand("act heat -on");
-            }
-            else if (action == "turn_off") {
+            } else if (action == "turn_off") {
                 dataManager->logData("Disable heater", true);
                 CommandManager::getInstance()->parseCommand("act heat -off");
-            }
-            else{
+            } else {
                 dataManager->logData("Unrecognized actuator command in packet parser-heater.", true);
                 return false;
             }
@@ -318,12 +313,10 @@ bool PacketParser::handleCommand(const JsonObject &doc) {
             if (action == "turn_on") {
                 dataManager->logData("Enable humidifier", true);
                 CommandManager::getInstance()->parseCommand("act humidify -on");
-            }
-            else if (action == "turn_off") {
+            } else if (action == "turn_off") {
                 dataManager->logData("Disable humidifier", true);
                 CommandManager::getInstance()->parseCommand("act humidify -off");
-            }
-            else{
+            } else {
                 dataManager->logData("Unrecognized actuator command in packet parser-humidifier.", true);
                 return false;
             }
@@ -337,23 +330,60 @@ bool PacketParser::handleCommand(const JsonObject &doc) {
 
                 dataManager->logData("Enable Dehumidifier, target:" + String(target), true);
                 CommandManager::getInstance()->parseCommand("act dehumidify -on");
-            }
-            else if (action == "turn_off") {
+            } else if (action == "turn_off") {
                 dataManager->logData("Disable dehumidifier", true);
                 CommandManager::getInstance()->parseCommand("act dehumidify -off");
-            }
-            else{
+            } else {
                 dataManager->logData("Unrecognized actuator command in packet parser-dehumidifier.", true);
                 return false;
             }
         }
             // 衣架控制
         else if (actuator == "Shelf") {
+            // 如果命令是取衣物
+            if (action == "fetch") {
+                dataManager->logData("shelf fetch", true);
 
+                // 获取衣物对象
+                Cloth *newCloth = getCloth(doc);
+                dataManager->logData(newCloth->output(), true);
+
+                // 根据衣物ID查找衣物所在位置
+                int position = ClothManager::getInstance()->findClothPositionById(newCloth->getId());
+
+                // 如果衣物在衣柜中,就直接取出
+                if (position != -1) {
+                    CommandManager::getInstance()->parseCommand("act shelf -pick_cloth " + String(position));
+                } else {
+                    dataManager->logData("Cloth not found in closet", true);
+                }
+            }
+                // 如果命令是归位衣物
+            else if (action == "homing") {
+                dataManager->logData("shelf homing", true);
+
+                // 获取衣物对象
+                Cloth *newCloth = getCloth(doc);
+                dataManager->logData(newCloth->output(), true);
+
+                // 使用平方取中法，查找并且选定一个空位
+                int position = ClothManager::getInstance()->findEmptyPositionUsingHash();
+                dataManager->logData(&"adding cloth to position"[position], true);
+
+                // 如果空位有效，则直接插入衣物
+                if (position != -1) {
+                    ShelfManager::getInstance()->addClothing(position, *newCloth);
+                } else {
+                    dataManager->logData("Cloth not found in closet", true);
+                }
+            } else {
+                dataManager->logData("Unrecognized actuator command in packet parser-dehumidifier.", true);
+                return false;
+            }
         }
 
-        // 如果什么执行器都没有匹配到，记录错误
-        else{
+            // 如果什么执行器都没有匹配到，记录错误
+        else {
             dataManager->logData("Unrecognized actuator in packet parser.", true);
             return false;
         }
@@ -367,6 +397,28 @@ bool PacketParser::handleCommand(const JsonObject &doc) {
         return false;
     }
     return true;
+}
+
+
+// 解包报文，创建一个新的衣物对象
+Cloth *PacketParser::getCloth(const JsonObject &doc) const {
+    JsonObject cloth = doc["cloth"];
+    String id = cloth["id"];
+    String color = cloth["color"];
+    String style = cloth["style"];
+    String material = cloth["material"];
+    String size = cloth["size"];
+    bool isInCloset = cloth["isInCloset"];
+    int hangPosition = cloth["hangPosition"];
+    String brand = cloth["brand"];
+    String purchaseDate = cloth["purchaseDate"];
+    bool isClean = cloth["isClean"];
+    String lastWornDate = cloth["lastWornDate"];
+
+    // 创建新的Cloth对象
+    Cloth *newCloth = new Cloth(id, color, style, material, size, isInCloset, hangPosition, brand, purchaseDate,
+                                isClean, lastWornDate);
+    return newCloth;
 }
 
 

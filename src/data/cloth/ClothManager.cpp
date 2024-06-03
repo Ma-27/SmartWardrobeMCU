@@ -70,6 +70,30 @@ int ClothManager::hashPosition(int position) {
     return hash == 0 ? 1 : hash;
 }
 
+// 使用平方取中法找到空位置
+int ClothManager::findEmptyPositionUsingHash() {
+    for (int i = 1; i < capacity; i++) {
+        int hashedPosition = hashPosition(i);
+        if (!clothes[hashedPosition].getIsInCloset()) {
+            return hashedPosition;
+        }
+    }
+    return -1; // 未找到空位置
+}
+
+
+// 根据衣物ID查找衣物所在位置
+int ClothManager::findClothPositionById(const String &clothId) const {
+    for (int i = 0; i < capacity; i++) {
+        Serial.println(clothId);
+        if (clothes[i].getId() == clothId && clothes[i].getIsInCloset()) {
+            return i;
+        }
+    }
+    return -1; // 未找到对应的衣物
+}
+
+
 // 获取衣物
 Cloth ClothManager::getCloth(int index) {
     if (index >= 0 && index < capacity && clothes[index].getHangPosition() != -1) {

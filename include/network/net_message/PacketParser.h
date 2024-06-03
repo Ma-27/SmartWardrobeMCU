@@ -15,6 +15,7 @@
 #define ARDUINOJSON_ENABLE_STD_STRING 0
 #define ARDUINOJSON_ENABLE_STD_STREAM 0
 #include <ArduinoJson.h>
+#include "data/cloth/Cloth.h"
 
 
 class PacketParser {
@@ -64,6 +65,8 @@ private:
 
     // 处理命令报文
     bool handleCommand(const JsonObject &doc);
+
+    Cloth *getCloth(const JsonObject &doc) const;
 };
 
 #endif // PacketParser_h
